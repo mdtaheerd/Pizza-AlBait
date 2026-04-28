@@ -1,5 +1,17 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import pdf from 'pdf-parse'
+
+// Extract text from PDF buffer
+async function extractTextFromPDF(buffer: Buffer): Promise<string> {
+  try {
+    const data = await pdf(buffer)
+    return data.text || ''
+  } catch (error) {
+    console.error('PDF parsing error:', error)
+    return ''
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,6 +49,14 @@ export async function POST(request: NextRequest) {
     const fileName = `${candidateId || 'new'}_${Date.now()}.${fileExt}`
     const filePath = `cvs/${fileName}`
 
+    // Extract text from PDF for keyword search
+    let resumeText = ''
+    if (file.type === 'application/pdf') {
+      const arrayBuffer = await file.arrayBuffer()
+      const buffer = Buffer.from(arrayBuffer)
+      resumeText = await extractTextFromPDF(buffer)
+    }
+
     // Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('cvs')
@@ -65,7 +85,8 @@ export async function POST(request: NextRequest) {
           resume_url: urlData.publicUrl,
           cv_uploaded_at: new Date().toISOString(),
           cv_filename: file.name,
-          cv_size_bytes: file.size
+          cv_size_bytes: file.size,
+          resume_text: resumeText || null
         })
         .eq('id', candidateId)
 
@@ -79,7 +100,8 @@ export async function POST(request: NextRequest) {
       url: urlData.publicUrl,
       filename: file.name,
       size: file.size,
-      path: filePath
+      path: filePath,
+      textExtracted: !!resumeText
     })
 
   } catch (error) {

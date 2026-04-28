@@ -16,13 +16,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Eye, Pencil, Trash2, FileText, Linkedin, Globe } from 'lucide-react'
+import { MoreHorizontal, Eye, Pencil, Trash2, FileText, Linkedin, Globe, Search, X, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import type { Candidate } from '@/lib/types'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -60,6 +60,10 @@ export function CandidatesTable({ candidates }: CandidatesTableProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [keywordSearch, setKeywordSearch] = useState('')
+  const [isSearchingKeywords, setIsSearchingKeywords] = useState(false)
+  const [keywordResults, setKeywordResults] = useState<CandidateWithStats[] | null>(null)
+  const [keywordSearchActive, setKeywordSearchActive] = useState(false)
 
   const handleDelete = async () => {
     if (!deleteId) return
@@ -72,7 +76,49 @@ export function CandidatesTable({ candidates }: CandidatesTableProps) {
     router.refresh()
   }
 
-  const filteredCandidates = candidates.filter((candidate) =>
+  const handleKeywordSearch = useCallback(async () => {
+    if (!keywordSearch.trim()) {
+      setKeywordResults(null)
+      setKeywordSearchActive(false)
+      return
+    }
+
+    setIsSearchingKeywords(true)
+    try {
+      const response = await fetch(`/api/candidates/search?keywords=${encodeURIComponent(keywordSearch.trim())}`)
+      const data = await response.json()
+      
+      if (response.ok && data.candidates) {
+        // Map search results to match the expected format with stats
+        const resultsWithStats = data.candidates.map((candidate: CandidateWithStats) => ({
+          ...candidate,
+          _stats: candidate._stats || { total: 0, active: 0 }
+        }))
+        setKeywordResults(resultsWithStats)
+        setKeywordSearchActive(true)
+      } else {
+        setKeywordResults([])
+        setKeywordSearchActive(true)
+      }
+    } catch (error) {
+      console.error('Keyword search error:', error)
+      setKeywordResults([])
+      setKeywordSearchActive(true)
+    } finally {
+      setIsSearchingKeywords(false)
+    }
+  }, [keywordSearch])
+
+  const clearKeywordSearch = () => {
+    setKeywordSearch('')
+    setKeywordResults(null)
+    setKeywordSearchActive(false)
+  }
+
+  // Use keyword results if keyword search is active, otherwise use all candidates
+  const baseCandidates = keywordSearchActive && keywordResults !== null ? keywordResults : candidates
+  
+  const filteredCandidates = baseCandidates.filter((candidate) =>
     candidate.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     candidate.email.toLowerCase().includes(searchTerm.toLowerCase())
   )
@@ -94,14 +140,60 @@ export function CandidatesTable({ candidates }: CandidatesTableProps) {
 
   return (
     <>
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <Input
-          placeholder="Search candidates..."
+          placeholder="Search by name or email..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
         />
+        
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1 sm:flex-none">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search resumes by keywords..."
+              value={keywordSearch}
+              onChange={(e) => setKeywordSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleKeywordSearch()}
+              className="w-full pl-9 pr-20 sm:w-72"
+            />
+            {keywordSearchActive && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-10 top-1/2 h-6 w-6 -translate-y-1/2"
+                onClick={clearKeywordSearch}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
+            <Button
+              size="sm"
+              className="absolute right-1 top-1/2 h-7 -translate-y-1/2"
+              onClick={handleKeywordSearch}
+              disabled={isSearchingKeywords || !keywordSearch.trim()}
+            >
+              {isSearchingKeywords ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                'Search'
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
+      
+      {keywordSearchActive && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>
+            Found {keywordResults?.length || 0} candidate{keywordResults?.length !== 1 ? 's' : ''} matching &quot;{keywordSearch}&quot; in resumes
+          </span>
+          <Button variant="link" size="sm" className="h-auto p-0" onClick={clearKeywordSearch}>
+            Clear search
+          </Button>
+        </div>
+      )}
 
       <Card>
         <Table>

@@ -62,6 +62,7 @@ export interface Candidate {
   portfolio_url: string | null
   source: CandidateSource | null
   notes: string | null
+  resume_text: string | null
   cv_uploaded_at: string | null
   cv_filename: string | null
   cv_size_bytes: number | null
