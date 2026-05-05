@@ -17,6 +17,7 @@ import {
   Linkedin,
   UserCog,
   FileSpreadsheet,
+  Home,
 } from 'lucide-react'
 import { SheetHeader, SheetTitle } from '@/components/ui/sheet'
 
@@ -62,6 +63,15 @@ export function MobileSidebar({ profile }: MobileSidebarProps) {
         </SheetTitle>
       </SheetHeader>
       <nav className="flex-1 space-y-1 p-4">
+        {/* Home Button */}
+        <Link
+          href="/"
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 text-muted-foreground hover:bg-muted hover:text-foreground mb-2 border border-border"
+        >
+          <Home className="h-5 w-5" />
+          Back to Home
+        </Link>
+
         <div className="space-y-1">
           {navigation.map((item) => {
             const isActive = pathname === item.href || 
