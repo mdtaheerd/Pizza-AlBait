@@ -49,7 +49,29 @@ export function JobForm({ job, departments }: JobFormProps) {
     const supabase = createClient()
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      
+      if (userError || !user) {
+        throw new Error('You must be logged in to create a job. Please log out and log back in.')
+      }
+
+      // Check user profile and approval status
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role, approval_status')
+        .eq('id', user.id)
+        .single()
+
+      if (profileError) {
+        console.error('[v0] Profile fetch error:', profileError)
+        throw new Error('Could not verify your permissions. Please try logging out and back in.')
+      }
+
+      if (profile.role !== 'admin' && profile.approval_status !== 'approved') {
+        throw new Error(`Your account is pending approval. Current status: ${profile.approval_status}`)
+      }
+
+      console.log('[v0] User profile:', profile)
 
       const jobData = {
         title: formData.title,
