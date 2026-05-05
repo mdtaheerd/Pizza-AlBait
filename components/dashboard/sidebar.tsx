@@ -15,6 +15,8 @@ import {
   Settings,
   Building2,
   Linkedin,
+  UserCog,
+  FileSpreadsheet,
 } from 'lucide-react'
 
 interface DashboardSidebarProps {
@@ -28,9 +30,11 @@ const navigation = [
   { name: 'Pipeline', href: '/dashboard/pipeline', icon: Briefcase },
   { name: 'Interviews', href: '/dashboard/interviews', icon: Calendar },
   { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+  { name: 'Reports', href: '/dashboard/reports', icon: FileSpreadsheet },
 ]
 
 const adminNavigation = [
+  { name: 'User Management', href: '/dashboard/users', icon: UserCog },
   { name: 'Departments', href: '/dashboard/departments', icon: Building2 },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]

@@ -7,6 +7,14 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { COUNTRY_CODES } from '@/lib/types'
 import { CheckCircle2, Upload, FileText, X, Loader2 } from 'lucide-react'
 
 interface ApplicationFormProps {
@@ -26,6 +34,7 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
+    country_code: '+971',
     phone: '',
     linkedin_url: '',
     portfolio_url: '',
@@ -133,6 +142,7 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
           .insert({
             full_name: formData.full_name,
             email: formData.email,
+            country_code: formData.country_code,
             phone: formData.phone || null,
             linkedin_url: formData.linkedin_url || null,
             portfolio_url: formData.portfolio_url || null,
@@ -234,32 +244,49 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+          <div className="space-y-2">
+            <Label htmlFor="phone">Phone Number *</Label>
+            <div className="flex gap-2">
+              <Select
+                value={formData.country_code}
+                onValueChange={(value) => setFormData({ ...formData, country_code: value })}
+              >
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Code" />
+                </SelectTrigger>
+                <SelectContent>
+                  {COUNTRY_CODES.map((country) => (
+                    <SelectItem key={country.code} value={country.code}>
+                      {country.flag} {country.code}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Input
                 id="phone"
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="+971 50 123 4567"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="linkedin_url">LinkedIn Profile</Label>
-              <Input
-                id="linkedin_url"
-                type="url"
-                value={formData.linkedin_url}
-                onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
-                placeholder="https://linkedin.com/in/johndoe"
+                placeholder="50 123 4567"
+                className="flex-1"
+                required
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="portfolio_url">Portfolio / Website</Label>
+            <Label htmlFor="linkedin_url">LinkedIn Profile (Optional)</Label>
+            <Input
+              id="linkedin_url"
+              type="url"
+              value={formData.linkedin_url}
+              onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
+              placeholder="https://linkedin.com/in/johndoe"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="portfolio_url">Portfolio / Website (Optional)</Label>
             <Input
               id="portfolio_url"
               type="url"

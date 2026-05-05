@@ -1,4 +1,5 @@
 export type UserRole = 'admin' | 'recruiter' | 'hiring_manager'
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
 export type JobStatus = 'draft' | 'open' | 'paused' | 'closed'
 export type EmploymentType = 'full_time' | 'part_time' | 'contract' | 'internship' | 'remote'
 export type ApplicationStage = 'applied' | 'screening' | 'interview' | 'assessment' | 'offer' | 'hired' | 'rejected'
@@ -24,9 +25,14 @@ export interface Profile {
   role: UserRole
   department_id: string | null
   avatar_url: string | null
+  approval_status: ApprovalStatus
+  approved_by: string | null
+  approved_at: string | null
+  rejection_reason: string | null
   created_at: string
   updated_at: string
   department?: Department | null
+  approver?: Profile | null
 }
 
 export interface Job {
@@ -57,6 +63,7 @@ export interface Candidate {
   email: string
   full_name: string
   phone: string | null
+  country_code: string | null
   resume_url: string | null
   linkedin_url: string | null
   portfolio_url: string | null
@@ -259,3 +266,40 @@ export const CURRENCY_SYMBOLS: Record<SalaryCurrency, string> = {
   GBP: '£',
   CNY: '¥',
 }
+
+export const APPROVAL_STATUS_LABELS: Record<ApprovalStatus, string> = {
+  pending: 'Pending Approval',
+  approved: 'Approved',
+  rejected: 'Rejected',
+}
+
+export const APPROVAL_STATUS_COLORS: Record<ApprovalStatus, string> = {
+  pending: 'bg-amber-100 text-amber-700 border-amber-200',
+  approved: 'bg-green-100 text-green-700 border-green-200',
+  rejected: 'bg-red-100 text-red-700 border-red-200',
+}
+
+export const COUNTRY_CODES = [
+  { code: '+971', country: 'UAE', flag: '🇦🇪' },
+  { code: '+966', country: 'Saudi Arabia', flag: '🇸🇦' },
+  { code: '+974', country: 'Qatar', flag: '🇶🇦' },
+  { code: '+965', country: 'Kuwait', flag: '🇰🇼' },
+  { code: '+973', country: 'Bahrain', flag: '🇧🇭' },
+  { code: '+968', country: 'Oman', flag: '🇴🇲' },
+  { code: '+91', country: 'India', flag: '🇮🇳' },
+  { code: '+92', country: 'Pakistan', flag: '🇵🇰' },
+  { code: '+63', country: 'Philippines', flag: '🇵🇭' },
+  { code: '+20', country: 'Egypt', flag: '🇪🇬' },
+  { code: '+962', country: 'Jordan', flag: '🇯🇴' },
+  { code: '+961', country: 'Lebanon', flag: '🇱🇧' },
+  { code: '+86', country: 'China', flag: '🇨🇳' },
+  { code: '+44', country: 'UK', flag: '🇬🇧' },
+  { code: '+1', country: 'USA/Canada', flag: '🇺🇸' },
+  { code: '+33', country: 'France', flag: '🇫🇷' },
+  { code: '+49', country: 'Germany', flag: '🇩🇪' },
+  { code: '+39', country: 'Italy', flag: '🇮🇹' },
+  { code: '+90', country: 'Turkey', flag: '🇹🇷' },
+  { code: '+234', country: 'Nigeria', flag: '🇳🇬' },
+  { code: '+27', country: 'South Africa', flag: '🇿🇦' },
+  { code: '+254', country: 'Kenya', flag: '🇰🇪' },
+]
