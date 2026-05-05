@@ -1,5 +1,3 @@
-'use client'
-
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { 
@@ -17,13 +15,61 @@ import {
   HardHat,
   ShieldCheck,
   Package,
-  Wrench,
   Cog
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { createClient } from '@/lib/supabase/server'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient()
+  
+  // Fetch departments with job counts
+  const { data: departments } = await supabase
+    .from('departments')
+    .select('id, name')
+    .order('name')
+  
+  // Fetch open job counts per department
+  const { data: jobs } = await supabase
+    .from('jobs')
+    .select('department_id')
+    .eq('status', 'open')
+  
+  // Calculate job counts per department
+  const jobCounts: Record<string, number> = {}
+  jobs?.forEach(job => {
+    if (job.department_id) {
+      jobCounts[job.department_id] = (jobCounts[job.department_id] || 0) + 1
+    }
+  })
+  
+  // Department icon mapping
+  const deptIcons: Record<string, typeof Building2> = {
+    'Engineering': Building2,
+    'Project Planning & Control': FileText,
+    'Quality Control': ShieldCheck,
+    'HSE': Shield,
+    'Procurement': Package,
+    'Construction': HardHat,
+    'Commissioning': Cog,
+    'Commercial and Finance': Calculator,
+    'Marketing': BarChart3,
+    'HR & Administration': Users,
+  }
+  
+  const deptDescriptions: Record<string, string> = {
+    'Engineering': 'Technical & design',
+    'Project Planning & Control': 'Planning & scheduling',
+    'Quality Control': 'QA/QC assurance',
+    'HSE': 'Health, Safety & Environment',
+    'Procurement': 'Materials & equipment',
+    'Construction': 'Site construction',
+    'Commissioning': 'Plant startup',
+    'Commercial and Finance': 'Finance & contracts',
+    'Marketing': 'Brand & communications',
+    'HR & Administration': 'People operations',
+  }
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
@@ -190,33 +236,30 @@ export default function HomePage() {
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {[
-              { name: 'Engineering', icon: Building2, openings: 15, description: 'Technical & design' },
-              { name: 'Project Planning & Control', icon: FileText, openings: 12, description: 'Planning & scheduling' },
-              { name: 'Quality Control', icon: ShieldCheck, openings: 8, description: 'QA/QC assurance' },
-              { name: 'HSE', icon: Shield, openings: 10, description: 'Health, Safety & Environment' },
-              { name: 'Procurement', icon: Package, openings: 9, description: 'Materials & equipment' },
-              { name: 'Construction', icon: HardHat, openings: 20, description: 'Site construction' },
-              { name: 'Commissioning', icon: Cog, openings: 7, description: 'Plant startup' },
-              { name: 'Commercial and Finance', icon: Calculator, openings: 10, description: 'Finance & contracts' },
-              { name: 'Marketing', icon: BarChart3, openings: 5, description: 'Brand & communications' },
-              { name: 'HR & Administration', icon: Users, openings: 6, description: 'People operations' }
-            ].map((dept) => (
-              <Card key={dept.name} className="border border-border/50 hover:border-red-600/30 hover:shadow-lg transition-all duration-300 cursor-pointer group overflow-hidden">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="h-10 w-10 rounded-lg bg-red-600/10 flex items-center justify-center group-hover:bg-red-600 group-hover:scale-110 transition-all duration-300">
-                      <dept.icon className="h-5 w-5 text-red-600 group-hover:text-white transition-colors" />
-                    </div>
-                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">
-                      {dept.openings} jobs
-                    </span>
-                  </div>
-                  <h3 className="font-semibold text-foreground text-sm mb-0.5 leading-tight">{dept.name}</h3>
-                  <p className="text-[11px] text-muted-foreground">{dept.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+            {departments?.map((dept) => {
+              const Icon = deptIcons[dept.name] || Briefcase
+              const description = deptDescriptions[dept.name] || 'View open positions'
+              const openings = jobCounts[dept.id] || 0
+              
+              return (
+                <Link key={dept.id} href={`/careers?department=${dept.id}`}>
+                  <Card className="border border-border/50 hover:border-red-600/30 hover:shadow-lg transition-all duration-300 cursor-pointer group overflow-hidden h-full">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="h-10 w-10 rounded-lg bg-red-600/10 flex items-center justify-center group-hover:bg-red-600 group-hover:scale-110 transition-all duration-300">
+                          <Icon className="h-5 w-5 text-red-600 group-hover:text-white transition-colors" />
+                        </div>
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">
+                          {openings} jobs
+                        </span>
+                      </div>
+                      <h3 className="font-semibold text-foreground text-sm mb-0.5 leading-tight">{dept.name}</h3>
+                      <p className="text-[11px] text-muted-foreground">{description}</p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              )
+            })}
           </div>
           
           <div className="text-center mt-10">

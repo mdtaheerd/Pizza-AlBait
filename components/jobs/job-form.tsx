@@ -72,13 +72,21 @@ export function JobForm({ job, departments }: JobFormProps) {
           .update(jobData)
           .eq('id', job.id)
 
-        if (updateError) throw updateError
+        if (updateError) {
+          console.error('[v0] Update job error:', updateError)
+          throw new Error(updateError.message || 'Failed to update job')
+        }
       } else {
-        const { error: insertError } = await supabase
+        const { data: insertData, error: insertError } = await supabase
           .from('jobs')
           .insert(jobData)
+          .select()
 
-        if (insertError) throw insertError
+        if (insertError) {
+          console.error('[v0] Insert job error:', insertError)
+          throw new Error(insertError.message || 'Failed to create job')
+        }
+        console.log('[v0] Job created:', insertData)
       }
 
       router.push('/dashboard/jobs')
@@ -241,7 +249,12 @@ export function JobForm({ job, departments }: JobFormProps) {
             />
           </div>
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && (
+            <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
+              <p className="text-sm text-destructive font-medium">Error creating job</p>
+              <p className="text-sm text-destructive/80 mt-1">{error}</p>
+            </div>
+          )}
 
           <div className="flex gap-3">
             <Button type="submit" disabled={isLoading}>
