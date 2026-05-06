@@ -104,6 +104,9 @@ export function CandidateApplicationActions({
         .update({
           stage: 'screening',
           assigned_to: currentUser.id,
+          locked_by: currentUser.id,
+          locked_at: new Date().toISOString(),
+          lock_status: 'locked',
         })
         .eq('id', application.id)
 
@@ -139,6 +142,10 @@ export function CandidateApplicationActions({
           interviewer_email: interviewerEmail,
           shortlisted_at: new Date().toISOString(),
           shortlisted_by: currentUser.id,
+          assigned_to: currentUser.id,
+          locked_by: currentUser.id,
+          locked_at: new Date().toISOString(),
+          lock_status: 'locked',
         })
         .eq('id', application.id)
 
@@ -178,6 +185,7 @@ export function CandidateApplicationActions({
 
     setIsLoading(true)
     try {
+      // Unlock candidate on rejection so other recruiters can process
       const { error } = await supabase
         .from('applications')
         .update({
@@ -186,6 +194,11 @@ export function CandidateApplicationActions({
           rejected_at: new Date().toISOString(),
           recruiter_comments: currentUser.role === 'recruiter' ? recruiterComments : undefined,
           hiring_manager_comments: currentUser.role === 'hiring_manager' ? hiringManagerComments : undefined,
+          // Unlock candidate for other recruiters
+          locked_by: null,
+          locked_at: null,
+          lock_status: 'available',
+          assigned_to: null,
         })
         .eq('id', application.id)
 
@@ -225,10 +238,16 @@ export function CandidateApplicationActions({
 
       if (interviewResult === 'hire') {
         updates.stage = 'offered'
+        // Keep locked when moving to offer
       } else {
         updates.stage = 'rejected'
         updates.rejected_at = new Date().toISOString()
         updates.rejection_comments = rejectionComments || null
+        // Unlock candidate on rejection for other recruiters
+        updates.locked_by = null
+        updates.locked_at = null
+        updates.lock_status = 'available'
+        updates.assigned_to = null
       }
 
       const { error } = await supabase
