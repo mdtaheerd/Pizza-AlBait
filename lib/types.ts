@@ -47,6 +47,8 @@ export interface Job {
   salary_max: number | null
   salary_currency: SalaryCurrency
   status: JobStatus
+  closing_date: string | null
+  auto_closed: boolean
   created_by: string | null
   created_at: string
   updated_at: string

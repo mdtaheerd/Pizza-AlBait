@@ -39,6 +39,7 @@ export function JobForm({ job, departments }: JobFormProps) {
     salary_max: job?.salary_max?.toString() || '',
     salary_currency: job?.salary_currency || 'USD',
     status: job?.status || 'draft',
+    closing_date: job?.closing_date || '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -84,6 +85,7 @@ export function JobForm({ job, departments }: JobFormProps) {
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         salary_currency: formData.salary_currency as SalaryCurrency,
         status: formData.status as JobStatus,
+        closing_date: formData.closing_date || null,
         created_by: user?.id || null,
         published_at: formData.status === 'open' ? new Date().toISOString() : null,
       }
@@ -166,7 +168,7 @@ export function JobForm({ job, departments }: JobFormProps) {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="employment_type">Employment Type</Label>
               <Select
@@ -203,6 +205,20 @@ export function JobForm({ job, departments }: JobFormProps) {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="closing_date">Closing Date</Label>
+              <Input
+                id="closing_date"
+                type="date"
+                value={formData.closing_date}
+                onChange={(e) => setFormData({ ...formData, closing_date: e.target.value })}
+                min={new Date().toISOString().split('T')[0]}
+              />
+              <p className="text-xs text-muted-foreground">
+                Job auto-closes on this date
+              </p>
             </div>
           </div>
 
