@@ -57,6 +57,7 @@ export default function CandidateRegisterPage() {
     current_salary_currency: 'AED' as SalaryCurrency,
     expected_salary: '',
     expected_salary_currency: 'AED' as SalaryCurrency,
+    notice_period_days: '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,6 +68,13 @@ export default function CandidateRegisterPage() {
     // Validate required fields
     if (!formData.email || !formData.password || !formData.full_name || !formData.phone) {
       setError('Please fill in all required fields')
+      setIsLoading(false)
+      return
+    }
+
+    // Validate mandatory salary and notice period fields
+    if (!formData.current_salary || !formData.expected_salary || !formData.notice_period_days) {
+      setError('Current salary, expected salary, and notice period are required')
       setIsLoading(false)
       return
     }
@@ -128,10 +136,11 @@ export default function CandidateRegisterPage() {
           country_code: formData.country_code,
           phone: formData.phone,
           nationality: formData.nationality || null,
-          current_salary: formData.current_salary ? parseFloat(formData.current_salary) : null,
-          current_salary_currency: formData.current_salary ? formData.current_salary_currency : null,
-          expected_salary: formData.expected_salary ? parseFloat(formData.expected_salary) : null,
-          expected_salary_currency: formData.expected_salary ? formData.expected_salary_currency : null,
+          current_salary: parseFloat(formData.current_salary),
+          current_salary_currency: formData.current_salary_currency,
+          expected_salary: parseFloat(formData.expected_salary),
+          expected_salary_currency: formData.expected_salary_currency,
+          notice_period_days: parseInt(formData.notice_period_days),
           user_id: authData.user.id,
           source: 'career_page',
         })
@@ -312,12 +321,12 @@ export default function CandidateRegisterPage() {
                 </Popover>
               </div>
 
-              {/* Salary Info - Optional */}
-              <div className="space-y-3 pt-2">
-                <p className="text-sm text-muted-foreground">Salary Information (Optional)</p>
+              {/* Salary & Notice Period - Mandatory */}
+              <div className="space-y-3 pt-2 border-t">
+                <p className="text-sm font-medium pt-2">Salary & Notice Period *</p>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="current_salary">Current Salary</Label>
+                    <Label htmlFor="current_salary">Current Salary (Monthly) *</Label>
                     <div className="flex gap-2">
                       <Select
                         value={formData.current_salary_currency}
@@ -341,11 +350,12 @@ export default function CandidateRegisterPage() {
                         onChange={(e) => setFormData({ ...formData, current_salary: e.target.value })}
                         placeholder="Amount"
                         className="flex-1"
+                        required
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="expected_salary">Expected Salary</Label>
+                    <Label htmlFor="expected_salary">Expected Salary (Monthly) *</Label>
                     <div className="flex gap-2">
                       <Select
                         value={formData.expected_salary_currency}
@@ -369,9 +379,25 @@ export default function CandidateRegisterPage() {
                         onChange={(e) => setFormData({ ...formData, expected_salary: e.target.value })}
                         placeholder="Amount"
                         className="flex-1"
+                        required
                       />
                     </div>
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="notice_period_days">Notice Period (Days) *</Label>
+                  <Input
+                    id="notice_period_days"
+                    type="number"
+                    min="0"
+                    value={formData.notice_period_days}
+                    onChange={(e) => setFormData({ ...formData, notice_period_days: e.target.value })}
+                    placeholder="e.g., 30, 60, 90"
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter 0 if you can join immediately
+                  </p>
                 </div>
               </div>
 
