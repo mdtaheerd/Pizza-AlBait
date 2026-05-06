@@ -2,11 +2,21 @@ import { NextRequest, NextResponse } from 'next/server'
 import { sendAdminApprovalEmail } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
+  console.log('[v0] notify-admin API called')
+  
   try {
     const body = await request.json()
     const { userId, email, fullName, role } = body
 
+    console.log('[v0] notify-admin received:', { userId, email, fullName, role })
+    console.log('[v0] Environment check:', {
+      hasResendKey: !!process.env.RESEND_API_KEY,
+      resendKeyPrefix: process.env.RESEND_API_KEY?.substring(0, 10),
+      adminEmail: process.env.ADMIN_EMAIL
+    })
+
     if (!userId || !email || !fullName || !role) {
+      console.log('[v0] Missing required fields')
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -21,20 +31,23 @@ export async function POST(request: NextRequest) {
       role,
     })
 
+    console.log('[v0] sendAdminApprovalEmail result:', JSON.stringify(result))
+
     if (!result.success) {
-      console.error('[API] Failed to send admin notification:', result.error)
+      console.error('[v0] Failed to send admin notification:', JSON.stringify(result.error))
       // Don't fail the registration if email fails
       return NextResponse.json(
-        { success: false, message: 'Email notification failed but registration succeeded' },
+        { success: false, message: 'Email notification failed but registration succeeded', error: result.error },
         { status: 200 }
       )
     }
 
+    console.log('[v0] Email sent successfully')
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[API] Error in notify-admin:', error)
+    console.error('[v0] Error in notify-admin:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', message: String(error) },
       { status: 500 }
     )
   }
