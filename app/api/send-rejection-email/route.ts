@@ -11,25 +11,29 @@ export async function POST(request: Request) {
       subject: `Application Update - ${jobTitle} at CPECC`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(135deg, #d32f2f 0%, #f57c00 100%); padding: 30px; text-align: center;">
+          <div style="background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%); padding: 30px; text-align: center;">
             <h1 style="color: white; margin: 0;">Application Update</h1>
           </div>
-          <div style="padding: 30px; background: #ffffff;">
-            <p>Dear ${candidateName},</p>
+          <div style="padding: 30px; background: #ffffff; line-height: 1.6;">
+            <p>Dear Applicant,</p>
             
-            <p>Thank you for your interest in the <strong>${jobTitle}</strong> position at China Petroleum Engineering & Construction Corporation (CPECC) and for taking the time to apply.</p>
+            <p>Thank you for your interest in the <strong>${jobTitle}</strong> position with our Company and for taking the time to submit your application.</p>
             
-            <p>After careful consideration, we regret to inform you that we have decided to move forward with other candidates whose qualifications more closely match our current requirements.</p>
+            <p>After careful review of your profile and qualifications, we regret to inform you that you have not been shortlisted for the next stage of the recruitment process for this particular opportunity.</p>
             
-            <p>We encourage you to continue exploring opportunities with CPECC. We will keep your resume on file for future openings that may be a better fit for your skills and experience.</p>
+            <p>Please note that this decision does not diminish your experience or professional achievements. We will keep your profile in our database and may contact you should a suitable opportunity arise in the future.</p>
             
-            <p>We wish you all the best in your career endeavors.</p>
+            <p>We wish you every success in your career endeavors.</p>
             
-            <p>Best regards,<br>
-            <strong>CPECC HR Team</strong></p>
+            <p style="margin-top: 30px;">Best regards,</p>
+            <p style="margin-top: 20px;">
+              <strong>CPECC HR Team</strong><br>
+              China Petroleum Engineering & Construction Corporation
+            </p>
           </div>
           <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
-            <p>China Petroleum Engineering & Construction Corporation</p>
+            <p style="margin: 0;">China Petroleum Engineering & Construction Corporation</p>
+            <p style="margin: 5px 0 0 0;">Gulf Region</p>
           </div>
         </div>
       `,

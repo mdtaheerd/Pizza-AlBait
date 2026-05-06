@@ -91,6 +91,7 @@ export function CandidateApplicationActions({
   const [hiringManagerComments, setHiringManagerComments] = useState('')
   const [interviewResult, setInterviewResult] = useState<'hire' | 'reject'>('hire')
   const [sendSelectionEmail, setSendSelectionEmail] = useState(false)
+  const [sendRejectionEmail, setSendRejectionEmail] = useState(true)
   
   // Screening notes states
   const [screeningNotesOpen, setScreeningNotesOpen] = useState(false)
@@ -235,19 +236,21 @@ export function CandidateApplicationActions({
 
       if (error) throw error
 
-      // Send rejection email
-      await fetch('/api/send-rejection-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          candidateEmail: application.candidate?.email,
-          candidateName: application.candidate?.full_name,
-          jobTitle: application.job?.title,
-          reason: rejectionComments,
-        }),
-      })
+      // Send rejection email if option is selected
+      if (sendRejectionEmail && application.candidate?.email) {
+        await fetch('/api/send-rejection-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            candidateEmail: application.candidate?.email,
+            candidateName: application.candidate?.full_name,
+            jobTitle: application.job?.title,
+          }),
+        })
+      }
 
       setRejectDialogOpen(false)
+      setSendRejectionEmail(true) // Reset for next time
       router.refresh()
     } catch (error) {
       console.error('Error rejecting application:', error)
@@ -299,7 +302,7 @@ export function CandidateApplicationActions({
             jobTitle: application.job?.title,
           }),
         })
-      } else if (interviewResult === 'reject') {
+      } else if (interviewResult === 'reject' && sendRejectionEmail && application.candidate?.email) {
         await fetch('/api/send-rejection-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -307,7 +310,6 @@ export function CandidateApplicationActions({
             candidateEmail: application.candidate?.email,
             candidateName: application.candidate?.full_name,
             jobTitle: application.job?.title,
-            reason: rejectionComments,
           }),
         })
       }
@@ -799,6 +801,18 @@ export function CandidateApplicationActions({
                 {rejectionComments.length}/30 characters
               </p>
             </div>
+            <div className="flex items-center space-x-2 pt-2 border-t">
+              <input
+                type="checkbox"
+                id="sendRejectionEmail"
+                checked={sendRejectionEmail}
+                onChange={(e) => setSendRejectionEmail(e.target.checked)}
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="sendRejectionEmail" className="text-sm font-normal cursor-pointer">
+                Send rejection email to candidate
+              </Label>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
@@ -806,7 +820,7 @@ export function CandidateApplicationActions({
             </Button>
             <Button variant="destructive" onClick={handleReject} disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Reject & Notify
+              {sendRejectionEmail ? 'Reject & Notify' : 'Reject'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -854,18 +868,32 @@ export function CandidateApplicationActions({
             )}
 
             {interviewResult === 'reject' && (
-              <div className="space-y-2">
-                <Label htmlFor="rejection_comments_interview">
-                  Rejection Reason (max 30 characters)
-                </Label>
-                <Input
-                  id="rejection_comments_interview"
-                  value={rejectionComments}
-                  onChange={(e) => setRejectionComments(e.target.value.slice(0, 30))}
-                  placeholder="Brief reason..."
-                  maxLength={30}
-                />
-              </div>
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="rejection_comments_interview">
+                    Rejection Reason (max 30 characters)
+                  </Label>
+                  <Input
+                    id="rejection_comments_interview"
+                    value={rejectionComments}
+                    onChange={(e) => setRejectionComments(e.target.value.slice(0, 30))}
+                    placeholder="Brief reason..."
+                    maxLength={30}
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="sendRejectionEmailInterview"
+                    checked={sendRejectionEmail}
+                    onChange={(e) => setSendRejectionEmail(e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="sendRejectionEmailInterview" className="text-sm font-normal cursor-pointer">
+                    Send rejection email to candidate
+                  </Label>
+                </div>
+              </>
             )}
 
             <div className="space-y-2">
