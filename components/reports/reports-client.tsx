@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import type { Application, Department, Profile } from '@/lib/types'
-import { STAGE_LABELS, STAGE_COLORS, CURRENCY_SYMBOLS, SalaryCurrency } from '@/lib/types'
+import { STAGE_LABELS, STAGE_COLORS } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -97,11 +97,10 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
 
-  // Format salary with currency
-  const formatSalary = (amount: number | null | undefined, currency: string | null | undefined) => {
+  // Format salary with currency - always use AED
+  const formatSalary = (amount: number | null | undefined) => {
     if (!amount) return 'N/A'
-    const symbol = CURRENCY_SYMBOLS[currency as SalaryCurrency] || currency || ''
-    return `${symbol} ${amount.toLocaleString()}`
+    return `AED ${amount.toLocaleString()}`
   }
 
   // Filter applications based on report type
@@ -193,10 +192,10 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
       app.candidate?.nationality || '',
       app.job?.title || '',
       app.job?.department?.name || '',
-      formatSalary(app.candidate?.current_salary, app.candidate?.current_salary_currency),
-      formatSalary(app.candidate?.expected_salary, app.candidate?.expected_salary_currency),
+      formatSalary(app.candidate?.current_salary),
+      formatSalary(app.candidate?.expected_salary),
       app.job?.salary_min && app.job?.salary_max 
-        ? `${formatSalary(app.job.salary_min, app.job.salary_currency)} - ${formatSalary(app.job.salary_max, app.job.salary_currency)}`
+        ? `${formatSalary(app.job.salary_min)} - ${formatSalary(app.job.salary_max)}`
         : 'N/A',
       app.candidate?.notice_period_days?.toString() || '',
       STAGE_LABELS[app.stage as keyof typeof STAGE_LABELS] || app.stage,
@@ -421,15 +420,15 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                           </TableCell>
                           <TableCell>{app.job?.department?.name || '-'}</TableCell>
                           <TableCell className="text-sm">
-                            {formatSalary(app.candidate?.current_salary, app.candidate?.current_salary_currency)}
+                            {formatSalary(app.candidate?.current_salary)}
                           </TableCell>
                           <TableCell className="text-sm">
-                            {formatSalary(app.candidate?.expected_salary, app.candidate?.expected_salary_currency)}
+                            {formatSalary(app.candidate?.expected_salary)}
                           </TableCell>
                           <TableCell className="text-sm">
                             {app.job?.salary_min && app.job?.salary_max ? (
                               <span>
-                                {formatSalary(app.job.salary_min, app.job.salary_currency)} - {formatSalary(app.job.salary_max, app.job.salary_currency)}
+                                {formatSalary(app.job.salary_min)} - {formatSalary(app.job.salary_max)}
                               </span>
                             ) : '-'}
                           </TableCell>

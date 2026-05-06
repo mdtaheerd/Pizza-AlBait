@@ -9,6 +9,10 @@ import Link from 'next/link'
 import { EMPLOYMENT_TYPE_LABELS, CURRENCY_SYMBOLS, type SalaryCurrency } from '@/lib/types'
 import { CareersHeader } from '@/components/careers/careers-header'
 
+// Disable caching to always fetch fresh data
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 interface JobDetailPageProps {
   params: Promise<{ id: string }>
 }

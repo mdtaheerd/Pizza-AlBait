@@ -39,7 +39,8 @@ import {
   Send,
   Briefcase,
   Clock,
-  MessageSquare
+  MessageSquare,
+  Mail
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
@@ -91,10 +92,42 @@ export function CandidateApplicationActions({
   const [hiringManagerComments, setHiringManagerComments] = useState('')
   const [interviewResult, setInterviewResult] = useState<'hire' | 'reject'>('hire')
   const [sendSelectionEmail, setSendSelectionEmail] = useState(false)
+  const [sendRejectionEmail, setSendRejectionEmail] = useState(true)
+  
+  // Screening notes states
+  const [screeningNotesOpen, setScreeningNotesOpen] = useState(false)
+  const [screeningSummary, setScreeningSummary] = useState(application.screening_summary || '')
+  const [salaryExpectation, setSalaryExpectation] = useState(application.salary_expectation || '')
+  const [benefitsExpectation, setBenefitsExpectation] = useState(application.benefits_expectation || '')
+  const [noticePeriod, setNoticePeriod] = useState(application.notice_period || '')
 
   const supabase = createClient()
   const isRecruiter = currentUser.role === 'recruiter' || currentUser.role === 'admin'
   const isHiringManager = currentUser.role === 'hiring_manager' || currentUser.role === 'admin'
+
+  const handleSaveScreeningNotes = async () => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('applications')
+        .update({
+          screening_summary: screeningSummary || null,
+          salary_expectation: salaryExpectation || null,
+          benefits_expectation: benefitsExpectation || null,
+          notice_period: noticePeriod || null,
+        })
+        .eq('id', application.id)
+
+      if (error) throw error
+      setScreeningNotesOpen(false)
+      router.refresh()
+    } catch (error) {
+      console.error('Error saving screening notes:', error)
+      alert('Failed to save screening notes')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleMoveToScreening = async () => {
     setIsLoading(true)
@@ -204,19 +237,21 @@ export function CandidateApplicationActions({
 
       if (error) throw error
 
-      // Send rejection email
-      await fetch('/api/send-rejection-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          candidateEmail: application.candidate?.email,
-          candidateName: application.candidate?.full_name,
-          jobTitle: application.job?.title,
-          reason: rejectionComments,
-        }),
-      })
+      // Send rejection email if option is selected
+      if (sendRejectionEmail && application.candidate?.email) {
+        await fetch('/api/send-rejection-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            candidateEmail: application.candidate?.email,
+            candidateName: application.candidate?.full_name,
+            jobTitle: application.job?.title,
+          }),
+        })
+      }
 
       setRejectDialogOpen(false)
+      setSendRejectionEmail(true) // Reset for next time
       router.refresh()
     } catch (error) {
       console.error('Error rejecting application:', error)
@@ -268,7 +303,7 @@ export function CandidateApplicationActions({
             jobTitle: application.job?.title,
           }),
         })
-      } else if (interviewResult === 'reject') {
+      } else if (interviewResult === 'reject' && sendRejectionEmail && application.candidate?.email) {
         await fetch('/api/send-rejection-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -276,7 +311,6 @@ export function CandidateApplicationActions({
             candidateEmail: application.candidate?.email,
             candidateName: application.candidate?.full_name,
             jobTitle: application.job?.title,
-            reason: rejectionComments,
           }),
         })
       }
@@ -402,6 +436,15 @@ export function CandidateApplicationActions({
       case 'screening':
         return isRecruiter ? (
           <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setScreeningNotesOpen(true)}
+              className="border-amber-500 text-amber-600 hover:bg-amber-50"
+            >
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Screening Notes
+            </Button>
             <Button
               size="sm"
               onClick={() => setShortlistDialogOpen(true)}
@@ -532,6 +575,40 @@ export function CandidateApplicationActions({
       {/* Actions */}
       {canPerformActions && renderActions()}
 
+      {/* Screening Notes - visible to hiring manager and in rejection view */}
+      {(application.screening_summary || application.salary_expectation || application.benefits_expectation || application.notice_period) && (
+        <div className="space-y-2 p-3 bg-amber-50 rounded-lg border border-amber-200">
+          <p className="text-sm font-medium flex items-center gap-2 text-amber-700">
+            <MessageSquare className="h-4 w-4" />
+            Screening Notes
+          </p>
+          {application.screening_summary && (
+            <div className="text-sm">
+              <span className="font-medium text-amber-700">Summary:</span>{' '}
+              <span className="text-amber-900">{application.screening_summary}</span>
+            </div>
+          )}
+          {application.salary_expectation && (
+            <div className="text-sm">
+              <span className="font-medium text-amber-700">Salary Expectation:</span>{' '}
+              <span className="text-amber-900">{application.salary_expectation}</span>
+            </div>
+          )}
+          {application.benefits_expectation && (
+            <div className="text-sm">
+              <span className="font-medium text-amber-700">Benefits Expectation:</span>{' '}
+              <span className="text-amber-900">{application.benefits_expectation}</span>
+            </div>
+          )}
+          {application.notice_period && (
+            <div className="text-sm">
+              <span className="font-medium text-amber-700">Notice Period:</span>{' '}
+              <span className="text-amber-900">{application.notice_period}</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Comments */}
       {hasComments && (
         <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
@@ -553,6 +630,66 @@ export function CandidateApplicationActions({
           )}
         </div>
       )}
+
+      {/* Screening Notes Dialog */}
+      <Dialog open={screeningNotesOpen} onOpenChange={setScreeningNotesOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Screening Notes</DialogTitle>
+            <DialogDescription>
+              Add your screening observations for {application.candidate?.full_name}. These notes will be visible to the hiring manager during interviews.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="screening_summary">Summary</Label>
+              <Textarea
+                id="screening_summary"
+                value={screeningSummary}
+                onChange={(e) => setScreeningSummary(e.target.value)}
+                placeholder="Brief summary of the candidate's profile and fit..."
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="salary_expectation">Salary Expectation</Label>
+              <Input
+                id="salary_expectation"
+                value={salaryExpectation}
+                onChange={(e) => setSalaryExpectation(e.target.value)}
+                placeholder="e.g., AED 25,000 - 30,000 per month"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="benefits_expectation">Benefits Expectation</Label>
+              <Input
+                id="benefits_expectation"
+                value={benefitsExpectation}
+                onChange={(e) => setBenefitsExpectation(e.target.value)}
+                placeholder="e.g., Housing allowance, annual leave, medical insurance"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="notice_period">Notice Period</Label>
+              <Input
+                id="notice_period"
+                value={noticePeriod}
+                onChange={(e) => setNoticePeriod(e.target.value)}
+                placeholder="e.g., 30 days, 2 months, Immediately available"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setScreeningNotesOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveScreeningNotes} disabled={isLoading} className="bg-amber-600 hover:bg-amber-700">
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Notes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Shortlist Dialog */}
       <Dialog open={shortlistDialogOpen} onOpenChange={setShortlistDialogOpen}>
@@ -665,15 +802,27 @@ export function CandidateApplicationActions({
                 {rejectionComments.length}/30 characters
               </p>
             </div>
-          </div>
-          <DialogFooter>
+            </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleReject} disabled={isLoading}>
+            <Button variant="destructive" onClick={() => { setSendRejectionEmail(false); handleReject(); }} disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Reject & Notify
+              Reject
             </Button>
+            {application.candidate?.email && (
+              <Button 
+                variant="destructive" 
+                onClick={() => { setSendRejectionEmail(true); handleReject(); }} 
+                disabled={isLoading}
+                className="bg-red-700 hover:bg-red-800"
+              >
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Mail className="mr-2 h-4 w-4" />
+                Send Rejection Email
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -751,14 +900,35 @@ export function CandidateApplicationActions({
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={() => setInterviewResultDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleInterviewResult} disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Result
-            </Button>
+            {interviewResult === 'reject' ? (
+              <>
+                <Button variant="destructive" onClick={() => { setSendRejectionEmail(false); handleInterviewResult(); }} disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Reject
+                </Button>
+                {application.candidate?.email && (
+                  <Button 
+                    variant="destructive" 
+                    onClick={() => { setSendRejectionEmail(true); handleInterviewResult(); }} 
+                    disabled={isLoading}
+                    className="bg-red-700 hover:bg-red-800"
+                  >
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    <Mail className="mr-2 h-4 w-4" />
+                    Send Rejection Email
+                  </Button>
+                )}
+              </>
+            ) : (
+              <Button onClick={() => { setSendRejectionEmail(false); handleInterviewResult(); }} disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Result
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
