@@ -40,9 +40,11 @@ interface CandidateWithStats extends Candidate {
   _stats: {
     total: number
     active: number
+    rejected: number
     recruiterName: string | null
     isLocked: boolean
     currentStage: string | null
+    isAvailableForNewApplication: boolean
   }
 }
 
@@ -169,12 +171,19 @@ export function CandidatesTable({ candidates }: CandidatesTableProps) {
                       {!['screening', 'interview_scheduled', 'interviewed', 'offered'].includes(candidate._stats.currentStage || '') && 'Processing'}
                     </Badge>
                   ) : candidate._stats.active > 0 ? (
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                      <LockOpen className="mr-1 h-3 w-3" />
+                      In Progress
+                    </Badge>
+                  ) : candidate._stats.rejected > 0 || candidate._stats.total === 0 ? (
                     <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                       <LockOpen className="mr-1 h-3 w-3" />
                       Available
                     </Badge>
                   ) : (
-                    <span className="text-sm text-muted-foreground">-</span>
+                    <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
+                      Completed
+                    </Badge>
                   )}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
