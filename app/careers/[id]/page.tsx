@@ -17,6 +17,8 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const { id } = await params
   const supabase = await createClient()
 
+  console.log('[v0] Job detail page - Requested ID:', id)
+
   const { data: job, error } = await supabase
     .from('jobs')
     .select(`
@@ -26,6 +28,8 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     .eq('id', id)
     .eq('status', 'open')
     .single()
+
+  console.log('[v0] Job detail page - Fetched job:', job?.id, job?.title, 'Error:', error?.message)
 
   if (error || !job) {
     notFound()
