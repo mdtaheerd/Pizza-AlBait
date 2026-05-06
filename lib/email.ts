@@ -6,6 +6,37 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'mohammed.taheer@cpecc.ae'
 const FROM_EMAIL = process.env.FROM_EMAIL || 'CPECC Recruitment <noreply@resend.dev>'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://pizza-al-bait.vercel.app'
 
+// Generic email sender for workflow emails
+export async function sendEmail({ 
+  to, 
+  subject, 
+  html 
+}: { 
+  to: string
+  subject: string
+  html: string 
+}) {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject,
+      html,
+    })
+
+    if (error) {
+      console.error('[Email] Failed to send email:', error)
+      return { success: false, error }
+    }
+
+    console.log('[Email] Email sent successfully:', data?.id)
+    return { success: true, data }
+  } catch (error) {
+    console.error('[Email] Error sending email:', error)
+    return { success: false, error }
+  }
+}
+
 export async function sendAdminApprovalEmail(user: {
   id: string
   email: string
