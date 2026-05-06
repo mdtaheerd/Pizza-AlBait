@@ -96,6 +96,30 @@ export function CandidateApplicationActions({
   const isRecruiter = currentUser.role === 'recruiter' || currentUser.role === 'admin'
   const isHiringManager = currentUser.role === 'hiring_manager' || currentUser.role === 'admin'
 
+  const handleMoveToScreening = async () => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('applications')
+        .update({
+          stage: 'screening',
+          assigned_to: currentUser.id,
+          locked_by: currentUser.id,
+          locked_at: new Date().toISOString(),
+          lock_status: 'locked',
+        })
+        .eq('id', application.id)
+
+      if (error) throw error
+      router.refresh()
+    } catch (error) {
+      console.error('Error moving to screening:', error)
+      alert('Failed to move to screening')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleShortlistForInterview = async () => {
     if (!interviewDate || !interviewTime || !interviewerEmail) {
       alert('Please fill in all required fields')
@@ -118,6 +142,10 @@ export function CandidateApplicationActions({
           interviewer_email: interviewerEmail,
           shortlisted_at: new Date().toISOString(),
           shortlisted_by: currentUser.id,
+          assigned_to: currentUser.id,
+          locked_by: currentUser.id,
+          locked_at: new Date().toISOString(),
+          lock_status: 'locked',
         })
         .eq('id', application.id)
 
@@ -157,6 +185,7 @@ export function CandidateApplicationActions({
 
     setIsLoading(true)
     try {
+      // Unlock candidate on rejection so other recruiters can process
       const { error } = await supabase
         .from('applications')
         .update({
@@ -165,6 +194,11 @@ export function CandidateApplicationActions({
           rejected_at: new Date().toISOString(),
           recruiter_comments: currentUser.role === 'recruiter' ? recruiterComments : undefined,
           hiring_manager_comments: currentUser.role === 'hiring_manager' ? hiringManagerComments : undefined,
+          // Unlock candidate for other recruiters
+          locked_by: null,
+          locked_at: null,
+          lock_status: 'available',
+          assigned_to: null,
         })
         .eq('id', application.id)
 
@@ -204,10 +238,16 @@ export function CandidateApplicationActions({
 
       if (interviewResult === 'hire') {
         updates.stage = 'offered'
+        // Keep locked when moving to offer
       } else {
         updates.stage = 'rejected'
         updates.rejected_at = new Date().toISOString()
         updates.rejection_comments = rejectionComments || null
+        // Unlock candidate on rejection for other recruiters
+        updates.locked_by = null
+        updates.locked_at = null
+        updates.lock_status = 'available'
+        updates.assigned_to = null
       }
 
       const { error } = await supabase
@@ -328,6 +368,37 @@ export function CandidateApplicationActions({
     switch (stage) {
       case 'applied':
       case 'new':
+        return isRecruiter ? (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleMoveToScreening}
+              disabled={isLoading}
+              className="border-blue-500 text-blue-600 hover:bg-blue-50"
+            >
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserCheck className="mr-2 h-4 w-4" />}
+              Move to Screening
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setShortlistDialogOpen(true)}
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              Shortlist for Interview
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => setRejectDialogOpen(true)}
+            >
+              <XCircle className="mr-2 h-4 w-4" />
+              Reject
+            </Button>
+          </div>
+        ) : null
+
       case 'screening':
         return isRecruiter ? (
           <div className="flex flex-wrap gap-2">
