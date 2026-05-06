@@ -56,6 +56,7 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
     current_salary_currency: 'AED' as SalaryCurrency,
     expected_salary: '',
     expected_salary_currency: 'AED' as SalaryCurrency,
+    notice_period_days: '',
     linkedin_url: '',
     portfolio_url: '',
     cover_letter: '',
@@ -169,6 +170,7 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
             current_salary_currency: formData.current_salary ? formData.current_salary_currency : null,
             expected_salary: formData.expected_salary ? parseFloat(formData.expected_salary) : null,
             expected_salary_currency: formData.expected_salary ? formData.expected_salary_currency : null,
+            notice_period_days: formData.notice_period_days ? parseInt(formData.notice_period_days) : null,
             linkedin_url: formData.linkedin_url || null,
             portfolio_url: formData.portfolio_url || null,
             source: 'career_page',
@@ -360,12 +362,12 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
             </Popover>
           </div>
 
-          {/* Salary Info - Optional */}
-          <div className="space-y-3 pt-2">
-            <p className="text-sm text-muted-foreground">Salary Information (Optional)</p>
+          {/* Salary & Notice Period - Required */}
+          <div className="space-y-3 pt-2 border-t">
+            <p className="text-sm font-medium pt-2">Salary & Notice Period *</p>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="current_salary">Current Salary</Label>
+                <Label htmlFor="current_salary">Current Salary (Monthly) *</Label>
                 <div className="flex gap-2">
                   <Select
                     value={formData.current_salary_currency}
@@ -389,11 +391,12 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
                     onChange={(e) => setFormData({ ...formData, current_salary: e.target.value })}
                     placeholder="Amount"
                     className="flex-1"
+                    required
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="expected_salary">Expected Salary</Label>
+                <Label htmlFor="expected_salary">Expected Salary (Monthly) *</Label>
                 <div className="flex gap-2">
                   <Select
                     value={formData.expected_salary_currency}
@@ -417,9 +420,22 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
                     onChange={(e) => setFormData({ ...formData, expected_salary: e.target.value })}
                     placeholder="Amount"
                     className="flex-1"
+                    required
                   />
                 </div>
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="notice_period_days">Notice Period (Days) *</Label>
+              <Input
+                id="notice_period_days"
+                type="number"
+                min="0"
+                value={formData.notice_period_days}
+                onChange={(e) => setFormData({ ...formData, notice_period_days: e.target.value })}
+                placeholder="e.g., 30, 60, 90 (Enter 0 if you can join immediately)"
+                required
+              />
             </div>
           </div>
 

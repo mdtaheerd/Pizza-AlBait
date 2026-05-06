@@ -71,6 +71,7 @@ export interface Candidate {
   current_salary_currency: SalaryCurrency | null
   expected_salary: number | null
   expected_salary_currency: SalaryCurrency | null
+  notice_period_days: number | null
   user_id: string | null
   resume_url: string | null
   linkedin_url: string | null

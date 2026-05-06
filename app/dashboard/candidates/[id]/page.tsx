@@ -190,7 +190,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
                   </div>
                 </div>
                 <Button variant="outline" size="sm" asChild>
-                  <a href={candidate.resume_url} target="_blank" rel="noopener noreferrer" download>
+                  <a href={`/api/download-cv?candidateId=${candidate.id}`} download={candidate.cv_filename || 'resume.pdf'}>
                     <Download className="mr-2 h-4 w-4" />
                     Download
                   </a>
