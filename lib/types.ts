@@ -127,6 +127,11 @@ export interface Application {
   interviewed_by: string | null
   hiring_manager_comments: string | null
   recruiter_comments: string | null
+  // Screening notes fields
+  screening_summary: string | null
+  salary_expectation: string | null
+  benefits_expectation: string | null
+  notice_period: string | null
   candidate?: Candidate
   job?: Job
   assignee?: Profile | null
