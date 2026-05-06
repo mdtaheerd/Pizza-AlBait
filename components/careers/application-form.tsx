@@ -176,7 +176,11 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
           .select('id')
           .single()
 
-        if (candidateError) throw candidateError
+        if (candidateError) {
+          console.error('[v0] Candidate insert error:', candidateError)
+          throw new Error(candidateError.message || 'Failed to create candidate record')
+        }
+        console.log('[v0] Created candidate:', newCandidate.id)
         candidateId = newCandidate.id
 
         // Upload CV if provided
@@ -210,11 +214,22 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
           notes: formData.cover_letter || null,
         })
 
-      if (applicationError) throw applicationError
+      if (applicationError) {
+        console.error('[v0] Application insert error:', applicationError)
+        throw new Error(applicationError.message || 'Failed to submit application')
+      }
+      console.log('[v0] Application submitted successfully')
 
       setIsSubmitted(true)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+    } catch (err: unknown) {
+      console.error('[v0] Application form error:', err)
+      if (err && typeof err === 'object' && 'message' in err) {
+        setError((err as { message: string }).message)
+      } else if (err && typeof err === 'object' && 'error_description' in err) {
+        setError((err as { error_description: string }).error_description)
+      } else {
+        setError('An error occurred. Please try again.')
+      }
       setIsUploading(false)
     } finally {
       setIsLoading(false)
