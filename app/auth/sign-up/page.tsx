@@ -58,7 +58,8 @@ export default function SignUpPage() {
       // Send notification to admin for approval
       if (data.user) {
         try {
-          await fetch('/api/notify-admin', {
+          console.log('[v0] Calling notify-admin API for user:', data.user.id)
+          const notifyResponse = await fetch('/api/notify-admin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -68,9 +69,11 @@ export default function SignUpPage() {
               role: role,
             }),
           })
+          const notifyResult = await notifyResponse.json()
+          console.log('[v0] notify-admin API response:', notifyResult)
         } catch (notifyError) {
           // Don't fail registration if notification fails
-          console.error('Failed to notify admin:', notifyError)
+          console.error('[v0] Failed to notify admin:', notifyError)
         }
       }
 

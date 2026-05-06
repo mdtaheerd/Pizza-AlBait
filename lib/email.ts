@@ -46,6 +46,16 @@ export async function sendAdminApprovalEmail(user: {
   try {
     const approvalUrl = `${APP_URL}/dashboard/users?approve=${user.id}`
     
+    console.log('[v0] sendAdminApprovalEmail called with:', { 
+      userId: user.id, 
+      userEmail: user.email, 
+      userName: user.full_name,
+      role: user.role,
+      adminEmail: ADMIN_EMAIL,
+      fromEmail: FROM_EMAIL,
+      hasApiKey: !!process.env.RESEND_API_KEY
+    })
+    
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
@@ -103,11 +113,11 @@ export async function sendAdminApprovalEmail(user: {
     })
 
     if (error) {
-      console.error('[Email] Failed to send admin approval email:', error)
+      console.error('[v0] Failed to send admin approval email:', JSON.stringify(error))
       return { success: false, error }
     }
 
-    console.log('[Email] Admin approval email sent successfully:', data?.id)
+    console.log('[v0] Admin approval email sent successfully:', data?.id)
     return { success: true, data }
   } catch (error) {
     console.error('[Email] Error sending admin approval email:', error)
