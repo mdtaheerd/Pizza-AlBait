@@ -1,14 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Pencil, Mail, Phone, Linkedin, Globe, FileText, Plus, AlertTriangle, Lock, Download, Calendar, Briefcase } from 'lucide-react'
+import { Pencil, Mail, Phone, Linkedin, Globe, FileText, Plus, AlertTriangle, Lock, Download, Calendar, Briefcase, DollarSign, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
-import { STAGE_LABELS, STAGE_COLORS, LOCK_STATUS_LABELS, LOCK_STATUS_COLORS } from '@/lib/types'
+import { STAGE_LABELS, STAGE_COLORS, LOCK_STATUS_LABELS, LOCK_STATUS_COLORS, CURRENCY_SYMBOLS, SalaryCurrency } from '@/lib/types'
 import type { Application, CandidateHistory } from '@/lib/types'
 import { CandidateHistoryTimeline } from '@/components/candidates/candidate-history'
+import { CandidateApplicationActions } from '@/components/candidates/candidate-application-actions'
 
 interface CandidateDetailPageProps {
   params: Promise<{ id: string }>
@@ -26,6 +27,18 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   const { id } = await params
   const supabase = await createClient()
 
+  // Get current user and profile
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/auth/login')
+
+  const { data: currentProfile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+
+  if (!currentProfile) redirect('/auth/login')
+
   const { data: candidate, error } = await supabase
     .from('candidates')
     .select('*, global_locker:profiles!candidates_global_locked_by_fkey(full_name, email), locked_job:jobs!candidates_global_lock_job_id_fkey(title)')
@@ -38,7 +51,18 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
 
   const { data: applications } = await supabase
     .from('applications')
-    .select('*, job:jobs(id, title, department:departments(name)), locker:profiles!applications_locked_by_fkey(full_name, email)')
+    .select(`
+      *,
+      job:jobs(
+        id, 
+        title, 
+        salary_min,
+        salary_max,
+        salary_currency,
+        department:departments(id, name)
+      ),
+      locker:profiles!applications_locked_by_fkey(full_name, email)
+    `)
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
 
@@ -242,6 +266,67 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
         </Card>
       )}
 
+      {/* Candidate Info Summary */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <DollarSign className="h-5 w-5" />
+            Salary & Availability
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">Current Salary</p>
+              <p className="font-medium">
+                {candidate.current_salary 
+                  ? `${CURRENCY_SYMBOLS[candidate.current_salary_currency as SalaryCurrency] || candidate.current_salary_currency || ''} ${candidate.current_salary.toLocaleString()}`
+                  : 'Not specified'}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">Expected Salary</p>
+              <p className="font-medium">
+                {candidate.expected_salary 
+                  ? `${CURRENCY_SYMBOLS[candidate.expected_salary_currency as SalaryCurrency] || candidate.expected_salary_currency || ''} ${candidate.expected_salary.toLocaleString()}`
+                  : 'Not specified'}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">Notice Period</p>
+              <p className="font-medium flex items-center gap-1">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                {candidate.notice_period_days !== null && candidate.notice_period_days !== undefined
+                  ? `${candidate.notice_period_days} days`
+                  : 'Not specified'}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">Nationality</p>
+              <p className="font-medium">{candidate.nationality || 'Not specified'}</p>
+            </div>
+          </div>
+          {/* Contact Numbers */}
+          <div className="mt-4 pt-4 border-t">
+            <p className="text-sm font-medium mb-2">Contact Numbers</p>
+            <div className="grid gap-2 sm:grid-cols-3 text-sm">
+              <div>
+                <span className="text-muted-foreground">Primary:</span>{' '}
+                {candidate.phone ? `${candidate.country_code || ''} ${candidate.phone}` : 'N/A'}
+              </div>
+              <div>
+                <span className="text-muted-foreground">Home Country:</span>{' '}
+                {candidate.home_country_phone ? `${candidate.home_country_code || ''} ${candidate.home_country_phone}` : 'N/A'}
+              </div>
+              <div>
+                <span className="text-muted-foreground">Alternate:</span>{' '}
+                {candidate.alternate_phone ? `${candidate.alternate_country_code || ''} ${candidate.alternate_phone}` : 'N/A'}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Applications */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -259,47 +344,73 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
               This candidate has not applied to any jobs yet.
             </p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {(applications as Application[]).map((application) => (
                 <div
                   key={application.id}
-                  className="flex items-center justify-between rounded-lg border p-4"
+                  className="rounded-lg border p-4 space-y-4"
                 >
-                  <div>
-                    <Link
-                      href={`/dashboard/jobs/${application.job?.id}`}
-                      className="font-medium hover:underline"
-                    >
-                      {application.job?.title}
-                    </Link>
-                    {application.job?.department?.name && (
-                      <p className="text-sm text-muted-foreground">
-                        {application.job.department.name}
-                      </p>
-                    )}
-                    {/* Show lock status */}
-                    {application.lock_status && application.lock_status !== 'available' && (
-                      <div className="mt-1 flex items-center gap-2">
-                        <Lock className="h-3 w-3 text-muted-foreground" />
-                        <Badge variant="outline" className={`text-xs ${LOCK_STATUS_COLORS[application.lock_status]}`}>
-                          {LOCK_STATUS_LABELS[application.lock_status]}
-                        </Badge>
-                        {application.locker && (
-                          <span className="text-xs text-muted-foreground">
-                            by {application.locker.full_name}
-                          </span>
-                        )}
-                      </div>
-                    )}
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <Link
+                        href={`/dashboard/jobs/${application.job?.id}`}
+                        className="font-medium hover:underline text-lg"
+                      >
+                        {application.job?.title}
+                      </Link>
+                      {application.job?.department?.name && (
+                        <p className="text-sm text-muted-foreground">
+                          Department: {application.job.department.name}
+                        </p>
+                      )}
+                      {application.job?.salary_min && application.job?.salary_max && (
+                        <p className="text-sm text-muted-foreground">
+                          Position Salary: {CURRENCY_SYMBOLS[application.job.salary_currency as SalaryCurrency] || application.job.salary_currency}{' '}
+                          {application.job.salary_min.toLocaleString()} - {application.job.salary_max.toLocaleString()}
+                        </p>
+                      )}
+                      {/* Show lock status */}
+                      {application.lock_status && application.lock_status !== 'available' && (
+                        <div className="mt-1 flex items-center gap-2">
+                          <Lock className="h-3 w-3 text-muted-foreground" />
+                          <Badge variant="outline" className={`text-xs ${LOCK_STATUS_COLORS[application.lock_status]}`}>
+                            {LOCK_STATUS_LABELS[application.lock_status]}
+                          </Badge>
+                          {application.locker && (
+                            <span className="text-xs text-muted-foreground">
+                              by {application.locker.full_name}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge variant="secondary" className={STAGE_COLORS[application.stage]}>
+                        {STAGE_LABELS[application.stage]}
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">
+                        {format(new Date(application.applied_at), 'MMM d, yyyy')}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="secondary" className={STAGE_COLORS[application.stage]}>
-                      {STAGE_LABELS[application.stage]}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      {format(new Date(application.applied_at), 'MMM d, yyyy')}
-                    </span>
-                  </div>
+                  
+                  {/* Workflow Actions */}
+                  <CandidateApplicationActions 
+                    application={{
+                      ...application,
+                      candidate: {
+                        email: candidate.email,
+                        full_name: candidate.full_name,
+                        current_salary: candidate.current_salary,
+                        current_salary_currency: candidate.current_salary_currency,
+                        expected_salary: candidate.expected_salary,
+                        expected_salary_currency: candidate.expected_salary_currency,
+                        notice_period_days: candidate.notice_period_days,
+                        nationality: candidate.nationality,
+                      }
+                    }}
+                    currentUser={currentProfile}
+                  />
                 </div>
               ))}
             </div>

@@ -52,6 +52,8 @@ export default function CandidateRegisterPage() {
     full_name: '',
     country_code: '+971',
     phone: '',
+    home_country_code: '+91',
+    home_country_phone: '',
     nationality: '',
     current_salary: '',
     current_salary_currency: 'AED' as SalaryCurrency,
@@ -68,6 +70,13 @@ export default function CandidateRegisterPage() {
     // Validate required fields
     if (!formData.email || !formData.password || !formData.full_name || !formData.phone) {
       setError('Please fill in all required fields')
+      setIsLoading(false)
+      return
+    }
+
+    // Validate home country phone (mandatory)
+    if (!formData.home_country_phone) {
+      setError('Home country contact number is required')
       setIsLoading(false)
       return
     }
@@ -135,6 +144,8 @@ export default function CandidateRegisterPage() {
           full_name: formData.full_name,
           country_code: formData.country_code,
           phone: formData.phone,
+          home_country_code: formData.home_country_code,
+          home_country_phone: formData.home_country_phone,
           nationality: formData.nationality || null,
           current_salary: parseFloat(formData.current_salary),
           current_salary_currency: formData.current_salary_currency,
@@ -244,9 +255,9 @@ export default function CandidateRegisterPage() {
                 </div>
               </div>
 
-              {/* Phone */}
+              {/* Phone - Current Location */}
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number *</Label>
+                <Label htmlFor="phone">Current Location Phone *</Label>
                 <div className="flex gap-2">
                   <Select
                     value={formData.country_code}
@@ -273,6 +284,40 @@ export default function CandidateRegisterPage() {
                     required
                   />
                 </div>
+              </div>
+
+              {/* Home Country Phone - Mandatory */}
+              <div className="space-y-2">
+                <Label htmlFor="home_country_phone">Home Country Contact Number *</Label>
+                <div className="flex gap-2">
+                  <Select
+                    value={formData.home_country_code}
+                    onValueChange={(value) => setFormData({ ...formData, home_country_code: value })}
+                  >
+                    <SelectTrigger className="w-[130px]">
+                      <SelectValue placeholder="Code" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COUNTRY_CODES.map((c) => (
+                        <SelectItem key={c.code} value={c.code}>
+                          {c.flag} {c.code}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    id="home_country_phone"
+                    type="tel"
+                    value={formData.home_country_phone}
+                    onChange={(e) => setFormData({ ...formData, home_country_phone: e.target.value })}
+                    placeholder="9876543210"
+                    className="flex-1"
+                    required
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Your permanent home country contact number
+                </p>
               </div>
 
               {/* Nationality - Searchable Combobox */}

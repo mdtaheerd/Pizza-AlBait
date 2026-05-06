@@ -2,7 +2,7 @@ export type UserRole = 'admin' | 'recruiter' | 'hiring_manager' | 'candidate'
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
 export type JobStatus = 'draft' | 'open' | 'paused' | 'closed'
 export type EmploymentType = 'full_time' | 'part_time' | 'contract' | 'internship' | 'remote'
-export type ApplicationStage = 'applied' | 'screening' | 'interview' | 'assessment' | 'offer' | 'hired' | 'rejected'
+export type ApplicationStage = 'applied' | 'new' | 'screening' | 'shortlisted' | 'interview_scheduled' | 'interviewed' | 'offered' | 'hired' | 'rejected' | 'withdrawn'
 export type InterviewType = 'phone' | 'video' | 'onsite' | 'technical' | 'panel'
 export type InterviewStatus = 'scheduled' | 'completed' | 'cancelled' | 'no_show'
 export type CandidateSource = 'career_page' | 'linkedin' | 'referral' | 'agency' | 'other'
@@ -66,6 +66,10 @@ export interface Candidate {
   full_name: string
   phone: string | null
   country_code: string | null
+  home_country_code: string | null
+  home_country_phone: string | null
+  alternate_country_code: string | null
+  alternate_phone: string | null
   nationality: string | null
   current_salary: number | null
   current_salary_currency: SalaryCurrency | null
@@ -105,11 +109,30 @@ export interface Application {
   lock_status: LockStatus
   applied_at: string
   updated_at: string
+  // Workflow fields
+  interview_date: string | null
+  interview_location: string | null
+  interviewer_email: string | null
+  interviewer_name: string | null
+  screening_notes: string | null
+  interview_notes: string | null
+  rejection_reason: string | null
+  rejection_comments: string | null
+  offer_sent_at: string | null
+  hired_at: string | null
+  rejected_at: string | null
+  shortlisted_at: string | null
+  shortlisted_by: string | null
+  interviewed_at: string | null
+  interviewed_by: string | null
+  hiring_manager_comments: string | null
+  recruiter_comments: string | null
   candidate?: Candidate
   job?: Job
   assignee?: Profile | null
   locker?: Profile | null
   interviews?: Interview[]
+  shortlister?: Profile | null
 }
 
 export interface CandidateHistory {
@@ -178,22 +201,28 @@ export interface PipelineColumn {
 
 export const STAGE_LABELS: Record<ApplicationStage, string> = {
   applied: 'Applied',
+  new: 'New',
   screening: 'Screening',
-  interview: 'Interview',
-  assessment: 'Assessment',
-  offer: 'Offer',
+  shortlisted: 'Shortlisted',
+  interview_scheduled: 'Interview Scheduled',
+  interviewed: 'Interviewed',
+  offered: 'Offered',
   hired: 'Hired',
   rejected: 'Rejected',
+  withdrawn: 'Withdrawn',
 }
 
 export const STAGE_COLORS: Record<ApplicationStage, string> = {
   applied: 'bg-slate-100 text-slate-700',
+  new: 'bg-slate-100 text-slate-700',
   screening: 'bg-blue-100 text-blue-700',
-  interview: 'bg-amber-100 text-amber-700',
-  assessment: 'bg-purple-100 text-purple-700',
-  offer: 'bg-emerald-100 text-emerald-700',
+  shortlisted: 'bg-indigo-100 text-indigo-700',
+  interview_scheduled: 'bg-amber-100 text-amber-700',
+  interviewed: 'bg-purple-100 text-purple-700',
+  offered: 'bg-emerald-100 text-emerald-700',
   hired: 'bg-green-100 text-green-700',
   rejected: 'bg-red-100 text-red-700',
+  withdrawn: 'bg-gray-100 text-gray-700',
 }
 
 export const EMPLOYMENT_TYPE_LABELS: Record<EmploymentType, string> = {

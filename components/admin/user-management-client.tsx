@@ -72,6 +72,18 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
       })
       
       if (error) throw error
+
+      // Send approval confirmation email
+      try {
+        await fetch('/api/send-approval-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, action: 'approve' }),
+        })
+      } catch (emailError) {
+        console.error('Failed to send approval email:', emailError)
+      }
+
       router.refresh()
     } catch (error) {
       console.error('Error approving user:', error)
@@ -92,6 +104,22 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
       })
       
       if (error) throw error
+
+      // Send rejection email
+      try {
+        await fetch('/api/send-approval-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            userId: selectedUser.id, 
+            action: 'reject',
+            reason: rejectionReason || undefined
+          }),
+        })
+      } catch (emailError) {
+        console.error('Failed to send rejection email:', emailError)
+      }
+
       setRejectDialogOpen(false)
       setSelectedUser(null)
       setRejectionReason('')
