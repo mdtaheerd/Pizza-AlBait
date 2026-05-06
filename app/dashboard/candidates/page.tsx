@@ -12,25 +12,29 @@ export default async function CandidatesPage() {
     .select('*')
     .order('created_at', { ascending: false })
 
-  // Get application counts for each candidate
+  // Get application counts and recruiter info for each candidate
   const { data: applications } = await supabase
     .from('applications')
-    .select('candidate_id, stage')
+    .select('candidate_id, stage, assigned_to, assignee:profiles!applications_assigned_to_fkey(id, full_name)')
 
   const applicationsByCandidate = (applications || []).reduce((acc, app) => {
     if (!acc[app.candidate_id]) {
-      acc[app.candidate_id] = { total: 0, active: 0 }
+      acc[app.candidate_id] = { total: 0, active: 0, recruiterName: null as string | null }
     }
     acc[app.candidate_id].total++
     if (!['hired', 'rejected'].includes(app.stage)) {
       acc[app.candidate_id].active++
     }
+    // Get recruiter name from the most recent assigned application
+    if (app.assignee && !acc[app.candidate_id].recruiterName) {
+      acc[app.candidate_id].recruiterName = (app.assignee as { full_name: string }).full_name
+    }
     return acc
-  }, {} as Record<string, { total: number; active: number }>)
+  }, {} as Record<string, { total: number; active: number; recruiterName: string | null }>)
 
   const candidatesWithStats = (candidates || []).map((candidate) => ({
     ...candidate,
-    _stats: applicationsByCandidate[candidate.id] || { total: 0, active: 0 },
+    _stats: applicationsByCandidate[candidate.id] || { total: 0, active: 0, recruiterName: null },
   }))
 
   return (

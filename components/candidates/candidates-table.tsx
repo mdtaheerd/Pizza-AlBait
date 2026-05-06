@@ -40,6 +40,7 @@ interface CandidateWithStats extends Candidate {
   _stats: {
     total: number
     active: number
+    recruiterName: string | null
   }
 }
 
@@ -111,6 +112,7 @@ export function CandidatesTable({ candidates }: CandidatesTableProps) {
               <TableHead className="hidden md:table-cell">Email</TableHead>
               <TableHead className="hidden sm:table-cell">Source</TableHead>
               <TableHead>Applications</TableHead>
+              <TableHead className="hidden md:table-cell">Recruiter</TableHead>
               <TableHead className="hidden lg:table-cell">Links</TableHead>
               <TableHead className="hidden lg:table-cell">Added</TableHead>
               <TableHead className="w-[50px]"></TableHead>
@@ -152,6 +154,13 @@ export function CandidatesTable({ candidates }: CandidatesTableProps) {
                       </span>
                     )}
                   </div>
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  {candidate._stats.recruiterName ? (
+                    <span className="text-sm">{candidate._stats.recruiterName}</span>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">-</span>
+                  )}
                 </TableCell>
                 <TableCell className="hidden lg:table-cell">
                   <div className="flex gap-2">

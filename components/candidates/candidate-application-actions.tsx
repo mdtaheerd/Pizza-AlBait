@@ -96,6 +96,27 @@ export function CandidateApplicationActions({
   const isRecruiter = currentUser.role === 'recruiter' || currentUser.role === 'admin'
   const isHiringManager = currentUser.role === 'hiring_manager' || currentUser.role === 'admin'
 
+  const handleMoveToScreening = async () => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('applications')
+        .update({
+          stage: 'screening',
+          assigned_to: currentUser.id,
+        })
+        .eq('id', application.id)
+
+      if (error) throw error
+      router.refresh()
+    } catch (error) {
+      console.error('Error moving to screening:', error)
+      alert('Failed to move to screening')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleShortlistForInterview = async () => {
     if (!interviewDate || !interviewTime || !interviewerEmail) {
       alert('Please fill in all required fields')
@@ -328,6 +349,37 @@ export function CandidateApplicationActions({
     switch (stage) {
       case 'applied':
       case 'new':
+        return isRecruiter ? (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleMoveToScreening}
+              disabled={isLoading}
+              className="border-blue-500 text-blue-600 hover:bg-blue-50"
+            >
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserCheck className="mr-2 h-4 w-4" />}
+              Move to Screening
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setShortlistDialogOpen(true)}
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              Shortlist for Interview
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => setRejectDialogOpen(true)}
+            >
+              <XCircle className="mr-2 h-4 w-4" />
+              Reject
+            </Button>
+          </div>
+        ) : null
+
       case 'screening':
         return isRecruiter ? (
           <div className="flex flex-wrap gap-2">
