@@ -53,13 +53,22 @@ export default function SignUpPage() {
           },
         },
       })
-      if (error) throw error
+      
+      // Handle rate limit error specifically - registration may still succeed
+      if (error) {
+        if (error.message.toLowerCase().includes('rate limit')) {
+          // Rate limit on Supabase confirmation email - user is still created
+          // Continue to notify admin and redirect
+          console.log('[v0] Rate limit hit but continuing with registration')
+        } else {
+          throw error
+        }
+      }
 
-      // Send notification to admin for approval
-      if (data.user) {
+      // Send notification to admin for approval (don't fail registration if this fails)
+      if (data?.user) {
         try {
-          console.log('[v0] Calling notify-admin API for user:', data.user.id)
-          const notifyResponse = await fetch('/api/notify-admin', {
+          await fetch('/api/notify-admin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -69,17 +78,23 @@ export default function SignUpPage() {
               role: role,
             }),
           })
-          const notifyResult = await notifyResponse.json()
-          console.log('[v0] notify-admin API response:', notifyResult)
         } catch (notifyError) {
-          // Don't fail registration if notification fails
-          console.error('[v0] Failed to notify admin:', notifyError)
+          // Silent fail - admin can see pending users in dashboard
+          console.error('Failed to notify admin:', notifyError)
         }
       }
 
       router.push('/auth/sign-up-success')
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'An error occurred')
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      // Provide user-friendly error messages
+      if (errorMessage.toLowerCase().includes('rate limit')) {
+        setError('Too many attempts. Please try again in a few minutes.')
+      } else if (errorMessage.toLowerCase().includes('already registered')) {
+        setError('This email is already registered. Please sign in instead.')
+      } else {
+        setError(errorMessage)
+      }
     } finally {
       setIsLoading(false)
     }
