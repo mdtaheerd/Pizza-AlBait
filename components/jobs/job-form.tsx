@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
 import type { Job, Department, JobStatus, EmploymentType, SalaryCurrency } from '@/lib/types'
-import { EMPLOYMENT_TYPE_LABELS, JOB_STATUS_LABELS, CURRENCY_OPTIONS } from '@/lib/types'
+import { EMPLOYMENT_TYPE_LABELS, JOB_STATUS_LABELS } from '@/lib/types'
 
 interface JobFormProps {
   job?: Job
@@ -37,7 +37,7 @@ export function JobForm({ job, departments }: JobFormProps) {
     employment_type: job?.employment_type || '',
     salary_min: job?.salary_min?.toString() || '',
     salary_max: job?.salary_max?.toString() || '',
-    salary_currency: job?.salary_currency || 'USD',
+    salary_currency: 'AED',
     status: job?.status || 'draft',
     closing_date: job?.closing_date || '',
   })
@@ -222,28 +222,9 @@ export function JobForm({ job, departments }: JobFormProps) {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="salary_currency">Salary Currency</Label>
-            <Select
-              value={formData.salary_currency}
-              onValueChange={(value) => setFormData({ ...formData, salary_currency: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select currency" />
-              </SelectTrigger>
-              <SelectContent>
-                {CURRENCY_OPTIONS.map((currency) => (
-                  <SelectItem key={currency.value} value={currency.value}>
-                    {currency.symbol} {currency.label} ({currency.value})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="salary_min">Minimum Salary (Annual)</Label>
+              <Label htmlFor="salary_min">Minimum Salary (AED/Annual)</Label>
               <Input
                 id="salary_min"
                 type="number"
@@ -254,7 +235,7 @@ export function JobForm({ job, departments }: JobFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="salary_max">Maximum Salary (Annual)</Label>
+              <Label htmlFor="salary_max">Maximum Salary (AED/Annual)</Label>
               <Input
                 id="salary_max"
                 type="number"
