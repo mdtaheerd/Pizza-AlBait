@@ -22,31 +22,40 @@ export default async function CandidatesPage() {
       acc[app.candidate_id] = { 
         total: 0, 
         active: 0, 
+        rejected: 0,
         recruiterName: null as string | null,
         isLocked: false,
-        currentStage: null as string | null
+        currentStage: null as string | null,
+        isAvailableForNewApplication: true
       }
     }
     acc[app.candidate_id].total++
-    if (!['hired', 'rejected'].includes(app.stage)) {
+    
+    if (app.stage === 'rejected') {
+      acc[app.candidate_id].rejected++
+    } else if (app.stage !== 'hired') {
       acc[app.candidate_id].active++
       // Track lock status for active applications
       if (app.lock_status === 'locked') {
         acc[app.candidate_id].isLocked = true
+        acc[app.candidate_id].isAvailableForNewApplication = false
       }
       // Track current stage
       acc[app.candidate_id].currentStage = app.stage
+    } else {
+      // Hired - not available for new applications to the same job but could apply to other jobs
     }
-    // Get recruiter name from the most recent assigned application
-    if (app.assignee && !acc[app.candidate_id].recruiterName) {
+    
+    // Get recruiter name from active applications only
+    if (app.assignee && !['hired', 'rejected'].includes(app.stage) && !acc[app.candidate_id].recruiterName) {
       acc[app.candidate_id].recruiterName = (app.assignee as { full_name: string }).full_name
     }
     return acc
-  }, {} as Record<string, { total: number; active: number; recruiterName: string | null; isLocked: boolean; currentStage: string | null }>)
+  }, {} as Record<string, { total: number; active: number; rejected: number; recruiterName: string | null; isLocked: boolean; currentStage: string | null; isAvailableForNewApplication: boolean }>)
 
   const candidatesWithStats = (candidates || []).map((candidate) => ({
     ...candidate,
-    _stats: applicationsByCandidate[candidate.id] || { total: 0, active: 0, recruiterName: null, isLocked: false, currentStage: null },
+    _stats: applicationsByCandidate[candidate.id] || { total: 0, active: 0, rejected: 0, recruiterName: null, isLocked: false, currentStage: null, isAvailableForNewApplication: true },
   }))
 
   return (
