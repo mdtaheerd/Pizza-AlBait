@@ -99,8 +99,11 @@ export default async function HomePage() {
               </Link>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="ghost" asChild>
-                <Link href="/auth/login">Sign In</Link>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/candidate/login">Candidate Login</Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/auth/login">Recruiter Login</Link>
               </Button>
               <Button asChild className="bg-red-600 hover:bg-red-700 rounded-xl">
                 <Link href="/careers">View Jobs</Link>

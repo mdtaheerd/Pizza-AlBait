@@ -14,8 +14,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { COUNTRY_CODES } from '@/lib/types'
-import { CheckCircle2, Upload, FileText, X, Loader2 } from 'lucide-react'
+import { COUNTRY_CODES, COUNTRIES, CURRENCY_OPTIONS, SalaryCurrency } from '@/lib/types'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
+import { CheckCircle2, Upload, FileText, X, Loader2, Check, ChevronsUpDown } from 'lucide-react'
 
 interface ApplicationFormProps {
   jobId: string
@@ -30,12 +44,18 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [cvFile, setCvFile] = useState<File | null>(null)
   const [cvUrl, setCvUrl] = useState<string | null>(null)
+  const [nationalityOpen, setNationalityOpen] = useState(false)
 
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
     country_code: '+971',
     phone: '',
+    nationality: '',
+    current_salary: '',
+    current_salary_currency: 'AED' as SalaryCurrency,
+    expected_salary: '',
+    expected_salary_currency: 'AED' as SalaryCurrency,
     linkedin_url: '',
     portfolio_url: '',
     cover_letter: '',
@@ -144,6 +164,11 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
             email: formData.email,
             country_code: formData.country_code,
             phone: formData.phone || null,
+            nationality: formData.nationality || null,
+            current_salary: formData.current_salary ? parseFloat(formData.current_salary) : null,
+            current_salary_currency: formData.current_salary ? formData.current_salary_currency : null,
+            expected_salary: formData.expected_salary ? parseFloat(formData.expected_salary) : null,
+            expected_salary_currency: formData.expected_salary ? formData.expected_salary_currency : null,
             linkedin_url: formData.linkedin_url || null,
             portfolio_url: formData.portfolio_url || null,
             source: 'career_page',
@@ -274,26 +299,137 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
             </div>
           </div>
 
+          {/* Nationality - Searchable Combobox */}
           <div className="space-y-2">
-            <Label htmlFor="linkedin_url">LinkedIn Profile (Optional)</Label>
-            <Input
-              id="linkedin_url"
-              type="url"
-              value={formData.linkedin_url}
-              onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
-              placeholder="https://linkedin.com/in/johndoe"
-            />
+            <Label>Nationality (Optional)</Label>
+            <Popover open={nationalityOpen} onOpenChange={setNationalityOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={nationalityOpen}
+                  className="w-full justify-between font-normal"
+                >
+                  {formData.nationality || "Select nationality..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Type to search country..." />
+                  <CommandList>
+                    <CommandEmpty>No country found.</CommandEmpty>
+                    <CommandGroup className="max-h-64 overflow-auto">
+                      {COUNTRIES.map((country) => (
+                        <CommandItem
+                          key={country}
+                          value={country}
+                          onSelect={() => {
+                            setFormData({ ...formData, nationality: country })
+                            setNationalityOpen(false)
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              formData.nationality === country ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {country}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="portfolio_url">Portfolio / Website (Optional)</Label>
-            <Input
-              id="portfolio_url"
-              type="url"
-              value={formData.portfolio_url}
-              onChange={(e) => setFormData({ ...formData, portfolio_url: e.target.value })}
-              placeholder="https://johndoe.com"
-            />
+          {/* Salary Info - Optional */}
+          <div className="space-y-3 pt-2">
+            <p className="text-sm text-muted-foreground">Salary Information (Optional)</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="current_salary">Current Salary</Label>
+                <div className="flex gap-2">
+                  <Select
+                    value={formData.current_salary_currency}
+                    onValueChange={(value) => setFormData({ ...formData, current_salary_currency: value as SalaryCurrency })}
+                  >
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CURRENCY_OPTIONS.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>
+                          {c.value}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    id="current_salary"
+                    type="number"
+                    value={formData.current_salary}
+                    onChange={(e) => setFormData({ ...formData, current_salary: e.target.value })}
+                    placeholder="Amount"
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="expected_salary">Expected Salary</Label>
+                <div className="flex gap-2">
+                  <Select
+                    value={formData.expected_salary_currency}
+                    onValueChange={(value) => setFormData({ ...formData, expected_salary_currency: value as SalaryCurrency })}
+                  >
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CURRENCY_OPTIONS.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>
+                          {c.value}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    id="expected_salary"
+                    type="number"
+                    value={formData.expected_salary}
+                    onChange={(e) => setFormData({ ...formData, expected_salary: e.target.value })}
+                    placeholder="Amount"
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="linkedin_url">LinkedIn Profile (Optional)</Label>
+              <Input
+                id="linkedin_url"
+                type="url"
+                value={formData.linkedin_url}
+                onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
+                placeholder="https://linkedin.com/in/johndoe"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="portfolio_url">Portfolio / Website (Optional)</Label>
+              <Input
+                id="portfolio_url"
+                type="url"
+                value={formData.portfolio_url}
+                onChange={(e) => setFormData({ ...formData, portfolio_url: e.target.value })}
+                placeholder="https://johndoe.com"
+              />
+            </div>
           </div>
 
           {/* CV Upload Section */}
