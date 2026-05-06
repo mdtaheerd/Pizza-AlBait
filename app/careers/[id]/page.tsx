@@ -9,6 +9,10 @@ import Link from 'next/link'
 import { EMPLOYMENT_TYPE_LABELS, CURRENCY_SYMBOLS, type SalaryCurrency } from '@/lib/types'
 import { CareersHeader } from '@/components/careers/careers-header'
 
+// Disable caching to always fetch fresh data
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 interface JobDetailPageProps {
   params: Promise<{ id: string }>
 }
@@ -16,8 +20,6 @@ interface JobDetailPageProps {
 export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const { id } = await params
   const supabase = await createClient()
-
-  console.log('[v0] Job detail page - Requested ID:', id)
 
   const { data: job, error } = await supabase
     .from('jobs')
@@ -28,8 +30,6 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     .eq('id', id)
     .eq('status', 'open')
     .single()
-
-  console.log('[v0] Job detail page - Fetched job:', job?.id, job?.title, 'Error:', error?.message)
 
   if (error || !job) {
     notFound()

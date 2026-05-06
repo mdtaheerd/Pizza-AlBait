@@ -1,5 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+
+// Disable caching to always fetch fresh data
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { MapPin, Clock, Banknote, Search, HardHat, ArrowRight, Users, Briefcase, Shield, Linkedin, Globe } from 'lucide-react'
@@ -170,9 +174,7 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
             <p className="text-sm text-muted-foreground">
               Showing {filteredJobs.length} open position{filteredJobs.length !== 1 ? 's' : ''}
             </p>
-            {filteredJobs.map((job) => {
-              console.log('[v0] Rendering job card:', job.id, job.title)
-              return (
+            {filteredJobs.map((job) => (
               <Link key={job.id} href={`/careers/${job.id}`} className="block">
                 <Card className="group relative overflow-hidden transition-all hover:shadow-lg hover:border-red-600/30">
                   <div className="absolute inset-0 bg-gradient-to-r from-red-600/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none" />
@@ -227,8 +229,7 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
                   </CardContent>
                 </Card>
               </Link>
-            )})}
-            
+            ))}
           </div>
         )}
       </section>
