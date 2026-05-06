@@ -7,7 +7,7 @@ export type InterviewType = 'phone' | 'video' | 'onsite' | 'technical' | 'panel'
 export type InterviewStatus = 'scheduled' | 'completed' | 'cancelled' | 'no_show'
 export type CandidateSource = 'career_page' | 'linkedin' | 'referral' | 'agency' | 'other'
 export type LockStatus = 'available' | 'locked' | 'in_process' | 'completed' | 'released'
-export type SalaryCurrency = 'USD' | 'AED' | 'SAR' | 'QAR' | 'KWD' | 'BHD' | 'OMR' | 'EUR' | 'GBP' | 'CNY'
+export type SalaryCurrency = 'AED'
 export type HistoryActionType = 'applied' | 'screened' | 'interviewed' | 'assessed' | 'offered' | 'hired' | 'rejected' | 'offer_declined' | 'withdrawn' | 'locked' | 'unlocked' | 'reassigned' | 'note_added'
 
 export interface Department {
@@ -285,29 +285,11 @@ export const HISTORY_ACTION_LABELS: Record<HistoryActionType, string> = {
 }
 
 export const CURRENCY_OPTIONS: { value: SalaryCurrency; label: string; symbol: string }[] = [
-  { value: 'USD', label: 'US Dollar', symbol: '$' },
-  { value: 'AED', label: 'UAE Dirham', symbol: 'د.إ' },
-  { value: 'SAR', label: 'Saudi Riyal', symbol: '﷼' },
-  { value: 'QAR', label: 'Qatari Riyal', symbol: 'ر.ق' },
-  { value: 'KWD', label: 'Kuwaiti Dinar', symbol: 'د.ك' },
-  { value: 'BHD', label: 'Bahraini Dinar', symbol: 'د.ب' },
-  { value: 'OMR', label: 'Omani Rial', symbol: 'ر.ع' },
-  { value: 'EUR', label: 'Euro', symbol: '€' },
-  { value: 'GBP', label: 'British Pound', symbol: '£' },
-  { value: 'CNY', label: 'Chinese Yuan', symbol: '¥' },
+  { value: 'AED', label: 'UAE Dirham', symbol: 'AED' },
 ]
 
 export const CURRENCY_SYMBOLS: Record<SalaryCurrency, string> = {
-  USD: '$',
-  AED: 'د.إ',
-  SAR: '﷼',
-  QAR: 'ر.ق',
-  KWD: 'د.ك',
-  BHD: 'د.ب',
-  OMR: 'ر.ع',
-  EUR: '€',
-  GBP: '£',
-  CNY: '¥',
+  AED: 'AED',
 }
 
 export const APPROVAL_STATUS_LABELS: Record<ApprovalStatus, string> = {
