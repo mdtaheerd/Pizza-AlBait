@@ -39,7 +39,8 @@ import {
   Send,
   Briefcase,
   Clock,
-  MessageSquare
+  MessageSquare,
+  Mail
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
@@ -801,27 +802,27 @@ export function CandidateApplicationActions({
                 {rejectionComments.length}/30 characters
               </p>
             </div>
-            <div className="flex items-center space-x-2 pt-2 border-t">
-              <input
-                type="checkbox"
-                id="sendRejectionEmail"
-                checked={sendRejectionEmail}
-                onChange={(e) => setSendRejectionEmail(e.target.checked)}
-                className="rounded border-gray-300"
-              />
-              <Label htmlFor="sendRejectionEmail" className="text-sm font-normal cursor-pointer">
-                Send rejection email to candidate
-              </Label>
             </div>
-          </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleReject} disabled={isLoading}>
+            <Button variant="destructive" onClick={() => { setSendRejectionEmail(false); handleReject(); }} disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {sendRejectionEmail ? 'Reject & Notify' : 'Reject'}
+              Reject
             </Button>
+            {application.candidate?.email && (
+              <Button 
+                variant="destructive" 
+                onClick={() => { setSendRejectionEmail(true); handleReject(); }} 
+                disabled={isLoading}
+                className="bg-red-700 hover:bg-red-800"
+              >
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Mail className="mr-2 h-4 w-4" />
+                Send Rejection Email
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -868,32 +869,18 @@ export function CandidateApplicationActions({
             )}
 
             {interviewResult === 'reject' && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="rejection_comments_interview">
-                    Rejection Reason (max 30 characters)
-                  </Label>
-                  <Input
-                    id="rejection_comments_interview"
-                    value={rejectionComments}
-                    onChange={(e) => setRejectionComments(e.target.value.slice(0, 30))}
-                    placeholder="Brief reason..."
-                    maxLength={30}
-                  />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="sendRejectionEmailInterview"
-                    checked={sendRejectionEmail}
-                    onChange={(e) => setSendRejectionEmail(e.target.checked)}
-                    className="rounded border-gray-300"
-                  />
-                  <Label htmlFor="sendRejectionEmailInterview" className="text-sm font-normal cursor-pointer">
-                    Send rejection email to candidate
-                  </Label>
-                </div>
-              </>
+              <div className="space-y-2">
+                <Label htmlFor="rejection_comments_interview">
+                  Rejection Reason (max 30 characters)
+                </Label>
+                <Input
+                  id="rejection_comments_interview"
+                  value={rejectionComments}
+                  onChange={(e) => setRejectionComments(e.target.value.slice(0, 30))}
+                  placeholder="Brief reason..."
+                  maxLength={30}
+                />
+              </div>
             )}
 
             <div className="space-y-2">
@@ -913,14 +900,35 @@ export function CandidateApplicationActions({
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={() => setInterviewResultDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleInterviewResult} disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Result
-            </Button>
+            {interviewResult === 'reject' ? (
+              <>
+                <Button variant="destructive" onClick={() => { setSendRejectionEmail(false); handleInterviewResult(); }} disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Reject
+                </Button>
+                {application.candidate?.email && (
+                  <Button 
+                    variant="destructive" 
+                    onClick={() => { setSendRejectionEmail(true); handleInterviewResult(); }} 
+                    disabled={isLoading}
+                    className="bg-red-700 hover:bg-red-800"
+                  >
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    <Mail className="mr-2 h-4 w-4" />
+                    Send Rejection Email
+                  </Button>
+                )}
+              </>
+            ) : (
+              <Button onClick={() => { setSendRejectionEmail(false); handleInterviewResult(); }} disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Result
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
