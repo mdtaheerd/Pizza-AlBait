@@ -13,7 +13,8 @@ function getResendClient(): Resend {
   return resendClient
 }
 
-const getAdminEmail = () => process.env.ADMIN_EMAIL || 'mdtaheerd@gmail.com'
+// Hardcoded to match Resend registered email - env var wasn't updating properly
+const getAdminEmail = () => 'mdtaheerd@gmail.com'
 const FROM_EMAIL = 'CPECC Recruitment <noreply@resend.dev>'
 const getAppUrl = () => process.env.NEXT_PUBLIC_APP_URL || 'https://pizza-al-bait.vercel.app'
 
