@@ -171,9 +171,9 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
               Showing {filteredJobs.length} open position{filteredJobs.length !== 1 ? 's' : ''}
             </p>
             {filteredJobs.map((job) => (
-              <Link key={job.id} href={`/careers/${job.id}`}>
-                <Card className="group overflow-hidden transition-all hover:shadow-lg hover:border-red-600/30">
-                  <div className="absolute inset-0 bg-gradient-to-r from-red-600/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+              <Link key={job.id} href={`/careers/${job.id}`} className="block">
+                <Card className="group relative overflow-hidden transition-all hover:shadow-lg hover:border-red-600/30">
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-600/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none" />
                   <CardHeader className="relative pb-3">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
