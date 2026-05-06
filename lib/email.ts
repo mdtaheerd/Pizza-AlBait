@@ -1,10 +1,21 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Lazy initialize Resend client to avoid build errors when env var is not available
+let resendClient: Resend | null = null
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'mohammed.taheer@cpecc.ae'
-const FROM_EMAIL = process.env.FROM_EMAIL || 'CPECC Recruitment <noreply@resend.dev>'
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://pizza-al-bait.vercel.app'
+function getResendClient(): Resend {
+  if (!resendClient) {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY environment variable is not set')
+    }
+    resendClient = new Resend(process.env.RESEND_API_KEY)
+  }
+  return resendClient
+}
+
+const getAdminEmail = () => process.env.ADMIN_EMAIL || 'mdtaheerd@gmail.com'
+const FROM_EMAIL = 'CPECC Recruitment <noreply@resend.dev>'
+const getAppUrl = () => process.env.NEXT_PUBLIC_APP_URL || 'https://pizza-al-bait.vercel.app'
 
 // Generic email sender for workflow emails
 export async function sendEmail({ 
@@ -17,6 +28,7 @@ export async function sendEmail({
   html: string 
 }) {
   try {
+    const resend = getResendClient()
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to,
@@ -44,6 +56,9 @@ export async function sendAdminApprovalEmail(user: {
   role: string
 }) {
   try {
+    const resend = getResendClient()
+    const ADMIN_EMAIL = getAdminEmail()
+    const APP_URL = getAppUrl()
     const approvalUrl = `${APP_URL}/dashboard/users?approve=${user.id}`
     
     console.log('[v0] sendAdminApprovalEmail called with:', { 
@@ -130,6 +145,8 @@ export async function sendApprovalConfirmationEmail(user: {
   full_name: string
 }) {
   try {
+    const resend = getResendClient()
+    const APP_URL = getAppUrl()
     const loginUrl = `${APP_URL}/auth/login`
     
     const { data, error } = await resend.emails.send({
@@ -200,6 +217,7 @@ export async function sendRejectionEmail(user: {
   reason?: string
 }) {
   try {
+    const resend = getResendClient()
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: user.email,
