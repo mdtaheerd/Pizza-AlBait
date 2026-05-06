@@ -203,7 +203,7 @@ export default async function HomePage() {
             
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-                Engineering Excellence in the Middle East
+                EPC Excellence in the Middle East
               </h2>
               <p className="text-muted-foreground mb-6 leading-relaxed">
                 China Petroleum Engineering and Construction Corporation (CPECC) is a premier EPC contractor specializing in onshore oil and gas, petrochemical, and energy infrastructure projects across the Middle East. Our integrated approach combines cutting-edge engineering, strategic procurement, and world-class construction capabilities.
