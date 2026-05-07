@@ -78,6 +78,7 @@ interface ExtendedJob {
   title: string
   status: string
   created_at: string
+  closing_date?: string | null
   department?: { id: string; name: string } | null
   creator?: { id: string; full_name: string; email: string } | null
 }
@@ -179,7 +180,9 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
       'Stage',
       'Applied Date',
       'Recruiter Name',
-      'Interview Date',
+      'Interview Schedule Date',
+      'Offer Date',
+      'Hire Date',
       'Rejection Reason'
     ]
 
@@ -202,6 +205,8 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
       format(new Date(app.applied_at), 'yyyy-MM-dd'),
       app.job?.creator?.full_name || '',
       app.interview_date ? format(new Date(app.interview_date), 'yyyy-MM-dd HH:mm') : '',
+      app.offer_sent_at ? format(new Date(app.offer_sent_at), 'yyyy-MM-dd') : '',
+      app.hired_at ? format(new Date(app.hired_at), 'yyyy-MM-dd') : '',
       app.rejection_comments || ''
     ])
 
@@ -219,7 +224,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
 
   // Export Jobs Report to CSV
   const exportJobsToCSV = () => {
-    const headers = ['Job Title', 'Department', 'Status', 'Recruiter Name', 'Recruiter Email', 'Created Date', 'Applications Count']
+    const headers = ['Job Title', 'Department', 'Status', 'Recruiter Name', 'Recruiter Email', 'Created Date', 'Closing Date', 'Applications Count']
     
     const rows = jobs.map(job => {
       const appCount = applications.filter(a => a.job_id === job.id).length
@@ -230,6 +235,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
         job.creator?.full_name || '',
         job.creator?.email || '',
         format(new Date(job.created_at), 'yyyy-MM-dd'),
+        job.closing_date ? format(new Date(job.closing_date), 'yyyy-MM-dd') : '',
         appCount.toString()
       ]
     })
@@ -396,7 +402,9 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                         <TableHead>Alternate Contact</TableHead>
                         <TableHead>Stage</TableHead>
                         <TableHead>Applied Date</TableHead>
-                        {reportType === 'interview' && <TableHead>Interview Date</TableHead>}
+                        <TableHead>Interview Date</TableHead>
+                        <TableHead>Offer Date</TableHead>
+                        <TableHead>Hire Date</TableHead>
                         {reportType === 'rejected' && <TableHead>Reason</TableHead>}
                       </TableRow>
                     </TableHeader>
@@ -460,13 +468,21 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                           <TableCell className="text-sm">
                             {format(new Date(app.applied_at), 'MMM d, yyyy')}
                           </TableCell>
-                          {reportType === 'interview' && (
-                            <TableCell className="text-sm">
-                              {app.interview_date 
-                                ? format(new Date(app.interview_date), 'MMM d, yyyy HH:mm')
-                                : '-'}
-                            </TableCell>
-                          )}
+                          <TableCell className="text-sm">
+                            {app.interview_date 
+                              ? format(new Date(app.interview_date), 'MMM d, yyyy HH:mm')
+                              : '-'}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {app.offer_sent_at 
+                              ? format(new Date(app.offer_sent_at), 'MMM d, yyyy')
+                              : '-'}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {app.hired_at 
+                              ? format(new Date(app.hired_at), 'MMM d, yyyy')
+                              : '-'}
+                          </TableCell>
                           {reportType === 'rejected' && (
                             <TableCell className="text-sm text-red-600">
                               {app.rejection_comments || '-'}
@@ -476,7 +492,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                       ))}
                       {filteredApplications.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={14} className="text-center text-muted-foreground py-8">
+                          <TableCell colSpan={16} className="text-center text-muted-foreground py-8">
                             No applications found
                           </TableCell>
                         </TableRow>
@@ -515,6 +531,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                       <TableHead>Recruiter Name</TableHead>
                       <TableHead>Recruiter Email</TableHead>
                       <TableHead>Created Date</TableHead>
+                      <TableHead>Closing Date</TableHead>
                       <TableHead>Applications</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -536,6 +553,11 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                           </TableCell>
                           <TableCell>{format(new Date(job.created_at), 'MMM d, yyyy')}</TableCell>
                           <TableCell>
+                            {job.closing_date 
+                              ? format(new Date(job.closing_date), 'MMM d, yyyy')
+                              : '-'}
+                          </TableCell>
+                          <TableCell>
                             <Badge variant="outline">{appCount}</Badge>
                           </TableCell>
                         </TableRow>
@@ -543,7 +565,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                     })}
                     {jobs.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                        <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                           No jobs found
                         </TableCell>
                       </TableRow>

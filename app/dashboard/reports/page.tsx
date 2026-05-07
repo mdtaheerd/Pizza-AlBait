@@ -63,6 +63,7 @@ export default async function ReportsPage() {
       title,
       status,
       created_at,
+      closing_date,
       department:departments(id, name),
       creator:profiles(id, full_name, email)
     `)
