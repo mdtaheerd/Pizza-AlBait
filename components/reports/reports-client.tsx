@@ -40,7 +40,8 @@ import {
   Gift,
   CheckCircle,
   XCircle,
-  Briefcase
+  Briefcase,
+  BarChart3
 } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -56,6 +57,9 @@ interface ExtendedApplication extends Application {
     alternate_country_code?: string | null
     alternate_phone?: string | null
     nationality?: string | null
+    gender?: string | null
+    date_of_birth?: string | null
+    qualification?: string | null
     current_salary?: number | null
     current_salary_currency?: string | null
     expected_salary?: number | null
@@ -92,7 +96,7 @@ interface ReportsClientProps {
   currentUser?: Profile
 }
 
-type ReportType = 'all' | 'screening' | 'interview' | 'offered' | 'hired' | 'rejected' | 'jobs'
+type ReportType = 'all' | 'screening' | 'interview' | 'offered' | 'hired' | 'rejected' | 'jobs' | 'analytics'
 
 export function ReportsClient({ applications, jobs, currentUser }: ReportsClientProps) {
   const [activeReport, setActiveReport] = useState<ReportType>('all')
@@ -162,8 +166,76 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
     offered: applications.filter(a => a.stage === 'offered').length,
     hired: applications.filter(a => a.stage === 'hired').length,
     rejected: applications.filter(a => a.stage === 'rejected').length,
-  }), [applications])
+}), [applications])
 
+  // Analytics calculations
+  const analytics = useMemo(() => {
+    // Positions per department
+    const positionsByDept: Record<string, number> = {}
+    jobs.forEach(job => {
+      const deptName = job.department?.name || 'Unassigned'
+      positionsByDept[deptName] = (positionsByDept[deptName] || 0) + 1
+    })
+
+    // Gender distribution
+    const genderDist: Record<string, number> = {}
+    applications.forEach(app => {
+      const gender = app.candidate?.gender || 'Not Specified'
+      genderDist[gender] = (genderDist[gender] || 0) + 1
+    })
+
+    // Nationality distribution
+    const nationalityDist: Record<string, number> = {}
+    applications.forEach(app => {
+      const nationality = app.candidate?.nationality || 'Not Specified'
+      nationalityDist[nationality] = (nationalityDist[nationality] || 0) + 1
+    })
+
+    // Age distribution (calculate age from date_of_birth)
+    const ageDist: Record<string, number> = {
+      'Under 25': 0,
+      '25-34': 0,
+      '35-44': 0,
+      '45-54': 0,
+      '55+': 0,
+      'Not Specified': 0,
+    }
+    applications.forEach(app => {
+      const dob = app.candidate?.date_of_birth
+      if (dob) {
+        const birthDate = new Date(dob)
+        const today = new Date()
+        let age = today.getFullYear() - birthDate.getFullYear()
+        const m = today.getMonth() - birthDate.getMonth()
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+          age--
+        }
+        if (age < 25) ageDist['Under 25']++
+        else if (age < 35) ageDist['25-34']++
+        else if (age < 45) ageDist['35-44']++
+        else if (age < 55) ageDist['45-54']++
+        else ageDist['55+']++
+      } else {
+        ageDist['Not Specified']++
+      }
+    })
+
+    // Qualification distribution
+    const qualificationDist: Record<string, number> = {}
+    applications.forEach(app => {
+      const qualification = app.candidate?.qualification || 'Not Specified'
+      qualificationDist[qualification] = (qualificationDist[qualification] || 0) + 1
+    })
+
+    return {
+      positionsByDept,
+      genderDist,
+      nationalityDist,
+      ageDist,
+      qualificationDist,
+    }
+  }, [applications, jobs])
+  
   // Calculate days to fill position
   const calculateDaysToFill = (openDate: string | null | undefined, hiredAt: string | null | undefined) => {
     if (!openDate) return ''
@@ -270,14 +342,15 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
     { id: 'interview', label: 'Interview', icon: Calendar, count: stats.interview },
     { id: 'offered', label: 'Offer', icon: Gift, count: stats.offered },
     { id: 'hired', label: 'Hired', icon: CheckCircle, count: stats.hired },
-    { id: 'rejected', label: 'Rejected', icon: XCircle, count: stats.rejected },
-    { id: 'jobs', label: 'Jobs', icon: Briefcase, count: jobs.length },
+{ id: 'rejected', label: 'Rejected', icon: XCircle, count: stats.rejected },
+  { id: 'jobs', label: 'Jobs', icon: Briefcase, count: jobs.length },
+  { id: 'analytics', label: 'Analytics', icon: BarChart3, count: 0 },
   ]
 
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
+      <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-7">
         <Card className="cursor-pointer hover:border-primary transition-colors" onClick={() => setActiveReport('screening')}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Screening</CardTitle>
@@ -326,11 +399,21 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
             <div className="text-2xl font-bold text-purple-600">{jobs.length}</div>
           </CardContent>
         </Card>
+        <Card className="cursor-pointer hover:border-primary transition-colors" onClick={() => setActiveReport('analytics')}>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Analytics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-indigo-600">
+              <BarChart3 className="h-6 w-6" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeReport} onValueChange={(v) => setActiveReport(v as ReportType)}>
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           {reportTabs.map(tab => (
             <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-1">
               <tab.icon className="h-4 w-4" />
@@ -576,6 +659,175 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Analytics Tab */}
+        <TabsContent value="analytics" className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Positions by Department */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Briefcase className="h-5 w-5" />
+                  Positions by Department
+                </CardTitle>
+                <CardDescription>Number of job positions per department</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {Object.entries(analytics.positionsByDept)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([dept, count]) => (
+                      <div key={dept} className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{dept}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-blue-500 rounded-full"
+                              style={{ width: `${(count / jobs.length) * 100}%` }}
+                            />
+                          </div>
+                          <Badge variant="secondary">{count}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                  {Object.keys(analytics.positionsByDept).length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No data available</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Gender Distribution */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Gender Distribution
+                </CardTitle>
+                <CardDescription>Candidate distribution by gender</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {Object.entries(analytics.genderDist)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([gender, count]) => (
+                      <div key={gender} className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{gender}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-purple-500 rounded-full"
+                              style={{ width: `${(count / applications.length) * 100}%` }}
+                            />
+                          </div>
+                          <Badge variant="secondary">{count}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Nationality Distribution */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Nationality Distribution
+                </CardTitle>
+                <CardDescription>Top nationalities of candidates</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {Object.entries(analytics.nationalityDist)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 15)
+                    .map(([nationality, count]) => (
+                      <div key={nationality} className="flex items-center justify-between">
+                        <span className="text-sm font-medium truncate max-w-[150px]">{nationality}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-green-500 rounded-full"
+                              style={{ width: `${(count / applications.length) * 100}%` }}
+                            />
+                          </div>
+                          <Badge variant="secondary">{count}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                  {Object.keys(analytics.nationalityDist).length > 15 && (
+                    <p className="text-xs text-muted-foreground text-center">
+                      +{Object.keys(analytics.nationalityDist).length - 15} more nationalities
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Age Distribution */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Age Distribution
+                </CardTitle>
+                <CardDescription>Candidate distribution by age group</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {Object.entries(analytics.ageDist)
+                    .filter(([_, count]) => count > 0)
+                    .map(([ageGroup, count]) => (
+                      <div key={ageGroup} className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{ageGroup}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-amber-500 rounded-full"
+                              style={{ width: `${(count / applications.length) * 100}%` }}
+                            />
+                          </div>
+                          <Badge variant="secondary">{count}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Qualification Distribution */}
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ClipboardList className="h-5 w-5" />
+                  Qualification Distribution
+                </CardTitle>
+                <CardDescription>Candidate distribution by qualification level</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {Object.entries(analytics.qualificationDist)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([qualification, count]) => (
+                      <div key={qualification} className="flex items-center justify-between p-3 border rounded-lg">
+                        <span className="text-sm font-medium truncate max-w-[150px]">{qualification}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-indigo-500 rounded-full"
+                              style={{ width: `${(count / applications.length) * 100}%` }}
+                            />
+                          </div>
+                          <Badge variant="secondary">{count}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
