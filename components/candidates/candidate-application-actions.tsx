@@ -100,6 +100,21 @@ export function CandidateApplicationActions({
   const [salaryExpectation, setSalaryExpectation] = useState(application.salary_expectation || '')
   const [benefitsExpectation, setBenefitsExpectation] = useState(application.benefits_expectation || '')
   const [noticePeriod, setNoticePeriod] = useState(application.notice_period || '')
+  
+  // Reschedule states
+  const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false)
+  const [rescheduleDate, setRescheduleDate] = useState<Date | undefined>(
+    application.interview_date ? new Date(application.interview_date) : undefined
+  )
+  const [rescheduleTime, setRescheduleTime] = useState(
+    application.interview_date ? format(new Date(application.interview_date), 'HH:mm') : '10:00'
+  )
+  const [rescheduleLocation, setRescheduleLocation] = useState(application.interview_location || '')
+  
+  // Multiple interviewers
+  const [interviewerEmailsInput, setInterviewerEmailsInput] = useState(
+    application.interviewer_emails?.join(', ') || application.interviewer_email || ''
+  )
 
   const supabase = createClient()
   const isRecruiter = currentUser.role === 'recruiter' || currentUser.role === 'admin'
@@ -129,6 +144,67 @@ export function CandidateApplicationActions({
     }
   }
 
+  const handleReschedule = async (sendNotification: boolean) => {
+    if (!rescheduleDate) {
+      alert('Please select a date')
+      return
+    }
+    
+    setIsLoading(true)
+    try {
+      const [hours, minutes] = rescheduleTime.split(':').map(Number)
+      const scheduledDate = new Date(rescheduleDate)
+      scheduledDate.setHours(hours, minutes, 0, 0)
+
+      // Parse interviewer emails
+      const emailsArray = interviewerEmailsInput
+        .split(',')
+        .map(e => e.trim())
+        .filter(e => e.length > 0)
+
+      const { error } = await supabase
+        .from('applications')
+        .update({
+          interview_date: scheduledDate.toISOString(),
+          interview_location: rescheduleLocation || null,
+          interviewer_emails: emailsArray.length > 0 ? emailsArray : null,
+          interview_status: 'rescheduled',
+          original_interview_date: application.interview_date,
+          rescheduled_at: new Date().toISOString(),
+          rescheduled_by: currentUser.id,
+        })
+        .eq('id', application.id)
+
+      if (error) throw error
+
+      // Send notification if requested
+      if (sendNotification && application.candidate?.email) {
+        await fetch('/api/send-interview-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            candidateEmail: application.candidate.email,
+            candidateName: application.candidate.full_name,
+            jobTitle: application.job?.title,
+            interviewDate: format(scheduledDate, 'EEEE, MMMM d, yyyy'),
+            interviewTime: format(scheduledDate, 'h:mm a'),
+            interviewLocation: rescheduleLocation,
+            interviewerEmails: emailsArray,
+            isRescheduled: true,
+          }),
+        })
+      }
+
+      setRescheduleDialogOpen(false)
+      router.refresh()
+    } catch (error) {
+      console.error('Error rescheduling interview:', error)
+      alert('Failed to reschedule interview')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleMoveToScreening = async () => {
     setIsLoading(true)
     try {
@@ -153,7 +229,7 @@ export function CandidateApplicationActions({
     }
   }
 
-  const handleShortlistForInterview = async () => {
+  const handleShortlistForInterview = async (sendNotificationToCandidate: boolean = false) => {
     if (!interviewDate || !interviewTime || !interviewerEmail) {
       alert('Please fill in all required fields')
       return
@@ -165,6 +241,12 @@ export function CandidateApplicationActions({
       const scheduledDate = new Date(interviewDate)
       scheduledDate.setHours(parseInt(hours), parseInt(minutes))
 
+      // Parse multiple interviewer emails (comma-separated)
+      const emailsArray = interviewerEmail
+        .split(',')
+        .map((e: string) => e.trim())
+        .filter((e: string) => e.length > 0)
+
       const { error } = await supabase
         .from('applications')
         .update({
@@ -172,7 +254,9 @@ export function CandidateApplicationActions({
           interview_date: scheduledDate.toISOString(),
           interview_location: interviewLocation || null,
           interviewer_name: interviewerName,
-          interviewer_email: interviewerEmail,
+          interviewer_email: emailsArray[0] || interviewerEmail, // Keep first for backward compat
+          interviewer_emails: emailsArray,
+          interview_status: 'pending',
           shortlisted_at: new Date().toISOString(),
           shortlisted_by: currentUser.id,
           assigned_to: currentUser.id,
@@ -184,7 +268,7 @@ export function CandidateApplicationActions({
 
       if (error) throw error
 
-      // Send email to interviewer and candidate
+      // Send email to interviewer(s)
       await fetch('/api/send-interview-invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -192,13 +276,43 @@ export function CandidateApplicationActions({
           applicationId: application.id,
           candidateEmail: application.candidate?.email,
           candidateName: application.candidate?.full_name,
-          interviewerEmail,
+          interviewerEmail: emailsArray[0],
+          interviewerEmails: emailsArray,
           interviewerName,
           jobTitle: application.job?.title,
           interviewDate: scheduledDate.toISOString(),
           interviewLocation,
         }),
       })
+
+      // Send notification to candidate if requested (when HM accepts)
+      if (sendNotificationToCandidate && application.candidate?.email) {
+        await fetch('/api/send-interview-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            candidateEmail: application.candidate.email,
+            candidateName: application.candidate.full_name,
+            jobTitle: application.job?.title,
+            interviewDate: format(scheduledDate, 'EEEE, MMMM d, yyyy'),
+            interviewTime: format(scheduledDate, 'h:mm a'),
+            interviewLocation,
+            interviewerEmails: emailsArray,
+            isRescheduled: false,
+          }),
+        })
+        
+        // Mark notification as sent
+        await supabase
+          .from('applications')
+          .update({
+            interview_notification_sent_at: new Date().toISOString(),
+            interview_status: 'accepted',
+            interview_accepted_at: new Date().toISOString(),
+            interview_accepted_by: currentUser.id,
+          })
+          .eq('id', application.id)
+      }
 
       setShortlistDialogOpen(false)
       router.refresh()
@@ -466,19 +580,41 @@ export function CandidateApplicationActions({
 
       case 'shortlisted':
       case 'interview_scheduled':
+        const isUrl = application.interview_location?.startsWith('http://') || application.interview_location?.startsWith('https://')
         return (
           <div className="space-y-3">
             {application.interview_date && (
-              <div className="flex items-center gap-2 p-2 bg-amber-50 rounded-lg border border-amber-200">
+              <div className="flex flex-wrap items-center gap-2 p-2 bg-amber-50 rounded-lg border border-amber-200">
                 <Clock className="h-4 w-4 text-amber-600" />
                 <span className="text-sm">
                   Interview: {format(new Date(application.interview_date), 'PPp')}
                 </span>
                 {application.interview_location && (
-                  <span className="text-sm text-muted-foreground">
-                    | {application.interview_location}
-                  </span>
+                  isUrl ? (
+                    <a 
+                      href={application.interview_location} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:text-blue-800 underline"
+                    >
+                      Join Meeting
+                    </a>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">
+                      | {application.interview_location}
+                    </span>
+                  )
                 )}
+                {application.interview_status === 'rescheduled' && (
+                  <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-200 text-xs">
+                    Rescheduled
+                  </Badge>
+                )}
+              </div>
+            )}
+            {application.interviewer_emails && application.interviewer_emails.length > 0 && (
+              <div className="text-xs text-muted-foreground">
+                Interviewers: {application.interviewer_emails.join(', ')}
               </div>
             )}
             {(isRecruiter || isHiringManager) && (
@@ -490,6 +626,14 @@ export function CandidateApplicationActions({
                 >
                   <UserCheck className="mr-2 h-4 w-4" />
                   Record Interview Result
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setRescheduleDialogOpen(true)}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  Reschedule
                 </Button>
               </div>
             )}
@@ -755,23 +899,31 @@ export function CandidateApplicationActions({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="interviewer_email">Interviewer Email *</Label>
+              <Label htmlFor="interviewer_email">Interviewer Email(s) *</Label>
               <Input
                 id="interviewer_email"
-                type="email"
+                type="text"
                 value={interviewerEmail}
                 onChange={(e) => setInterviewerEmail(e.target.value)}
-                placeholder="interviewer@company.com"
+                placeholder="email1@company.com, email2@company.com"
               />
+              <p className="text-xs text-muted-foreground">
+                Separate multiple emails with commas
+              </p>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={() => setShortlistDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleShortlistForInterview} disabled={isLoading}>
+            <Button onClick={() => handleShortlistForInterview(false)} disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Schedule Interview
+              Schedule (Pending HM Approval)
+            </Button>
+            <Button onClick={() => handleShortlistForInterview(true)} disabled={isLoading} className="bg-green-600 hover:bg-green-700">
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Mail className="mr-2 h-4 w-4" />
+              Schedule & Notify Candidate
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -955,6 +1107,93 @@ export function CandidateApplicationActions({
             <Button onClick={handleSendOffer} disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Send Offer Email
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reschedule Dialog */}
+      <Dialog open={rescheduleDialogOpen} onOpenChange={setRescheduleDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reschedule Interview</DialogTitle>
+            <DialogDescription>
+              Reschedule the interview for {application.candidate?.full_name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>New Interview Date *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !rescheduleDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {rescheduleDate ? format(rescheduleDate, "PPP") : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={rescheduleDate}
+                    onSelect={setRescheduleDate}
+                    initialFocus
+                    disabled={(date) => date < new Date()}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reschedule_time">New Interview Time *</Label>
+              <Input
+                id="reschedule_time"
+                type="time"
+                value={rescheduleTime}
+                onChange={(e) => setRescheduleTime(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reschedule_location">Location / Meeting Link</Label>
+              <Input
+                id="reschedule_location"
+                value={rescheduleLocation}
+                onChange={(e) => setRescheduleLocation(e.target.value)}
+                placeholder="Office or video call link (paste URL here)"
+              />
+              <p className="text-xs text-muted-foreground">
+                Paste a meeting URL (e.g., Teams, Zoom) to make it clickable
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="interviewer_emails_input">Interviewer Email(s)</Label>
+              <Input
+                id="interviewer_emails_input"
+                value={interviewerEmailsInput}
+                onChange={(e) => setInterviewerEmailsInput(e.target.value)}
+                placeholder="email1@company.com, email2@company.com"
+              />
+              <p className="text-xs text-muted-foreground">
+                Separate multiple emails with commas
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setRescheduleDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => handleReschedule(false)} disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Reschedule Only
+            </Button>
+            <Button onClick={() => handleReschedule(true)} disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Mail className="mr-2 h-4 w-4" />
+              Reschedule & Notify Candidate
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -132,6 +132,15 @@ export interface Application {
   salary_expectation: string | null
   benefits_expectation: string | null
   notice_period: string | null
+  // Multiple interviewers and scheduling fields
+  interviewer_emails: string[] | null
+  interview_status: 'pending' | 'accepted' | 'rescheduled' | null
+  interview_accepted_at: string | null
+  interview_accepted_by: string | null
+  original_interview_date: string | null
+  rescheduled_at: string | null
+  rescheduled_by: string | null
+  interview_notification_sent_at: string | null
   candidate?: Candidate
   job?: Job
   assignee?: Profile | null
