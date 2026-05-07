@@ -31,15 +31,12 @@ interface PipelineBoardProps {
 
 const STAGES: ApplicationStage[] = [
   'applied',
-  'new',
   'screening',
-  'shortlisted',
-  'interview_scheduled',
-  'interviewed',
-  'offered',
+  'interview',
+  'assessment',
+  'offer',
   'hired',
   'rejected',
-  'withdrawn',
 ]
 
 export function PipelineBoard({ applications: initialApplications, currentUser }: PipelineBoardProps) {

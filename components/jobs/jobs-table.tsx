@@ -16,7 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Eye, Pencil, Trash2, Users, ExternalLink, Calendar, AlertCircle } from 'lucide-react'
+import { MoreHorizontal, Eye, Pencil, Trash2, Users, ExternalLink } from 'lucide-react'
 import { format } from 'date-fns'
 import type { Job } from '@/lib/types'
 import { JOB_STATUS_LABELS, JOB_STATUS_COLORS, EMPLOYMENT_TYPE_LABELS } from '@/lib/types'
@@ -81,7 +81,6 @@ export function JobsTable({ jobs }: JobsTableProps) {
               <TableHead className="hidden md:table-cell">Department</TableHead>
               <TableHead className="hidden sm:table-cell">Type</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="hidden lg:table-cell">Closing Date</TableHead>
               <TableHead className="hidden lg:table-cell">Applications</TableHead>
               <TableHead className="hidden lg:table-cell">Created</TableHead>
               <TableHead className="w-[50px]"></TableHead>
@@ -110,29 +109,9 @@ export function JobsTable({ jobs }: JobsTableProps) {
                   {job.employment_type ? EMPLOYMENT_TYPE_LABELS[job.employment_type] : '-'}
                 </TableCell>
                 <TableCell>
-                  <div className="flex flex-col gap-1">
-                    <Badge variant="secondary" className={JOB_STATUS_COLORS[job.status]}>
-                      {JOB_STATUS_LABELS[job.status]}
-                    </Badge>
-                    {job.auto_closed && (
-                      <span className="text-xs text-amber-600 flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        Auto-closed
-                      </span>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell className="hidden lg:table-cell">
-                  {job.closing_date ? (
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className={new Date(job.closing_date) < new Date() ? 'text-red-600' : ''}>
-                        {format(new Date(job.closing_date), 'MMM d, yyyy')}
-                      </span>
-                    </div>
-                  ) : (
-                    <span className="text-muted-foreground">-</span>
-                  )}
+                  <Badge variant="secondary" className={JOB_STATUS_COLORS[job.status]}>
+                    {JOB_STATUS_LABELS[job.status]}
+                  </Badge>
                 </TableCell>
                 <TableCell className="hidden lg:table-cell">
                   <div className="flex items-center gap-1">

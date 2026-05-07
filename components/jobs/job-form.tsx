@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
 import type { Job, Department, JobStatus, EmploymentType, SalaryCurrency } from '@/lib/types'
-import { EMPLOYMENT_TYPE_LABELS, JOB_STATUS_LABELS } from '@/lib/types'
+import { EMPLOYMENT_TYPE_LABELS, JOB_STATUS_LABELS, CURRENCY_OPTIONS } from '@/lib/types'
 
 interface JobFormProps {
   job?: Job
@@ -37,9 +37,8 @@ export function JobForm({ job, departments }: JobFormProps) {
     employment_type: job?.employment_type || '',
     salary_min: job?.salary_min?.toString() || '',
     salary_max: job?.salary_max?.toString() || '',
-    salary_currency: 'AED',
+    salary_currency: job?.salary_currency || 'USD',
     status: job?.status || 'draft',
-    closing_date: job?.closing_date || '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,29 +49,7 @@ export function JobForm({ job, departments }: JobFormProps) {
     const supabase = createClient()
 
     try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser()
-      
-      if (userError || !user) {
-        throw new Error('You must be logged in to create a job. Please log out and log back in.')
-      }
-
-      // Check user profile and approval status
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('role, approval_status')
-        .eq('id', user.id)
-        .single()
-
-      if (profileError) {
-        console.error('[v0] Profile fetch error:', profileError)
-        throw new Error('Could not verify your permissions. Please try logging out and back in.')
-      }
-
-      if (profile.role !== 'admin' && profile.approval_status !== 'approved') {
-        throw new Error(`Your account is pending approval. Current status: ${profile.approval_status}`)
-      }
-
-      console.log('[v0] User profile:', profile)
+      const { data: { user } } = await supabase.auth.getUser()
 
       const jobData = {
         title: formData.title,
@@ -85,7 +62,6 @@ export function JobForm({ job, departments }: JobFormProps) {
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         salary_currency: formData.salary_currency as SalaryCurrency,
         status: formData.status as JobStatus,
-        closing_date: formData.closing_date || null,
         created_by: user?.id || null,
         published_at: formData.status === 'open' ? new Date().toISOString() : null,
       }
@@ -96,21 +72,13 @@ export function JobForm({ job, departments }: JobFormProps) {
           .update(jobData)
           .eq('id', job.id)
 
-        if (updateError) {
-          console.error('[v0] Update job error:', updateError)
-          throw new Error(updateError.message || 'Failed to update job')
-        }
+        if (updateError) throw updateError
       } else {
-        const { data: insertData, error: insertError } = await supabase
+        const { error: insertError } = await supabase
           .from('jobs')
           .insert(jobData)
-          .select()
 
-        if (insertError) {
-          console.error('[v0] Insert job error:', insertError)
-          throw new Error(insertError.message || 'Failed to create job')
-        }
-        console.log('[v0] Job created:', insertData)
+        if (insertError) throw insertError
       }
 
       router.push('/dashboard/jobs')
@@ -168,7 +136,7 @@ export function JobForm({ job, departments }: JobFormProps) {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="employment_type">Employment Type</Label>
               <Select
@@ -206,25 +174,30 @@ export function JobForm({ job, departments }: JobFormProps) {
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="closing_date">Closing Date</Label>
-              <Input
-                id="closing_date"
-                type="date"
-                value={formData.closing_date}
-                onChange={(e) => setFormData({ ...formData, closing_date: e.target.value })}
-                min={new Date().toISOString().split('T')[0]}
-              />
-              <p className="text-xs text-muted-foreground">
-                Job auto-closes on this date
-              </p>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="salary_currency">Salary Currency</Label>
+            <Select
+              value={formData.salary_currency}
+              onValueChange={(value) => setFormData({ ...formData, salary_currency: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select currency" />
+              </SelectTrigger>
+              <SelectContent>
+                {CURRENCY_OPTIONS.map((currency) => (
+                  <SelectItem key={currency.value} value={currency.value}>
+                    {currency.symbol} {currency.label} ({currency.value})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="salary_min">Minimum Salary (AED/Annual)</Label>
+              <Label htmlFor="salary_min">Minimum Salary (Annual)</Label>
               <Input
                 id="salary_min"
                 type="number"
@@ -235,7 +208,7 @@ export function JobForm({ job, departments }: JobFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="salary_max">Maximum Salary (AED/Annual)</Label>
+              <Label htmlFor="salary_max">Maximum Salary (Annual)</Label>
               <Input
                 id="salary_max"
                 type="number"
@@ -268,12 +241,7 @@ export function JobForm({ job, departments }: JobFormProps) {
             />
           </div>
 
-          {error && (
-            <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
-              <p className="text-sm text-destructive font-medium">Error creating job</p>
-              <p className="text-sm text-destructive/80 mt-1">{error}</p>
-            </div>
-          )}
+          {error && <p className="text-sm text-destructive">{error}</p>}
 
           <div className="flex gap-3">
             <Button type="submit" disabled={isLoading}>

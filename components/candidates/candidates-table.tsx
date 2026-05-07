@@ -16,7 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Eye, Pencil, Trash2, FileText, Linkedin, Globe, Lock, LockOpen } from 'lucide-react'
+import { MoreHorizontal, Eye, Pencil, Trash2, FileText, Linkedin, Globe } from 'lucide-react'
 import { format } from 'date-fns'
 import type { Candidate } from '@/lib/types'
 import Link from 'next/link'
@@ -40,11 +40,6 @@ interface CandidateWithStats extends Candidate {
   _stats: {
     total: number
     active: number
-    rejected: number
-    recruiterName: string | null
-    isLocked: boolean
-    currentStage: string | null
-    isAvailableForNewApplication: boolean
   }
 }
 
@@ -116,8 +111,6 @@ export function CandidatesTable({ candidates }: CandidatesTableProps) {
               <TableHead className="hidden md:table-cell">Email</TableHead>
               <TableHead className="hidden sm:table-cell">Source</TableHead>
               <TableHead>Applications</TableHead>
-              <TableHead className="hidden sm:table-cell">Status</TableHead>
-              <TableHead className="hidden md:table-cell">Recruiter</TableHead>
               <TableHead className="hidden lg:table-cell">Links</TableHead>
               <TableHead className="hidden lg:table-cell">Added</TableHead>
               <TableHead className="w-[50px]"></TableHead>
@@ -160,47 +153,14 @@ export function CandidatesTable({ candidates }: CandidatesTableProps) {
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="hidden sm:table-cell">
-                  {candidate._stats.isLocked ? (
-                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                      <Lock className="mr-1 h-3 w-3" />
-                      {candidate._stats.currentStage === 'screening' && 'Screening'}
-                      {candidate._stats.currentStage === 'interview_scheduled' && 'Interview'}
-                      {candidate._stats.currentStage === 'interviewed' && 'Interviewed'}
-                      {candidate._stats.currentStage === 'offered' && 'Offer'}
-                      {!['screening', 'interview_scheduled', 'interviewed', 'offered'].includes(candidate._stats.currentStage || '') && 'Processing'}
-                    </Badge>
-                  ) : candidate._stats.active > 0 ? (
-                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                      <LockOpen className="mr-1 h-3 w-3" />
-                      In Progress
-                    </Badge>
-                  ) : candidate._stats.rejected > 0 || candidate._stats.total === 0 ? (
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                      <LockOpen className="mr-1 h-3 w-3" />
-                      Available
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
-                      Completed
-                    </Badge>
-                  )}
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  {candidate._stats.recruiterName ? (
-                    <span className="text-sm font-medium">{candidate._stats.recruiterName}</span>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">Unassigned</span>
-                  )}
-                </TableCell>
                 <TableCell className="hidden lg:table-cell">
                   <div className="flex gap-2">
                     {candidate.resume_url && (
                       <a
-                        href={`/api/download-cv?candidateId=${candidate.id}`}
-                        download
+                        href={candidate.resume_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="text-muted-foreground hover:text-foreground"
-                        title="Download CV"
                       >
                         <FileText className="h-4 w-4" />
                       </a>
