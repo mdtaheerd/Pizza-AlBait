@@ -42,9 +42,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error sending rejection email:', error)
-    return NextResponse.json(
-      { error: 'Failed to send rejection email' },
-      { status: 500 }
-    )
+    // Return success even on error to not block the workflow
+    // The rejection status is already updated in the database
+    return NextResponse.json({ 
+      success: true, 
+      warning: 'Email could not be sent but rejection was processed' 
+    })
   }
 }

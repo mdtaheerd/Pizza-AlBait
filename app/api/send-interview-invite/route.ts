@@ -8,10 +8,13 @@ export async function POST(request: Request) {
       candidateEmail,
       candidateName,
       interviewerEmail,
+      interviewerEmails,
       interviewerName,
       jobTitle,
       interviewDate,
       interviewLocation,
+      hiringManagerEmail,
+      hiringManagerName,
     } = body
 
     const formattedDate = new Date(interviewDate).toLocaleString('en-US', {
@@ -83,6 +86,74 @@ export async function POST(request: Request) {
               
               <p>Best regards,<br>
               <strong>CPECC HR Team</strong></p>
+            </div>
+          </div>
+        `,
+      })
+    }
+
+    // Send email to additional interviewers if provided
+    if (interviewerEmails && Array.isArray(interviewerEmails)) {
+      for (const email of interviewerEmails) {
+        if (email && email !== interviewerEmail) {
+          await sendEmail({
+            to: email,
+            subject: `Interview Scheduled - ${candidateName} for ${jobTitle}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #d32f2f 0%, #f57c00 100%); padding: 30px; text-align: center;">
+                  <h1 style="color: white; margin: 0;">Interview Scheduled</h1>
+                </div>
+                <div style="padding: 30px; background: #ffffff;">
+                  <p>Dear Interviewer,</p>
+                  <p>An interview has been scheduled for you to interview a candidate.</p>
+                  
+                  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h3 style="margin-top: 0; color: #d32f2f;">Interview Details</h3>
+                    <p><strong>Candidate:</strong> ${candidateName}</p>
+                    <p><strong>Position:</strong> ${jobTitle}</p>
+                    <p><strong>Date & Time:</strong> ${formattedDate}</p>
+                    ${interviewLocation ? `<p><strong>Location:</strong> ${interviewLocation}</p>` : ''}
+                  </div>
+                  
+                  <p>Please add this to your calendar.</p>
+                  
+                  <p>Best regards,<br>
+                  <strong>CPECC HR Team</strong></p>
+                </div>
+              </div>
+            `,
+          })
+        }
+      }
+    }
+
+    // Send email to hiring manager if provided
+    if (hiringManagerEmail) {
+      await sendEmail({
+        to: hiringManagerEmail,
+        subject: `Interview Scheduled - ${candidateName} for ${jobTitle}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #d32f2f 0%, #f57c00 100%); padding: 30px; text-align: center;">
+              <h1 style="color: white; margin: 0;">Interview Scheduled</h1>
+            </div>
+            <div style="padding: 30px; background: #ffffff;">
+              <p>Dear ${hiringManagerName || 'Hiring Manager'},</p>
+              <p>An interview has been scheduled for a candidate applying to a position you manage.</p>
+              
+              <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #d32f2f;">Interview Details</h3>
+                <p><strong>Candidate:</strong> ${candidateName}</p>
+                <p><strong>Position:</strong> ${jobTitle}</p>
+                <p><strong>Date & Time:</strong> ${formattedDate}</p>
+                ${interviewLocation ? `<p><strong>Location:</strong> ${interviewLocation}</p>` : ''}
+              </div>
+              
+              <p>Please add this to your calendar.</p>
+              
+              <p>Best regards,<br>
+              <strong>CPECC Recruitment System</strong></p>
             </div>
           </div>
         `,

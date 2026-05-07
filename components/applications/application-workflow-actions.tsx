@@ -61,6 +61,8 @@ interface ApplicationWorkflowActionsProps {
       salary_min?: number | null
       salary_max?: number | null
       salary_currency?: string
+      created_by?: string | null
+      hiring_manager?: { email: string; full_name: string } | null
     }
   }
   currentUser: Profile
