@@ -10,8 +10,8 @@ export async function POST(request: NextRequest) {
 
     console.log('[v0] notify-admin received:', { userId, email, fullName, role })
     console.log('[v0] Environment check:', {
-      hasResendKey: !!process.env.RESEND_API_KEY,
-      resendKeyPrefix: process.env.RESEND_API_KEY?.substring(0, 10),
+      hasSendGridKey: !!process.env.SENDGRID_API_KEY,
+      sendGridKeyPrefix: process.env.SENDGRID_API_KEY?.substring(0, 10),
       adminEmail: process.env.ADMIN_EMAIL
     })
 

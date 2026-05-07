@@ -1,21 +1,22 @@
-import { Resend } from 'resend'
+import sgMail from '@sendgrid/mail'
 
-// Lazy initialize Resend client to avoid build errors when env var is not available
-let resendClient: Resend | null = null
+// Initialize SendGrid with API key
+let initialized = false
 
-function getResendClient(): Resend {
-  if (!resendClient) {
-    if (!process.env.RESEND_API_KEY) {
-      throw new Error('RESEND_API_KEY environment variable is not set')
+function initSendGrid() {
+  if (!initialized) {
+    if (!process.env.SENDGRID_API_KEY) {
+      throw new Error('SENDGRID_API_KEY environment variable is not set')
     }
-    resendClient = new Resend(process.env.RESEND_API_KEY)
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+    initialized = true
   }
-  return resendClient
 }
 
-// Hardcoded to match Resend registered email - env var wasn't updating properly
+// Hardcoded to match verified sender email
 const getAdminEmail = () => 'mdtaheerd@gmail.com'
-const FROM_EMAIL = 'CPECC Recruitment <noreply@resend.dev>'
+const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'noreply@cpecc-recruitment.com'
+const FROM_NAME = 'CPECC Recruitment'
 const getAppUrl = () => process.env.NEXT_PUBLIC_APP_URL || 'https://pizza-al-bait.vercel.app'
 
 // Generic email sender for workflow emails
@@ -29,23 +30,23 @@ export async function sendEmail({
   html: string 
 }) {
   try {
-    const resend = getResendClient()
-    const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL,
+    initSendGrid()
+    
+    const msg = {
       to,
+      from: {
+        email: FROM_EMAIL,
+        name: FROM_NAME,
+      },
       subject,
       html,
-    })
-
-    if (error) {
-      console.error('[Email] Failed to send email:', error)
-      return { success: false, error }
     }
 
-    console.log('[Email] Email sent successfully:', data?.id)
-    return { success: true, data }
-  } catch (error) {
-    console.error('[Email] Error sending email:', error)
+    await sgMail.send(msg)
+    console.log('[Email] Email sent successfully to:', to)
+    return { success: true }
+  } catch (error: unknown) {
+    console.error('[Email] Failed to send email:', error)
     return { success: false, error }
   }
 }
@@ -57,7 +58,7 @@ export async function sendAdminApprovalEmail(user: {
   role: string
 }) {
   try {
-    const resend = getResendClient()
+    initSendGrid()
     const ADMIN_EMAIL = getAdminEmail()
     const APP_URL = getAppUrl()
     const approvalUrl = `${APP_URL}/dashboard/users?approve=${user.id}`
@@ -69,12 +70,15 @@ export async function sendAdminApprovalEmail(user: {
       role: user.role,
       adminEmail: ADMIN_EMAIL,
       fromEmail: FROM_EMAIL,
-      hasApiKey: !!process.env.RESEND_API_KEY
+      hasSendGridKey: !!process.env.SENDGRID_API_KEY
     })
     
-    const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL,
+    const msg = {
       to: ADMIN_EMAIL,
+      from: {
+        email: FROM_EMAIL,
+        name: FROM_NAME,
+      },
       subject: `New Registration Pending Approval: ${user.full_name}`,
       html: `
         <!DOCTYPE html>
@@ -126,17 +130,13 @@ export async function sendAdminApprovalEmail(user: {
         </body>
         </html>
       `,
-    })
-
-    if (error) {
-      console.error('[v0] Failed to send admin approval email:', JSON.stringify(error))
-      return { success: false, error }
     }
 
-    console.log('[v0] Admin approval email sent successfully:', data?.id)
-    return { success: true, data }
-  } catch (error) {
-    console.error('[Email] Error sending admin approval email:', error)
+    await sgMail.send(msg)
+    console.log('[v0] Admin approval email sent successfully')
+    return { success: true }
+  } catch (error: unknown) {
+    console.error('[v0] Failed to send admin approval email:', error)
     return { success: false, error }
   }
 }
@@ -146,13 +146,16 @@ export async function sendApprovalConfirmationEmail(user: {
   full_name: string
 }) {
   try {
-    const resend = getResendClient()
+    initSendGrid()
     const APP_URL = getAppUrl()
     const loginUrl = `${APP_URL}/auth/login`
     
-    const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL,
+    const msg = {
       to: user.email,
+      from: {
+        email: FROM_EMAIL,
+        name: FROM_NAME,
+      },
       subject: 'Your Registration Has Been Approved - CPECC Recruitment',
       html: `
         <!DOCTYPE html>
@@ -197,17 +200,13 @@ export async function sendApprovalConfirmationEmail(user: {
         </body>
         </html>
       `,
-    })
-
-    if (error) {
-      console.error('[Email] Failed to send approval confirmation email:', error)
-      return { success: false, error }
     }
 
-    console.log('[Email] Approval confirmation email sent successfully:', data?.id)
-    return { success: true, data }
-  } catch (error) {
-    console.error('[Email] Error sending approval confirmation email:', error)
+    await sgMail.send(msg)
+    console.log('[Email] Approval confirmation email sent successfully')
+    return { success: true }
+  } catch (error: unknown) {
+    console.error('[Email] Failed to send approval confirmation email:', error)
     return { success: false, error }
   }
 }
@@ -218,10 +217,14 @@ export async function sendRejectionEmail(user: {
   reason?: string
 }) {
   try {
-    const resend = getResendClient()
-    const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL,
+    initSendGrid()
+    
+    const msg = {
       to: user.email,
+      from: {
+        email: FROM_EMAIL,
+        name: FROM_NAME,
+      },
       subject: 'Registration Update - CPECC Recruitment',
       html: `
         <!DOCTYPE html>
@@ -262,17 +265,13 @@ export async function sendRejectionEmail(user: {
         </body>
         </html>
       `,
-    })
-
-    if (error) {
-      console.error('[Email] Failed to send rejection email:', error)
-      return { success: false, error }
     }
 
-    console.log('[Email] Rejection email sent successfully:', data?.id)
-    return { success: true, data }
-  } catch (error) {
-    console.error('[Email] Error sending rejection email:', error)
+    await sgMail.send(msg)
+    console.log('[Email] Rejection email sent successfully')
+    return { success: true }
+  } catch (error: unknown) {
+    console.error('[Email] Failed to send rejection email:', error)
     return { success: false, error }
   }
 }
