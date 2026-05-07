@@ -37,6 +37,9 @@ export default async function ReportsPage() {
         alternate_country_code,
         alternate_phone,
         nationality,
+        gender,
+        date_of_birth,
+        qualification,
         current_salary,
         current_salary_currency,
         expected_salary,
@@ -49,6 +52,8 @@ export default async function ReportsPage() {
         salary_min,
         salary_max,
         salary_currency,
+        published_at,
+        closing_date,
         department:departments(id, name),
         creator:profiles(id, full_name, email)
       )

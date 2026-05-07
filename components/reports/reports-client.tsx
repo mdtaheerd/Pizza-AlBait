@@ -40,7 +40,8 @@ import {
   Gift,
   CheckCircle,
   XCircle,
-  Briefcase
+  Briefcase,
+  BarChart3
 } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -56,6 +57,9 @@ interface ExtendedApplication extends Application {
     alternate_country_code?: string | null
     alternate_phone?: string | null
     nationality?: string | null
+    gender?: string | null
+    date_of_birth?: string | null
+    qualification?: string | null
     current_salary?: number | null
     current_salary_currency?: string | null
     expected_salary?: number | null
@@ -68,6 +72,8 @@ interface ExtendedApplication extends Application {
     salary_min?: number | null
     salary_max?: number | null
     salary_currency?: string
+    published_at?: string | null
+    closing_date?: string | null
     department?: { id: string; name: string } | null
     creator?: { id: string; full_name: string; email: string } | null
   }
@@ -90,7 +96,7 @@ interface ReportsClientProps {
   currentUser?: Profile
 }
 
-type ReportType = 'all' | 'screening' | 'interview' | 'offered' | 'hired' | 'rejected' | 'jobs'
+type ReportType = 'all' | 'screening' | 'interview' | 'offered' | 'hired' | 'rejected' | 'jobs' | 'analytics'
 
 export function ReportsClient({ applications, jobs, currentUser }: ReportsClientProps) {
   const [activeReport, setActiveReport] = useState<ReportType>('all')
@@ -160,54 +166,148 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
     offered: applications.filter(a => a.stage === 'offered').length,
     hired: applications.filter(a => a.stage === 'hired').length,
     rejected: applications.filter(a => a.stage === 'rejected').length,
-  }), [applications])
+}), [applications])
+
+  // Analytics calculations
+  const analytics = useMemo(() => {
+    // Positions per department
+    const positionsByDept: Record<string, number> = {}
+    jobs.forEach(job => {
+      const deptName = job.department?.name || 'Unassigned'
+      positionsByDept[deptName] = (positionsByDept[deptName] || 0) + 1
+    })
+
+    // Gender distribution
+    const genderDist: Record<string, number> = {}
+    applications.forEach(app => {
+      const gender = app.candidate?.gender || 'Not Specified'
+      genderDist[gender] = (genderDist[gender] || 0) + 1
+    })
+
+    // Nationality distribution
+    const nationalityDist: Record<string, number> = {}
+    applications.forEach(app => {
+      const nationality = app.candidate?.nationality || 'Not Specified'
+      nationalityDist[nationality] = (nationalityDist[nationality] || 0) + 1
+    })
+
+    // Age distribution (calculate age from date_of_birth)
+    const ageDist: Record<string, number> = {
+      'Under 25': 0,
+      '25-34': 0,
+      '35-44': 0,
+      '45-54': 0,
+      '55+': 0,
+      'Not Specified': 0,
+    }
+    applications.forEach(app => {
+      const dob = app.candidate?.date_of_birth
+      if (dob) {
+        const birthDate = new Date(dob)
+        const today = new Date()
+        let age = today.getFullYear() - birthDate.getFullYear()
+        const m = today.getMonth() - birthDate.getMonth()
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+          age--
+        }
+        if (age < 25) ageDist['Under 25']++
+        else if (age < 35) ageDist['25-34']++
+        else if (age < 45) ageDist['35-44']++
+        else if (age < 55) ageDist['45-54']++
+        else ageDist['55+']++
+      } else {
+        ageDist['Not Specified']++
+      }
+    })
+
+    // Qualification distribution
+    const qualificationDist: Record<string, number> = {}
+    applications.forEach(app => {
+      const qualification = app.candidate?.qualification || 'Not Specified'
+      qualificationDist[qualification] = (qualificationDist[qualification] || 0) + 1
+    })
+
+    // Department-wise open vs closed positions
+    const deptOpenClosed: Record<string, { open: number; closed: number }> = {}
+    jobs.forEach(job => {
+      const deptName = job.department?.name || 'Unassigned'
+      if (!deptOpenClosed[deptName]) {
+        deptOpenClosed[deptName] = { open: 0, closed: 0 }
+      }
+      // Consider 'published' and 'draft' as open, 'closed' and 'filled' as closed
+      if (job.status === 'closed' || job.status === 'filled') {
+        deptOpenClosed[deptName].closed++
+      } else {
+        deptOpenClosed[deptName].open++
+      }
+    })
+
+    return {
+      positionsByDept,
+      genderDist,
+      nationalityDist,
+      ageDist,
+      qualificationDist,
+      deptOpenClosed,
+    }
+  }, [applications, jobs])
+  
+  // Calculate days to fill position
+  const calculateDaysToFill = (openDate: string | null | undefined, hiredAt: string | null | undefined) => {
+    if (!openDate) return ''
+    const endDate = hiredAt ? new Date(hiredAt) : new Date()
+    const start = new Date(openDate)
+    const diffTime = Math.abs(endDate.getTime() - start.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays.toString()
+  }
 
   // Export to CSV
   const exportToCSV = () => {
     const headers = [
+      'Department',
+      'Position Applied',
+      'Job Open Date',
+      'Job Closing Date',
+      'No of Days to Fill Position',
       'Candidate Name',
       'Email',
       'Phone',
       'Home Country Phone',
-      'Alternate Phone',
       'Nationality',
-      'Position Applied',
-      'Department',
       'Current Salary',
       'Expected Salary',
       'Position Salary Range',
       'Notice Period (Days)',
-      'Stage',
       'Applied Date',
-      'Recruiter Name',
-      'Interview Schedule Date',
-      'Offer Date',
-      'Hire Date',
-      'Rejection Reason'
+      'Stage',
+      'Interview Date',
+      'Rejection Reason',
+      'Recruiter Name'
     ]
 
     const rows = filteredApplications.map(app => [
+      app.job?.department?.name || '',
+      app.job?.title || '',
+      app.job?.published_at ? format(new Date(app.job.published_at), 'yyyy-MM-dd') : '',
+      app.job?.closing_date ? format(new Date(app.job.closing_date), 'yyyy-MM-dd') : '',
+      calculateDaysToFill(app.job?.published_at, app.hired_at),
       app.candidate?.full_name || '',
       app.candidate?.email || '',
       app.candidate?.phone ? `${app.candidate.country_code || ''} ${app.candidate.phone}` : '',
       app.candidate?.home_country_phone ? `${app.candidate.home_country_code || ''} ${app.candidate.home_country_phone}` : '',
-      app.candidate?.alternate_phone ? `${app.candidate.alternate_country_code || ''} ${app.candidate.alternate_phone}` : '',
       app.candidate?.nationality || '',
-      app.job?.title || '',
-      app.job?.department?.name || '',
       formatSalary(app.candidate?.current_salary),
       formatSalary(app.candidate?.expected_salary),
       app.job?.salary_min && app.job?.salary_max 
         ? `${formatSalary(app.job.salary_min)} - ${formatSalary(app.job.salary_max)}`
         : 'N/A',
       app.candidate?.notice_period_days?.toString() || '',
-      STAGE_LABELS[app.stage as keyof typeof STAGE_LABELS] || app.stage,
       format(new Date(app.applied_at), 'yyyy-MM-dd'),
-      app.job?.creator?.full_name || '',
+      STAGE_LABELS[app.stage as keyof typeof STAGE_LABELS] || app.stage,
       app.interview_date ? format(new Date(app.interview_date), 'yyyy-MM-dd HH:mm') : '',
-      app.offer_sent_at ? format(new Date(app.offer_sent_at), 'yyyy-MM-dd') : '',
-      app.hired_at ? format(new Date(app.hired_at), 'yyyy-MM-dd') : '',
-      app.rejection_comments || ''
+      app.rejection_comments || '',
+      app.job?.creator?.full_name || ''
     ])
 
     const csvContent = [
@@ -258,14 +358,15 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
     { id: 'interview', label: 'Interview', icon: Calendar, count: stats.interview },
     { id: 'offered', label: 'Offer', icon: Gift, count: stats.offered },
     { id: 'hired', label: 'Hired', icon: CheckCircle, count: stats.hired },
-    { id: 'rejected', label: 'Rejected', icon: XCircle, count: stats.rejected },
-    { id: 'jobs', label: 'Jobs', icon: Briefcase, count: jobs.length },
+{ id: 'rejected', label: 'Rejected', icon: XCircle, count: stats.rejected },
+  { id: 'jobs', label: 'Jobs', icon: Briefcase, count: jobs.length },
+  { id: 'analytics', label: 'Analytics', icon: BarChart3, count: 0 },
   ]
 
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
+      <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-7">
         <Card className="cursor-pointer hover:border-primary transition-colors" onClick={() => setActiveReport('screening')}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Screening</CardTitle>
@@ -314,11 +415,21 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
             <div className="text-2xl font-bold text-purple-600">{jobs.length}</div>
           </CardContent>
         </Card>
+        <Card className="cursor-pointer hover:border-primary transition-colors" onClick={() => setActiveReport('analytics')}>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Analytics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-indigo-600">
+              <BarChart3 className="h-6 w-6" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeReport} onValueChange={(v) => setActiveReport(v as ReportType)}>
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           {reportTabs.map(tab => (
             <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-1">
               <tab.icon className="h-4 w-4" />
@@ -390,43 +501,56 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="min-w-[150px]">Candidate</TableHead>
-                        <TableHead>Nationality</TableHead>
-                        <TableHead className="min-w-[150px]">Position Applied</TableHead>
                         <TableHead>Department</TableHead>
+                        <TableHead className="min-w-[150px]">Position Applied</TableHead>
+                        <TableHead>Job Open Date</TableHead>
+                        <TableHead>Job Closing Date</TableHead>
+                        <TableHead>Days to Fill</TableHead>
+                        <TableHead className="min-w-[150px]">Candidate Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Phone</TableHead>
+                        <TableHead>Home Country Phone</TableHead>
+                        <TableHead>Nationality</TableHead>
                         <TableHead>Current Salary</TableHead>
                         <TableHead>Expected Salary</TableHead>
-                        <TableHead>Position Salary</TableHead>
-                        <TableHead>Notice Period</TableHead>
-                        <TableHead>Contact</TableHead>
-                        <TableHead>Alternate Contact</TableHead>
-                        <TableHead>Stage</TableHead>
+                        <TableHead>Position Salary Range</TableHead>
+                        <TableHead>Notice Period (Days)</TableHead>
                         <TableHead>Applied Date</TableHead>
+                        <TableHead>Stage</TableHead>
                         <TableHead>Interview Date</TableHead>
-                        <TableHead>Offer Date</TableHead>
-                        <TableHead>Hire Date</TableHead>
-                        {reportType === 'rejected' && <TableHead>Reason</TableHead>}
+                        {reportType === 'rejected' && <TableHead>Rejection Reason</TableHead>}
+                        <TableHead>Recruiter Name</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredApplications.map(app => (
                         <TableRow key={app.id}>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{app.candidate?.full_name}</p>
-                              <p className="text-xs text-muted-foreground">{app.candidate?.email}</p>
-                            </div>
+                          <TableCell>{app.job?.department?.name || '-'}</TableCell>
+                          <TableCell className="font-medium">{app.job?.title || '-'}</TableCell>
+                          <TableCell className="text-sm">
+                            {app.job?.published_at 
+                              ? format(new Date(app.job.published_at), 'MMM d, yyyy')
+                              : '-'}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {app.job?.closing_date 
+                              ? format(new Date(app.job.closing_date), 'MMM d, yyyy')
+                              : '-'}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {calculateDaysToFill(app.job?.published_at, app.hired_at) || '-'}
+                          </TableCell>
+                          <TableCell className="font-medium">{app.candidate?.full_name || '-'}</TableCell>
+                          <TableCell className="text-sm">{app.candidate?.email || '-'}</TableCell>
+                          <TableCell className="text-sm">
+                            {app.candidate?.phone ? `${app.candidate.country_code || ''} ${app.candidate.phone}` : '-'}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {app.candidate?.home_country_phone 
+                              ? `${app.candidate.home_country_code || ''} ${app.candidate.home_country_phone}` 
+                              : '-'}
                           </TableCell>
                           <TableCell>{app.candidate?.nationality || '-'}</TableCell>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{app.job?.title}</p>
-                              <p className="text-xs text-muted-foreground">
-                                By: {app.job?.creator?.full_name || 'N/A'}
-                              </p>
-                            </div>
-                          </TableCell>
-                          <TableCell>{app.job?.department?.name || '-'}</TableCell>
                           <TableCell className="text-sm">
                             {formatSalary(app.candidate?.current_salary)}
                           </TableCell>
@@ -442,23 +566,11 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                           </TableCell>
                           <TableCell>
                             {app.candidate?.notice_period_days !== null && app.candidate?.notice_period_days !== undefined
-                              ? `${app.candidate.notice_period_days} days`
+                              ? app.candidate.notice_period_days
                               : '-'}
                           </TableCell>
-                          <TableCell className="text-xs">
-                            {app.candidate?.phone ? (
-                              <span>{app.candidate.country_code} {app.candidate.phone}</span>
-                            ) : '-'}
-                            {app.candidate?.home_country_phone && (
-                              <div className="text-muted-foreground">
-                                Home: {app.candidate.home_country_code} {app.candidate.home_country_phone}
-                              </div>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-xs">
-                            {app.candidate?.alternate_phone ? (
-                              <span>{app.candidate.alternate_country_code} {app.candidate.alternate_phone}</span>
-                            ) : '-'}
+                          <TableCell className="text-sm">
+                            {format(new Date(app.applied_at), 'MMM d, yyyy')}
                           </TableCell>
                           <TableCell>
                             <Badge className={STAGE_COLORS[app.stage as keyof typeof STAGE_COLORS]}>
@@ -466,21 +578,8 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                             </Badge>
                           </TableCell>
                           <TableCell className="text-sm">
-                            {format(new Date(app.applied_at), 'MMM d, yyyy')}
-                          </TableCell>
-                          <TableCell className="text-sm">
                             {app.interview_date 
                               ? format(new Date(app.interview_date), 'MMM d, yyyy HH:mm')
-                              : '-'}
-                          </TableCell>
-                          <TableCell className="text-sm">
-                            {app.offer_sent_at 
-                              ? format(new Date(app.offer_sent_at), 'MMM d, yyyy')
-                              : '-'}
-                          </TableCell>
-                          <TableCell className="text-sm">
-                            {app.hired_at 
-                              ? format(new Date(app.hired_at), 'MMM d, yyyy')
                               : '-'}
                           </TableCell>
                           {reportType === 'rejected' && (
@@ -488,11 +587,12 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                               {app.rejection_comments || '-'}
                             </TableCell>
                           )}
+                          <TableCell className="text-sm">{app.job?.creator?.full_name || '-'}</TableCell>
                         </TableRow>
                       ))}
                       {filteredApplications.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={16} className="text-center text-muted-foreground py-8">
+                          <TableCell colSpan={19} className="text-center text-muted-foreground py-8">
                             No applications found
                           </TableCell>
                         </TableRow>
@@ -575,6 +675,228 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Analytics Tab */}
+        <TabsContent value="analytics" className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Positions by Department */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Briefcase className="h-5 w-5" />
+                  Positions by Department
+                </CardTitle>
+                <CardDescription>Number of job positions per department</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {Object.entries(analytics.positionsByDept)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([dept, count]) => (
+                      <div key={dept} className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{dept}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-blue-500 rounded-full"
+                              style={{ width: `${(count / jobs.length) * 100}%` }}
+                            />
+                          </div>
+                          <Badge variant="secondary">{count}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                  {Object.keys(analytics.positionsByDept).length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No data available</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Department-wise Open vs Closed Positions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Dept-wise Open vs Closed Positions
+                </CardTitle>
+                <CardDescription>Position status breakdown by department</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {Object.entries(analytics.deptOpenClosed)
+                    .sort((a, b) => (b[1].open + b[1].closed) - (a[1].open + a[1].closed))
+                    .map(([dept, data]) => {
+                      const total = data.open + data.closed
+                      return (
+                        <div key={dept} className="space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">{dept}</span>
+                            <span className="text-xs text-muted-foreground">Total: {total}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden flex">
+                              <div 
+                                className="h-full bg-green-500"
+                                style={{ width: `${(data.open / total) * 100}%` }}
+                                title={`Open: ${data.open}`}
+                              />
+                              <div 
+                                className="h-full bg-red-500"
+                                style={{ width: `${(data.closed / total) * 100}%` }}
+                                title={`Closed: ${data.closed}`}
+                              />
+                            </div>
+                            <div className="flex gap-1 text-xs">
+                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                {data.open} Open
+                              </Badge>
+                              <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                                {data.closed} Closed
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  {Object.keys(analytics.deptOpenClosed).length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No data available</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Gender Distribution */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Gender Distribution
+                </CardTitle>
+                <CardDescription>Candidate distribution by gender</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {Object.entries(analytics.genderDist)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([gender, count]) => (
+                      <div key={gender} className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{gender}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-purple-500 rounded-full"
+                              style={{ width: `${(count / applications.length) * 100}%` }}
+                            />
+                          </div>
+                          <Badge variant="secondary">{count}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Nationality Distribution */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Nationality Distribution
+                </CardTitle>
+                <CardDescription>Top nationalities of candidates</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {Object.entries(analytics.nationalityDist)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 15)
+                    .map(([nationality, count]) => (
+                      <div key={nationality} className="flex items-center justify-between">
+                        <span className="text-sm font-medium truncate max-w-[150px]">{nationality}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-green-500 rounded-full"
+                              style={{ width: `${(count / applications.length) * 100}%` }}
+                            />
+                          </div>
+                          <Badge variant="secondary">{count}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                  {Object.keys(analytics.nationalityDist).length > 15 && (
+                    <p className="text-xs text-muted-foreground text-center">
+                      +{Object.keys(analytics.nationalityDist).length - 15} more nationalities
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Age Distribution */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Age Distribution
+                </CardTitle>
+                <CardDescription>Candidate distribution by age group</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {Object.entries(analytics.ageDist)
+                    .filter(([_, count]) => count > 0)
+                    .map(([ageGroup, count]) => (
+                      <div key={ageGroup} className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{ageGroup}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-amber-500 rounded-full"
+                              style={{ width: `${(count / applications.length) * 100}%` }}
+                            />
+                          </div>
+                          <Badge variant="secondary">{count}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Qualification Distribution */}
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ClipboardList className="h-5 w-5" />
+                  Qualification Distribution
+                </CardTitle>
+                <CardDescription>Candidate distribution by qualification level</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {Object.entries(analytics.qualificationDist)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([qualification, count]) => (
+                      <div key={qualification} className="flex items-center justify-between p-3 border rounded-lg">
+                        <span className="text-sm font-medium truncate max-w-[150px]">{qualification}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-indigo-500 rounded-full"
+                              style={{ width: `${(count / applications.length) * 100}%` }}
+                            />
+                          </div>
+                          <Badge variant="secondary">{count}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

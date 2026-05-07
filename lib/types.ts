@@ -71,6 +71,9 @@ export interface Candidate {
   alternate_country_code: string | null
   alternate_phone: string | null
   nationality: string | null
+  gender: string | null
+  date_of_birth: string | null
+  qualification: string | null
   current_salary: number | null
   current_salary_currency: SalaryCurrency | null
   expected_salary: number | null
