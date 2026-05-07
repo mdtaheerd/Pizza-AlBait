@@ -49,6 +49,8 @@ export default async function ReportsPage() {
         salary_min,
         salary_max,
         salary_currency,
+        published_at,
+        closing_date,
         department:departments(id, name),
         creator:profiles(id, full_name, email)
       )

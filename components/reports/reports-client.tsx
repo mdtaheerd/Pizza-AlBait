@@ -68,6 +68,8 @@ interface ExtendedApplication extends Application {
     salary_min?: number | null
     salary_max?: number | null
     salary_currency?: string
+    published_at?: string | null
+    closing_date?: string | null
     department?: { id: string; name: string } | null
     creator?: { id: string; full_name: string; email: string } | null
   }
@@ -162,52 +164,62 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
     rejected: applications.filter(a => a.stage === 'rejected').length,
   }), [applications])
 
+  // Calculate days to fill position
+  const calculateDaysToFill = (openDate: string | null | undefined, hiredAt: string | null | undefined) => {
+    if (!openDate) return ''
+    const endDate = hiredAt ? new Date(hiredAt) : new Date()
+    const start = new Date(openDate)
+    const diffTime = Math.abs(endDate.getTime() - start.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays.toString()
+  }
+
   // Export to CSV
   const exportToCSV = () => {
     const headers = [
+      'Department',
+      'Position Applied',
+      'Job Open Date',
+      'Job Closing Date',
+      'No of Days to Fill Position',
       'Candidate Name',
       'Email',
       'Phone',
       'Home Country Phone',
-      'Alternate Phone',
       'Nationality',
-      'Position Applied',
-      'Department',
       'Current Salary',
       'Expected Salary',
       'Position Salary Range',
       'Notice Period (Days)',
-      'Stage',
       'Applied Date',
-      'Recruiter Name',
-      'Interview Schedule Date',
-      'Offer Date',
-      'Hire Date',
-      'Rejection Reason'
+      'Stage',
+      'Interview Date',
+      'Rejection Reason',
+      'Recruiter Name'
     ]
 
     const rows = filteredApplications.map(app => [
+      app.job?.department?.name || '',
+      app.job?.title || '',
+      app.job?.published_at ? format(new Date(app.job.published_at), 'yyyy-MM-dd') : '',
+      app.job?.closing_date ? format(new Date(app.job.closing_date), 'yyyy-MM-dd') : '',
+      calculateDaysToFill(app.job?.published_at, app.hired_at),
       app.candidate?.full_name || '',
       app.candidate?.email || '',
       app.candidate?.phone ? `${app.candidate.country_code || ''} ${app.candidate.phone}` : '',
       app.candidate?.home_country_phone ? `${app.candidate.home_country_code || ''} ${app.candidate.home_country_phone}` : '',
-      app.candidate?.alternate_phone ? `${app.candidate.alternate_country_code || ''} ${app.candidate.alternate_phone}` : '',
       app.candidate?.nationality || '',
-      app.job?.title || '',
-      app.job?.department?.name || '',
       formatSalary(app.candidate?.current_salary),
       formatSalary(app.candidate?.expected_salary),
       app.job?.salary_min && app.job?.salary_max 
         ? `${formatSalary(app.job.salary_min)} - ${formatSalary(app.job.salary_max)}`
         : 'N/A',
       app.candidate?.notice_period_days?.toString() || '',
-      STAGE_LABELS[app.stage as keyof typeof STAGE_LABELS] || app.stage,
       format(new Date(app.applied_at), 'yyyy-MM-dd'),
-      app.job?.creator?.full_name || '',
+      STAGE_LABELS[app.stage as keyof typeof STAGE_LABELS] || app.stage,
       app.interview_date ? format(new Date(app.interview_date), 'yyyy-MM-dd HH:mm') : '',
-      app.offer_sent_at ? format(new Date(app.offer_sent_at), 'yyyy-MM-dd') : '',
-      app.hired_at ? format(new Date(app.hired_at), 'yyyy-MM-dd') : '',
-      app.rejection_comments || ''
+      app.rejection_comments || '',
+      app.job?.creator?.full_name || ''
     ])
 
     const csvContent = [
@@ -390,43 +402,56 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="min-w-[150px]">Candidate</TableHead>
-                        <TableHead>Nationality</TableHead>
-                        <TableHead className="min-w-[150px]">Position Applied</TableHead>
                         <TableHead>Department</TableHead>
+                        <TableHead className="min-w-[150px]">Position Applied</TableHead>
+                        <TableHead>Job Open Date</TableHead>
+                        <TableHead>Job Closing Date</TableHead>
+                        <TableHead>Days to Fill</TableHead>
+                        <TableHead className="min-w-[150px]">Candidate Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Phone</TableHead>
+                        <TableHead>Home Country Phone</TableHead>
+                        <TableHead>Nationality</TableHead>
                         <TableHead>Current Salary</TableHead>
                         <TableHead>Expected Salary</TableHead>
-                        <TableHead>Position Salary</TableHead>
-                        <TableHead>Notice Period</TableHead>
-                        <TableHead>Contact</TableHead>
-                        <TableHead>Alternate Contact</TableHead>
-                        <TableHead>Stage</TableHead>
+                        <TableHead>Position Salary Range</TableHead>
+                        <TableHead>Notice Period (Days)</TableHead>
                         <TableHead>Applied Date</TableHead>
+                        <TableHead>Stage</TableHead>
                         <TableHead>Interview Date</TableHead>
-                        <TableHead>Offer Date</TableHead>
-                        <TableHead>Hire Date</TableHead>
-                        {reportType === 'rejected' && <TableHead>Reason</TableHead>}
+                        {reportType === 'rejected' && <TableHead>Rejection Reason</TableHead>}
+                        <TableHead>Recruiter Name</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredApplications.map(app => (
                         <TableRow key={app.id}>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{app.candidate?.full_name}</p>
-                              <p className="text-xs text-muted-foreground">{app.candidate?.email}</p>
-                            </div>
+                          <TableCell>{app.job?.department?.name || '-'}</TableCell>
+                          <TableCell className="font-medium">{app.job?.title || '-'}</TableCell>
+                          <TableCell className="text-sm">
+                            {app.job?.published_at 
+                              ? format(new Date(app.job.published_at), 'MMM d, yyyy')
+                              : '-'}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {app.job?.closing_date 
+                              ? format(new Date(app.job.closing_date), 'MMM d, yyyy')
+                              : '-'}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {calculateDaysToFill(app.job?.published_at, app.hired_at) || '-'}
+                          </TableCell>
+                          <TableCell className="font-medium">{app.candidate?.full_name || '-'}</TableCell>
+                          <TableCell className="text-sm">{app.candidate?.email || '-'}</TableCell>
+                          <TableCell className="text-sm">
+                            {app.candidate?.phone ? `${app.candidate.country_code || ''} ${app.candidate.phone}` : '-'}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {app.candidate?.home_country_phone 
+                              ? `${app.candidate.home_country_code || ''} ${app.candidate.home_country_phone}` 
+                              : '-'}
                           </TableCell>
                           <TableCell>{app.candidate?.nationality || '-'}</TableCell>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{app.job?.title}</p>
-                              <p className="text-xs text-muted-foreground">
-                                By: {app.job?.creator?.full_name || 'N/A'}
-                              </p>
-                            </div>
-                          </TableCell>
-                          <TableCell>{app.job?.department?.name || '-'}</TableCell>
                           <TableCell className="text-sm">
                             {formatSalary(app.candidate?.current_salary)}
                           </TableCell>
@@ -442,23 +467,11 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                           </TableCell>
                           <TableCell>
                             {app.candidate?.notice_period_days !== null && app.candidate?.notice_period_days !== undefined
-                              ? `${app.candidate.notice_period_days} days`
+                              ? app.candidate.notice_period_days
                               : '-'}
                           </TableCell>
-                          <TableCell className="text-xs">
-                            {app.candidate?.phone ? (
-                              <span>{app.candidate.country_code} {app.candidate.phone}</span>
-                            ) : '-'}
-                            {app.candidate?.home_country_phone && (
-                              <div className="text-muted-foreground">
-                                Home: {app.candidate.home_country_code} {app.candidate.home_country_phone}
-                              </div>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-xs">
-                            {app.candidate?.alternate_phone ? (
-                              <span>{app.candidate.alternate_country_code} {app.candidate.alternate_phone}</span>
-                            ) : '-'}
+                          <TableCell className="text-sm">
+                            {format(new Date(app.applied_at), 'MMM d, yyyy')}
                           </TableCell>
                           <TableCell>
                             <Badge className={STAGE_COLORS[app.stage as keyof typeof STAGE_COLORS]}>
@@ -466,21 +479,8 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                             </Badge>
                           </TableCell>
                           <TableCell className="text-sm">
-                            {format(new Date(app.applied_at), 'MMM d, yyyy')}
-                          </TableCell>
-                          <TableCell className="text-sm">
                             {app.interview_date 
                               ? format(new Date(app.interview_date), 'MMM d, yyyy HH:mm')
-                              : '-'}
-                          </TableCell>
-                          <TableCell className="text-sm">
-                            {app.offer_sent_at 
-                              ? format(new Date(app.offer_sent_at), 'MMM d, yyyy')
-                              : '-'}
-                          </TableCell>
-                          <TableCell className="text-sm">
-                            {app.hired_at 
-                              ? format(new Date(app.hired_at), 'MMM d, yyyy')
                               : '-'}
                           </TableCell>
                           {reportType === 'rejected' && (
@@ -488,11 +488,12 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                               {app.rejection_comments || '-'}
                             </TableCell>
                           )}
+                          <TableCell className="text-sm">{app.job?.creator?.full_name || '-'}</TableCell>
                         </TableRow>
                       ))}
                       {filteredApplications.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={16} className="text-center text-muted-foreground py-8">
+                          <TableCell colSpan={19} className="text-center text-muted-foreground py-8">
                             No applications found
                           </TableCell>
                         </TableRow>
