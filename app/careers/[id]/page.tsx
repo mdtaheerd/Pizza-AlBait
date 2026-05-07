@@ -3,15 +3,10 @@ import { notFound } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { MapPin, Clock, Banknote, ArrowLeft, Building2, Calendar } from 'lucide-react'
-import { format } from 'date-fns'
+import { MapPin, Clock, Banknote, ArrowLeft, Building2 } from 'lucide-react'
 import Link from 'next/link'
 import { EMPLOYMENT_TYPE_LABELS, CURRENCY_SYMBOLS, type SalaryCurrency } from '@/lib/types'
 import { CareersHeader } from '@/components/careers/careers-header'
-
-// Disable caching to always fetch fresh data
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
 
 interface JobDetailPageProps {
   params: Promise<{ id: string }>
@@ -94,12 +89,6 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                 <span className="flex items-center gap-1">
                   <Banknote className="h-4 w-4" />
                   {formatSalary(job.salary_min, job.salary_max, job.salary_currency)} / year
-                </span>
-              )}
-              {job.closing_date && (
-                <span className="flex items-center gap-1 text-amber-600 font-medium">
-                  <Calendar className="h-4 w-4" />
-                  Apply by {format(new Date(job.closing_date), 'MMM d, yyyy')}
                 </span>
               )}
             </div>

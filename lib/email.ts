@@ -1,24 +1,22 @@
-import { Resend } from 'resend'
+import nodemailer from 'nodemailer'
 
-// Lazy initialize Resend client to avoid build errors when env var is not available
-let resendClient: Resend | null = null
-
-function getResendClient(): Resend {
-  if (!resendClient) {
-    if (!process.env.RESEND_API_KEY) {
-      throw new Error('RESEND_API_KEY environment variable is not set')
-    }
-    resendClient = new Resend(process.env.RESEND_API_KEY)
-  }
-  return resendClient
+// Create transporter using Gmail SMTP
+const createTransporter = () => {
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
+    },
+  })
 }
 
-// Hardcoded to match Resend registered email - env var wasn't updating properly
-const getAdminEmail = () => 'mdtaheerd@gmail.com'
-const FROM_EMAIL = 'CPECC Recruitment <noreply@resend.dev>'
+const FROM_NAME = 'CPECC Recruitment'
+const getFromEmail = () => process.env.GMAIL_USER || 'noreply@example.com'
+const getAdminEmail = () => process.env.ADMIN_EMAIL || 'cpecchr.auh@gmail.com'
 const getAppUrl = () => process.env.NEXT_PUBLIC_APP_URL || 'https://pizza-al-bait.vercel.app'
 
-// Generic email sender for workflow emails
+// Generic email sender
 export async function sendEmail({ 
   to, 
   subject, 
@@ -28,24 +26,27 @@ export async function sendEmail({
   subject: string
   html: string 
 }) {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    console.log('[Email] Skipping email send - Gmail credentials not configured')
+    console.log('[Email] Would have sent:', { to, subject })
+    return { success: true, message: 'Email skipped (no credentials)' }
+  }
+
   try {
-    const resend = getResendClient()
-    const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL,
+    const transporter = createTransporter()
+    const fromEmail = getFromEmail()
+
+    const info = await transporter.sendMail({
+      from: `"${FROM_NAME}" <${fromEmail}>`,
       to,
       subject,
       html,
     })
 
-    if (error) {
-      console.error('[Email] Failed to send email:', error)
-      return { success: false, error }
-    }
-
-    console.log('[Email] Email sent successfully:', data?.id)
-    return { success: true, data }
+    console.log('[Email] Email sent successfully:', info.messageId)
+    return { success: true, messageId: info.messageId }
   } catch (error) {
-    console.error('[Email] Error sending email:', error)
+    console.error('[Email] Failed to send email:', error)
     return { success: false, error }
   }
 }
@@ -56,24 +57,20 @@ export async function sendAdminApprovalEmail(user: {
   full_name: string
   role: string
 }) {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    console.log('[Email] Skipping admin approval email - Gmail credentials not configured')
+    return { success: true, message: 'Email skipped (no credentials)' }
+  }
+
   try {
-    const resend = getResendClient()
+    const transporter = createTransporter()
     const ADMIN_EMAIL = getAdminEmail()
     const APP_URL = getAppUrl()
+    const fromEmail = getFromEmail()
     const approvalUrl = `${APP_URL}/dashboard/users?approve=${user.id}`
-    
-    console.log('[v0] sendAdminApprovalEmail called with:', { 
-      userId: user.id, 
-      userEmail: user.email, 
-      userName: user.full_name,
-      role: user.role,
-      adminEmail: ADMIN_EMAIL,
-      fromEmail: FROM_EMAIL,
-      hasApiKey: !!process.env.RESEND_API_KEY
-    })
-    
-    const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL,
+
+    const info = await transporter.sendMail({
+      from: `"${FROM_NAME}" <${fromEmail}>`,
       to: ADMIN_EMAIL,
       subject: `New Registration Pending Approval: ${user.full_name}`,
       html: `
@@ -82,7 +79,6 @@ export async function sendAdminApprovalEmail(user: {
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>New Registration Pending Approval</title>
         </head>
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
@@ -114,10 +110,6 @@ export async function sendAdminApprovalEmail(user: {
                 Review & Approve
               </a>
             </div>
-            
-            <p style="color: #6b7280; font-size: 14px; margin-top: 20px; text-align: center;">
-              You can also manage user approvals from the <a href="${APP_URL}/dashboard/users" style="color: #dc2626;">User Management</a> section.
-            </p>
           </div>
           
           <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 20px;">
@@ -128,15 +120,10 @@ export async function sendAdminApprovalEmail(user: {
       `,
     })
 
-    if (error) {
-      console.error('[v0] Failed to send admin approval email:', JSON.stringify(error))
-      return { success: false, error }
-    }
-
-    console.log('[v0] Admin approval email sent successfully:', data?.id)
-    return { success: true, data }
+    console.log('[Email] Admin approval email sent successfully:', info.messageId)
+    return { success: true }
   } catch (error) {
-    console.error('[Email] Error sending admin approval email:', error)
+    console.error('[Email] Failed to send admin approval email:', error)
     return { success: false, error }
   }
 }
@@ -145,13 +132,19 @@ export async function sendApprovalConfirmationEmail(user: {
   email: string
   full_name: string
 }) {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    console.log('[Email] Skipping approval confirmation email - Gmail credentials not configured')
+    return { success: true, message: 'Email skipped (no credentials)' }
+  }
+
   try {
-    const resend = getResendClient()
+    const transporter = createTransporter()
     const APP_URL = getAppUrl()
+    const fromEmail = getFromEmail()
     const loginUrl = `${APP_URL}/auth/login`
-    
-    const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL,
+
+    const info = await transporter.sendMail({
+      from: `"${FROM_NAME}" <${fromEmail}>`,
       to: user.email,
       subject: 'Your Registration Has Been Approved - CPECC Recruitment',
       html: `
@@ -160,7 +153,6 @@ export async function sendApprovalConfirmationEmail(user: {
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Registration Approved</title>
         </head>
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
@@ -171,12 +163,12 @@ export async function sendApprovalConfirmationEmail(user: {
             <p style="font-size: 16px; margin-bottom: 20px;">Dear ${user.full_name},</p>
             
             <p style="font-size: 16px; margin-bottom: 20px;">
-              Great news! Your registration has been approved by the administrator. You now have full access to the CPECC Recruitment System.
+              Great news! Your registration has been approved. You now have full access to the CPECC Recruitment System.
             </p>
             
             <div style="background: #dcfce7; padding: 15px; border-radius: 8px; border: 1px solid #bbf7d0; margin-bottom: 20px;">
               <p style="margin: 0; color: #166534; font-weight: 500;">
-                ✓ Your account is now active and ready to use
+                Your account is now active and ready to use
               </p>
             </div>
             
@@ -185,10 +177,6 @@ export async function sendApprovalConfirmationEmail(user: {
                 Login to Dashboard
               </a>
             </div>
-            
-            <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
-              If you have any questions, please contact your system administrator.
-            </p>
           </div>
           
           <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 20px;">
@@ -199,15 +187,10 @@ export async function sendApprovalConfirmationEmail(user: {
       `,
     })
 
-    if (error) {
-      console.error('[Email] Failed to send approval confirmation email:', error)
-      return { success: false, error }
-    }
-
-    console.log('[Email] Approval confirmation email sent successfully:', data?.id)
-    return { success: true, data }
+    console.log('[Email] Approval confirmation email sent successfully:', info.messageId)
+    return { success: true }
   } catch (error) {
-    console.error('[Email] Error sending approval confirmation email:', error)
+    console.error('[Email] Failed to send approval confirmation email:', error)
     return { success: false, error }
   }
 }
@@ -217,10 +200,17 @@ export async function sendRejectionEmail(user: {
   full_name: string
   reason?: string
 }) {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    console.log('[Email] Skipping rejection email - Gmail credentials not configured')
+    return { success: true, message: 'Email skipped (no credentials)' }
+  }
+
   try {
-    const resend = getResendClient()
-    const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL,
+    const transporter = createTransporter()
+    const fromEmail = getFromEmail()
+
+    const info = await transporter.sendMail({
+      from: `"${FROM_NAME}" <${fromEmail}>`,
       to: user.email,
       subject: 'Registration Update - CPECC Recruitment',
       html: `
@@ -229,7 +219,6 @@ export async function sendRejectionEmail(user: {
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Registration Update</title>
         </head>
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
@@ -240,7 +229,7 @@ export async function sendRejectionEmail(user: {
             <p style="font-size: 16px; margin-bottom: 20px;">Dear ${user.full_name},</p>
             
             <p style="font-size: 16px; margin-bottom: 20px;">
-              Thank you for your interest in joining the CPECC Recruitment System. Unfortunately, your registration request could not be approved at this time.
+              Thank you for your interest. Unfortunately, your registration request could not be approved at this time.
             </p>
             
             ${user.reason ? `
@@ -252,27 +241,18 @@ export async function sendRejectionEmail(user: {
             ` : ''}
             
             <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
-              If you believe this is an error or have questions, please contact your HR department or system administrator.
+              If you have questions, please contact your HR department.
             </p>
           </div>
-          
-          <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 20px;">
-            This is an automated email from CPECC Recruitment System
-          </p>
         </body>
         </html>
       `,
     })
 
-    if (error) {
-      console.error('[Email] Failed to send rejection email:', error)
-      return { success: false, error }
-    }
-
-    console.log('[Email] Rejection email sent successfully:', data?.id)
-    return { success: true, data }
+    console.log('[Email] Rejection email sent successfully:', info.messageId)
+    return { success: true }
   } catch (error) {
-    console.error('[Email] Error sending rejection email:', error)
+    console.error('[Email] Failed to send rejection email:', error)
     return { success: false, error }
   }
 }

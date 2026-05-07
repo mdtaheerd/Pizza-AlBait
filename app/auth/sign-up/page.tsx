@@ -40,7 +40,7 @@ export default function SignUpPage() {
     setError(null)
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -53,48 +53,10 @@ export default function SignUpPage() {
           },
         },
       })
-      
-      // Handle rate limit error specifically - registration may still succeed
-      if (error) {
-        if (error.message.toLowerCase().includes('rate limit')) {
-          // Rate limit on Supabase confirmation email - user is still created
-          // Continue to notify admin and redirect
-          console.log('[v0] Rate limit hit but continuing with registration')
-        } else {
-          throw error
-        }
-      }
-
-      // Send notification to admin for approval (don't fail registration if this fails)
-      if (data?.user) {
-        try {
-          await fetch('/api/notify-admin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId: data.user.id,
-              email: email,
-              fullName: fullName,
-              role: role,
-            }),
-          })
-        } catch (notifyError) {
-          // Silent fail - admin can see pending users in dashboard
-          console.error('Failed to notify admin:', notifyError)
-        }
-      }
-
+      if (error) throw error
       router.push('/auth/sign-up-success')
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
-      // Provide user-friendly error messages
-      if (errorMessage.toLowerCase().includes('rate limit')) {
-        setError('Too many attempts. Please try again in a few minutes.')
-      } else if (errorMessage.toLowerCase().includes('already registered')) {
-        setError('This email is already registered. Please sign in instead.')
-      } else {
-        setError(errorMessage)
-      }
+      setError(error instanceof Error ? error.message : 'An error occurred')
     } finally {
       setIsLoading(false)
     }

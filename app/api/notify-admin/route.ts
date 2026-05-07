@@ -10,8 +10,8 @@ export async function POST(request: NextRequest) {
 
     console.log('[v0] notify-admin received:', { userId, email, fullName, role })
     console.log('[v0] Environment check:', {
-      hasResendKey: !!process.env.RESEND_API_KEY,
-      resendKeyPrefix: process.env.RESEND_API_KEY?.substring(0, 10),
+      hasGmailUser: !!process.env.GMAIL_USER,
+      hasGmailAppPassword: !!process.env.GMAIL_APP_PASSWORD,
       adminEmail: process.env.ADMIN_EMAIL
     })
 

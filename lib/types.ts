@@ -1,13 +1,12 @@
-export type UserRole = 'admin' | 'recruiter' | 'hiring_manager' | 'candidate'
-export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
+export type UserRole = 'admin' | 'recruiter' | 'hiring_manager'
 export type JobStatus = 'draft' | 'open' | 'paused' | 'closed'
 export type EmploymentType = 'full_time' | 'part_time' | 'contract' | 'internship' | 'remote'
-export type ApplicationStage = 'applied' | 'new' | 'screening' | 'shortlisted' | 'interview_scheduled' | 'interviewed' | 'offered' | 'hired' | 'rejected' | 'withdrawn'
+export type ApplicationStage = 'applied' | 'screening' | 'interview' | 'assessment' | 'offer' | 'hired' | 'rejected'
 export type InterviewType = 'phone' | 'video' | 'onsite' | 'technical' | 'panel'
 export type InterviewStatus = 'scheduled' | 'completed' | 'cancelled' | 'no_show'
 export type CandidateSource = 'career_page' | 'linkedin' | 'referral' | 'agency' | 'other'
 export type LockStatus = 'available' | 'locked' | 'in_process' | 'completed' | 'released'
-export type SalaryCurrency = 'AED'
+export type SalaryCurrency = 'USD' | 'AED' | 'SAR' | 'QAR' | 'KWD' | 'BHD' | 'OMR' | 'EUR' | 'GBP' | 'CNY'
 export type HistoryActionType = 'applied' | 'screened' | 'interviewed' | 'assessed' | 'offered' | 'hired' | 'rejected' | 'offer_declined' | 'withdrawn' | 'locked' | 'unlocked' | 'reassigned' | 'note_added'
 
 export interface Department {
@@ -25,14 +24,9 @@ export interface Profile {
   role: UserRole
   department_id: string | null
   avatar_url: string | null
-  approval_status: ApprovalStatus
-  approved_by: string | null
-  approved_at: string | null
-  rejection_reason: string | null
   created_at: string
   updated_at: string
   department?: Department | null
-  approver?: Profile | null
 }
 
 export interface Job {
@@ -47,8 +41,6 @@ export interface Job {
   salary_max: number | null
   salary_currency: SalaryCurrency
   status: JobStatus
-  closing_date: string | null
-  auto_closed: boolean
   created_by: string | null
   created_at: string
   updated_at: string
@@ -65,21 +57,6 @@ export interface Candidate {
   email: string
   full_name: string
   phone: string | null
-  country_code: string | null
-  home_country_code: string | null
-  home_country_phone: string | null
-  alternate_country_code: string | null
-  alternate_phone: string | null
-  nationality: string | null
-  gender: string | null
-  date_of_birth: string | null
-  qualification: string | null
-  current_salary: number | null
-  current_salary_currency: SalaryCurrency | null
-  expected_salary: number | null
-  expected_salary_currency: SalaryCurrency | null
-  notice_period_days: number | null
-  user_id: string | null
   resume_url: string | null
   linkedin_url: string | null
   portfolio_url: string | null
@@ -112,44 +89,11 @@ export interface Application {
   lock_status: LockStatus
   applied_at: string
   updated_at: string
-  // Workflow fields
-  interview_date: string | null
-  interview_location: string | null
-  interviewer_email: string | null
-  interviewer_name: string | null
-  screening_notes: string | null
-  interview_notes: string | null
-  rejection_reason: string | null
-  rejection_comments: string | null
-  offer_sent_at: string | null
-  hired_at: string | null
-  rejected_at: string | null
-  shortlisted_at: string | null
-  shortlisted_by: string | null
-  interviewed_at: string | null
-  interviewed_by: string | null
-  hiring_manager_comments: string | null
-  recruiter_comments: string | null
-  // Screening notes fields
-  screening_summary: string | null
-  salary_expectation: string | null
-  benefits_expectation: string | null
-  notice_period: string | null
-  // Multiple interviewers and scheduling fields
-  interviewer_emails: string[] | null
-  interview_status: 'pending' | 'accepted' | 'rescheduled' | null
-  interview_accepted_at: string | null
-  interview_accepted_by: string | null
-  original_interview_date: string | null
-  rescheduled_at: string | null
-  rescheduled_by: string | null
-  interview_notification_sent_at: string | null
   candidate?: Candidate
   job?: Job
   assignee?: Profile | null
   locker?: Profile | null
   interviews?: Interview[]
-  shortlister?: Profile | null
 }
 
 export interface CandidateHistory {
@@ -218,28 +162,22 @@ export interface PipelineColumn {
 
 export const STAGE_LABELS: Record<ApplicationStage, string> = {
   applied: 'Applied',
-  new: 'New',
   screening: 'Screening',
-  shortlisted: 'Shortlisted',
-  interview_scheduled: 'Interview Scheduled',
-  interviewed: 'Interviewed',
-  offered: 'Offered',
+  interview: 'Interview',
+  assessment: 'Assessment',
+  offer: 'Offer',
   hired: 'Hired',
   rejected: 'Rejected',
-  withdrawn: 'Withdrawn',
 }
 
 export const STAGE_COLORS: Record<ApplicationStage, string> = {
   applied: 'bg-slate-100 text-slate-700',
-  new: 'bg-slate-100 text-slate-700',
   screening: 'bg-blue-100 text-blue-700',
-  shortlisted: 'bg-indigo-100 text-indigo-700',
-  interview_scheduled: 'bg-amber-100 text-amber-700',
-  interviewed: 'bg-purple-100 text-purple-700',
-  offered: 'bg-emerald-100 text-emerald-700',
+  interview: 'bg-amber-100 text-amber-700',
+  assessment: 'bg-purple-100 text-purple-700',
+  offer: 'bg-emerald-100 text-emerald-700',
   hired: 'bg-green-100 text-green-700',
   rejected: 'bg-red-100 text-red-700',
-  withdrawn: 'bg-gray-100 text-gray-700',
 }
 
 export const EMPLOYMENT_TYPE_LABELS: Record<EmploymentType, string> = {
@@ -280,6 +218,20 @@ export const LOCK_STATUS_COLORS: Record<LockStatus, string> = {
   released: 'bg-slate-100 text-slate-700 border-slate-200',
 }
 
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
+
+export const APPROVAL_STATUS_LABELS: Record<ApprovalStatus, string> = {
+  pending: 'Pending',
+  approved: 'Approved',
+  rejected: 'Rejected',
+}
+
+export const APPROVAL_STATUS_COLORS: Record<ApprovalStatus, string> = {
+  pending: 'bg-amber-100 text-amber-700 border-amber-200',
+  approved: 'bg-green-100 text-green-700 border-green-200',
+  rejected: 'bg-red-100 text-red-700 border-red-200',
+}
+
 export const HISTORY_ACTION_LABELS: Record<HistoryActionType, string> = {
   applied: 'Applied',
   screened: 'Screened',
@@ -297,74 +249,83 @@ export const HISTORY_ACTION_LABELS: Record<HistoryActionType, string> = {
 }
 
 export const CURRENCY_OPTIONS: { value: SalaryCurrency; label: string; symbol: string }[] = [
-  { value: 'AED', label: 'UAE Dirham', symbol: 'AED' },
+  { value: 'USD', label: 'US Dollar', symbol: '$' },
+  { value: 'AED', label: 'UAE Dirham', symbol: 'د.إ' },
+  { value: 'SAR', label: 'Saudi Riyal', symbol: '﷼' },
+  { value: 'QAR', label: 'Qatari Riyal', symbol: 'ر.ق' },
+  { value: 'KWD', label: 'Kuwaiti Dinar', symbol: 'د.ك' },
+  { value: 'BHD', label: 'Bahraini Dinar', symbol: 'د.ب' },
+  { value: 'OMR', label: 'Omani Rial', symbol: 'ر.ع' },
+  { value: 'EUR', label: 'Euro', symbol: '€' },
+  { value: 'GBP', label: 'British Pound', symbol: '£' },
+  { value: 'CNY', label: 'Chinese Yuan', symbol: '¥' },
 ]
 
 export const CURRENCY_SYMBOLS: Record<SalaryCurrency, string> = {
-  AED: 'AED',
+  USD: '$',
+  AED: 'د.إ',
+  SAR: '﷼',
+  QAR: 'ر.ق',
+  KWD: 'د.ك',
+  BHD: 'د.ب',
+  OMR: 'ر.ع',
+  EUR: '€',
+  GBP: '£',
+  CNY: '¥',
 }
 
-export const APPROVAL_STATUS_LABELS: Record<ApprovalStatus, string> = {
-  pending: 'Pending Approval',
-  approved: 'Approved',
-  rejected: 'Rejected',
-}
-
-export const APPROVAL_STATUS_COLORS: Record<ApprovalStatus, string> = {
-  pending: 'bg-amber-100 text-amber-700 border-amber-200',
-  approved: 'bg-green-100 text-green-700 border-green-200',
-  rejected: 'bg-red-100 text-red-700 border-red-200',
-}
-
-export const COUNTRY_CODES = [
-  { code: '+971', country: 'UAE', flag: '🇦🇪' },
-  { code: '+966', country: 'Saudi Arabia', flag: '🇸🇦' },
-  { code: '+974', country: 'Qatar', flag: '🇶🇦' },
-  { code: '+965', country: 'Kuwait', flag: '🇰🇼' },
-  { code: '+973', country: 'Bahrain', flag: '🇧🇭' },
-  { code: '+968', country: 'Oman', flag: '🇴🇲' },
-  { code: '+91', country: 'India', flag: '🇮🇳' },
-  { code: '+92', country: 'Pakistan', flag: '🇵🇰' },
-  { code: '+63', country: 'Philippines', flag: '🇵🇭' },
-  { code: '+20', country: 'Egypt', flag: '🇪🇬' },
-  { code: '+962', country: 'Jordan', flag: '🇯🇴' },
-  { code: '+961', country: 'Lebanon', flag: '🇱🇧' },
-  { code: '+86', country: 'China', flag: '🇨🇳' },
-  { code: '+44', country: 'UK', flag: '🇬🇧' },
-  { code: '+1', country: 'USA/Canada', flag: '🇺🇸' },
-  { code: '+33', country: 'France', flag: '🇫🇷' },
-  { code: '+49', country: 'Germany', flag: '🇩🇪' },
-  { code: '+39', country: 'Italy', flag: '🇮🇹' },
-  { code: '+90', country: 'Turkey', flag: '🇹🇷' },
-  { code: '+234', country: 'Nigeria', flag: '🇳🇬' },
-  { code: '+27', country: 'South Africa', flag: '🇿🇦' },
-  { code: '+254', country: 'Kenya', flag: '🇰🇪' },
+export const COUNTRY_CODES: { code: string; name: string; dial_code: string }[] = [
+  { code: 'AE', name: 'United Arab Emirates', dial_code: '+971' },
+  { code: 'SA', name: 'Saudi Arabia', dial_code: '+966' },
+  { code: 'QA', name: 'Qatar', dial_code: '+974' },
+  { code: 'KW', name: 'Kuwait', dial_code: '+965' },
+  { code: 'BH', name: 'Bahrain', dial_code: '+973' },
+  { code: 'OM', name: 'Oman', dial_code: '+968' },
+  { code: 'IN', name: 'India', dial_code: '+91' },
+  { code: 'PK', name: 'Pakistan', dial_code: '+92' },
+  { code: 'PH', name: 'Philippines', dial_code: '+63' },
+  { code: 'BD', name: 'Bangladesh', dial_code: '+880' },
+  { code: 'NP', name: 'Nepal', dial_code: '+977' },
+  { code: 'LK', name: 'Sri Lanka', dial_code: '+94' },
+  { code: 'EG', name: 'Egypt', dial_code: '+20' },
+  { code: 'JO', name: 'Jordan', dial_code: '+962' },
+  { code: 'LB', name: 'Lebanon', dial_code: '+961' },
+  { code: 'SY', name: 'Syria', dial_code: '+963' },
+  { code: 'IQ', name: 'Iraq', dial_code: '+964' },
+  { code: 'YE', name: 'Yemen', dial_code: '+967' },
+  { code: 'US', name: 'United States', dial_code: '+1' },
+  { code: 'GB', name: 'United Kingdom', dial_code: '+44' },
+  { code: 'CA', name: 'Canada', dial_code: '+1' },
+  { code: 'AU', name: 'Australia', dial_code: '+61' },
+  { code: 'DE', name: 'Germany', dial_code: '+49' },
+  { code: 'FR', name: 'France', dial_code: '+33' },
+  { code: 'CN', name: 'China', dial_code: '+86' },
 ]
 
-export const COUNTRIES = [
-  'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Argentina', 'Armenia', 'Australia',
-  'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium',
-  'Belize', 'Benin', 'Bhutan', 'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei',
-  'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde',
-  'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo', 'Costa Rica',
-  'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominican Republic',
-  'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Eswatini', 'Ethiopia',
-  'Fiji', 'Finland', 'France', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Greece', 'Grenada',
-  'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Honduras', 'Hungary', 'Iceland', 'India',
-  'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy', 'Ivory Coast', 'Jamaica', 'Japan', 'Jordan',
-  'Kazakhstan', 'Kenya', 'Kiribati', 'Kosovo', 'Kuwait', 'Kyrgyzstan', 'Laos', 'Latvia', 'Lebanon',
-  'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Madagascar', 'Malawi',
-  'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania', 'Mauritius', 'Mexico',
-  'Micronesia', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar',
-  'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria',
-  'North Korea', 'North Macedonia', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestine', 'Panama',
-  'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Qatar', 'Romania',
-  'Russia', 'Rwanda', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines',
-  'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles',
-  'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa',
-  'South Korea', 'South Sudan', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Sweden', 'Switzerland',
-  'Syria', 'Taiwan', 'Tajikistan', 'Tanzania', 'Thailand', 'Timor-Leste', 'Togo', 'Tonga',
-  'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Tuvalu', 'Uganda', 'Ukraine',
-  'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan', 'Vanuatu',
-  'Vatican City', 'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'
+export const COUNTRIES: { value: string; label: string }[] = [
+  { value: 'AE', label: 'United Arab Emirates' },
+  { value: 'SA', label: 'Saudi Arabia' },
+  { value: 'QA', label: 'Qatar' },
+  { value: 'KW', label: 'Kuwait' },
+  { value: 'BH', label: 'Bahrain' },
+  { value: 'OM', label: 'Oman' },
+  { value: 'IN', label: 'India' },
+  { value: 'PK', label: 'Pakistan' },
+  { value: 'PH', label: 'Philippines' },
+  { value: 'BD', label: 'Bangladesh' },
+  { value: 'NP', label: 'Nepal' },
+  { value: 'LK', label: 'Sri Lanka' },
+  { value: 'EG', label: 'Egypt' },
+  { value: 'JO', label: 'Jordan' },
+  { value: 'LB', label: 'Lebanon' },
+  { value: 'SY', label: 'Syria' },
+  { value: 'IQ', label: 'Iraq' },
+  { value: 'YE', label: 'Yemen' },
+  { value: 'US', label: 'United States' },
+  { value: 'GB', label: 'United Kingdom' },
+  { value: 'CA', label: 'Canada' },
+  { value: 'AU', label: 'Australia' },
+  { value: 'DE', label: 'Germany' },
+  { value: 'FR', label: 'France' },
+  { value: 'CN', label: 'China' },
 ]

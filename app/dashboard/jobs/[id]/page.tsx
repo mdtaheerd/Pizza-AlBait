@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Pencil, ExternalLink, MapPin, Banknote, Clock, Users, Calendar, AlertCircle } from 'lucide-react'
+import { Pencil, ExternalLink, MapPin, Banknote, Clock, Users } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import {
@@ -66,17 +66,11 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-3">
             <h1 className="text-2xl font-semibold text-balance">{job.title}</h1>
             <Badge variant="secondary" className={JOB_STATUS_COLORS[job.status]}>
               {JOB_STATUS_LABELS[job.status]}
             </Badge>
-            {job.auto_closed && (
-              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                <AlertCircle className="mr-1 h-3 w-3" />
-                Auto-closed
-              </Badge>
-            )}
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
             {job.department?.name && (
@@ -98,12 +92,6 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               <span className="flex items-center gap-1">
                 <Banknote className="h-4 w-4" />
                 {formatSalary(job.salary_min, job.salary_max)}
-              </span>
-            )}
-            {job.closing_date && (
-              <span className={`flex items-center gap-1 ${new Date(job.closing_date) < new Date() ? 'text-red-600' : ''}`}>
-                <Calendar className="h-4 w-4" />
-                Closes: {format(new Date(job.closing_date), 'MMM d, yyyy')}
               </span>
             )}
           </div>
