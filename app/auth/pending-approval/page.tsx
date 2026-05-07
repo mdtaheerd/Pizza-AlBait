@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Clock, Home, LogOut } from 'lucide-react'
@@ -10,12 +11,12 @@ import { useRouter } from 'next/navigation'
 
 export default function PendingApprovalPage() {
   const router = useRouter()
-  const supabase = createClient()
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
+    const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/')
-  }
+  }, [router])
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center bg-gradient-to-b from-amber-50 via-background to-background p-6 md:p-10">
