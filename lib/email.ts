@@ -13,7 +13,7 @@ const createTransporter = () => {
 
 const FROM_NAME = 'CPECC Recruitment'
 const getFromEmail = () => process.env.GMAIL_USER || 'noreply@example.com'
-const getAdminEmail = () => process.env.GMAIL_USER || 'mdtaheerd@gmail.com'
+const getAdminEmail = () => process.env.ADMIN_EMAIL || 'cpecchr.auh@gmail.com'
 const getAppUrl = () => process.env.NEXT_PUBLIC_APP_URL || 'https://pizza-al-bait.vercel.app'
 
 // Generic email sender
