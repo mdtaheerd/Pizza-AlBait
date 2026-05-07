@@ -227,12 +227,28 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
       qualificationDist[qualification] = (qualificationDist[qualification] || 0) + 1
     })
 
+    // Department-wise open vs closed positions
+    const deptOpenClosed: Record<string, { open: number; closed: number }> = {}
+    jobs.forEach(job => {
+      const deptName = job.department?.name || 'Unassigned'
+      if (!deptOpenClosed[deptName]) {
+        deptOpenClosed[deptName] = { open: 0, closed: 0 }
+      }
+      // Consider 'published' and 'draft' as open, 'closed' and 'filled' as closed
+      if (job.status === 'closed' || job.status === 'filled') {
+        deptOpenClosed[deptName].closed++
+      } else {
+        deptOpenClosed[deptName].open++
+      }
+    })
+
     return {
       positionsByDept,
       genderDist,
       nationalityDist,
       ageDist,
       qualificationDist,
+      deptOpenClosed,
     }
   }, [applications, jobs])
   
@@ -692,6 +708,59 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                       </div>
                     ))}
                   {Object.keys(analytics.positionsByDept).length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No data available</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Department-wise Open vs Closed Positions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Dept-wise Open vs Closed Positions
+                </CardTitle>
+                <CardDescription>Position status breakdown by department</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {Object.entries(analytics.deptOpenClosed)
+                    .sort((a, b) => (b[1].open + b[1].closed) - (a[1].open + a[1].closed))
+                    .map(([dept, data]) => {
+                      const total = data.open + data.closed
+                      return (
+                        <div key={dept} className="space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">{dept}</span>
+                            <span className="text-xs text-muted-foreground">Total: {total}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden flex">
+                              <div 
+                                className="h-full bg-green-500"
+                                style={{ width: `${(data.open / total) * 100}%` }}
+                                title={`Open: ${data.open}`}
+                              />
+                              <div 
+                                className="h-full bg-red-500"
+                                style={{ width: `${(data.closed / total) * 100}%` }}
+                                title={`Closed: ${data.closed}`}
+                              />
+                            </div>
+                            <div className="flex gap-1 text-xs">
+                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                {data.open} Open
+                              </Badge>
+                              <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                                {data.closed} Closed
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  {Object.keys(analytics.deptOpenClosed).length === 0 && (
                     <p className="text-sm text-muted-foreground text-center py-4">No data available</p>
                   )}
                 </div>
