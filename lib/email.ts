@@ -1,21 +1,17 @@
-import sgMail from '@sendgrid/mail'
+import * as Brevo from '@getbrevo/brevo'
 
-// Initialize SendGrid with API key
-let initialized = false
+// Initialize Brevo API
+const apiInstance = new Brevo.TransactionalEmailsApi()
 
-function initSendGrid() {
-  if (!initialized) {
-    if (!process.env.SENDGRID_API_KEY) {
-      throw new Error('SENDGRID_API_KEY environment variable is not set')
-    }
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY)
-    initialized = true
+function initBrevo() {
+  if (process.env.BREVO_API_KEY) {
+    apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY)
   }
 }
 
 // Hardcoded to match verified sender email
 const getAdminEmail = () => 'mdtaheerd@gmail.com'
-const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'noreply@cpecc-recruitment.com'
+const FROM_EMAIL = process.env.BREVO_FROM_EMAIL || 'mdtaheerd@gmail.com'
 const FROM_NAME = 'CPECC Recruitment'
 const getAppUrl = () => process.env.NEXT_PUBLIC_APP_URL || 'https://pizza-al-bait.vercel.app'
 
@@ -29,20 +25,23 @@ export async function sendEmail({
   subject: string
   html: string 
 }) {
-  try {
-    initSendGrid()
-    
-    const msg = {
-      to,
-      from: {
-        email: FROM_EMAIL,
-        name: FROM_NAME,
-      },
-      subject,
-      html,
-    }
+  // Skip sending if no API key (development mode)
+  if (!process.env.BREVO_API_KEY) {
+    console.log('[Email] Skipping email send - no BREVO_API_KEY configured')
+    console.log('[Email] Would have sent:', { to, subject })
+    return { success: true, message: 'Email skipped (no API key)' }
+  }
 
-    await sgMail.send(msg)
+  try {
+    initBrevo()
+    
+    const sendSmtpEmail = new Brevo.SendSmtpEmail()
+    sendSmtpEmail.subject = subject
+    sendSmtpEmail.htmlContent = html
+    sendSmtpEmail.sender = { name: FROM_NAME, email: FROM_EMAIL }
+    sendSmtpEmail.to = [{ email: to }]
+
+    await apiInstance.sendTransacEmail(sendSmtpEmail)
     console.log('[Email] Email sent successfully to:', to)
     return { success: true }
   } catch (error: unknown) {
@@ -57,8 +56,13 @@ export async function sendAdminApprovalEmail(user: {
   full_name: string
   role: string
 }) {
+  if (!process.env.BREVO_API_KEY) {
+    console.log('[Email] Skipping admin approval email - no BREVO_API_KEY configured')
+    return { success: true, message: 'Email skipped (no API key)' }
+  }
+
   try {
-    initSendGrid()
+    initBrevo()
     const ADMIN_EMAIL = getAdminEmail()
     const APP_URL = getAppUrl()
     const approvalUrl = `${APP_URL}/dashboard/users?approve=${user.id}`
@@ -70,17 +74,14 @@ export async function sendAdminApprovalEmail(user: {
       role: user.role,
       adminEmail: ADMIN_EMAIL,
       fromEmail: FROM_EMAIL,
-      hasSendGridKey: !!process.env.SENDGRID_API_KEY
+      hasBrevoKey: !!process.env.BREVO_API_KEY
     })
     
-    const msg = {
-      to: ADMIN_EMAIL,
-      from: {
-        email: FROM_EMAIL,
-        name: FROM_NAME,
-      },
-      subject: `New Registration Pending Approval: ${user.full_name}`,
-      html: `
+    const sendSmtpEmail = new Brevo.SendSmtpEmail()
+    sendSmtpEmail.subject = `New Registration Pending Approval: ${user.full_name}`
+    sendSmtpEmail.sender = { name: FROM_NAME, email: FROM_EMAIL }
+    sendSmtpEmail.to = [{ email: ADMIN_EMAIL }]
+    sendSmtpEmail.htmlContent = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -129,10 +130,9 @@ export async function sendAdminApprovalEmail(user: {
           </p>
         </body>
         </html>
-      `,
-    }
+      `
 
-    await sgMail.send(msg)
+    await apiInstance.sendTransacEmail(sendSmtpEmail)
     console.log('[v0] Admin approval email sent successfully')
     return { success: true }
   } catch (error: unknown) {
@@ -145,19 +145,21 @@ export async function sendApprovalConfirmationEmail(user: {
   email: string
   full_name: string
 }) {
+  if (!process.env.BREVO_API_KEY) {
+    console.log('[Email] Skipping approval confirmation email - no BREVO_API_KEY configured')
+    return { success: true, message: 'Email skipped (no API key)' }
+  }
+
   try {
-    initSendGrid()
+    initBrevo()
     const APP_URL = getAppUrl()
     const loginUrl = `${APP_URL}/auth/login`
     
-    const msg = {
-      to: user.email,
-      from: {
-        email: FROM_EMAIL,
-        name: FROM_NAME,
-      },
-      subject: 'Your Registration Has Been Approved - CPECC Recruitment',
-      html: `
+    const sendSmtpEmail = new Brevo.SendSmtpEmail()
+    sendSmtpEmail.subject = 'Your Registration Has Been Approved - CPECC Recruitment'
+    sendSmtpEmail.sender = { name: FROM_NAME, email: FROM_EMAIL }
+    sendSmtpEmail.to = [{ email: user.email }]
+    sendSmtpEmail.htmlContent = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -199,10 +201,9 @@ export async function sendApprovalConfirmationEmail(user: {
           </p>
         </body>
         </html>
-      `,
-    }
+      `
 
-    await sgMail.send(msg)
+    await apiInstance.sendTransacEmail(sendSmtpEmail)
     console.log('[Email] Approval confirmation email sent successfully')
     return { success: true }
   } catch (error: unknown) {
@@ -216,17 +217,19 @@ export async function sendRejectionEmail(user: {
   full_name: string
   reason?: string
 }) {
+  if (!process.env.BREVO_API_KEY) {
+    console.log('[Email] Skipping rejection email - no BREVO_API_KEY configured')
+    return { success: true, message: 'Email skipped (no API key)' }
+  }
+
   try {
-    initSendGrid()
+    initBrevo()
     
-    const msg = {
-      to: user.email,
-      from: {
-        email: FROM_EMAIL,
-        name: FROM_NAME,
-      },
-      subject: 'Registration Update - CPECC Recruitment',
-      html: `
+    const sendSmtpEmail = new Brevo.SendSmtpEmail()
+    sendSmtpEmail.subject = 'Registration Update - CPECC Recruitment'
+    sendSmtpEmail.sender = { name: FROM_NAME, email: FROM_EMAIL }
+    sendSmtpEmail.to = [{ email: user.email }]
+    sendSmtpEmail.htmlContent = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -264,10 +267,9 @@ export async function sendRejectionEmail(user: {
           </p>
         </body>
         </html>
-      `,
-    }
+      `
 
-    await sgMail.send(msg)
+    await apiInstance.sendTransacEmail(sendSmtpEmail)
     console.log('[Email] Rejection email sent successfully')
     return { success: true }
   } catch (error: unknown) {

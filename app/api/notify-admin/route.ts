@@ -10,8 +10,8 @@ export async function POST(request: NextRequest) {
 
     console.log('[v0] notify-admin received:', { userId, email, fullName, role })
     console.log('[v0] Environment check:', {
-      hasSendGridKey: !!process.env.SENDGRID_API_KEY,
-      sendGridKeyPrefix: process.env.SENDGRID_API_KEY?.substring(0, 10),
+      hasBrevoKey: !!process.env.BREVO_API_KEY,
+      brevoKeyPrefix: process.env.BREVO_API_KEY?.substring(0, 10),
       adminEmail: process.env.ADMIN_EMAIL
     })
 
