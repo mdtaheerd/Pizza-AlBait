@@ -15,6 +15,7 @@ import {
   Settings,
   Building2,
   Linkedin,
+  UserCheck,
 } from 'lucide-react'
 
 interface DashboardSidebarProps {
@@ -31,6 +32,7 @@ const navigation = [
 ]
 
 const adminNavigation = [
+  { name: 'User Approvals', href: '/dashboard/users', icon: UserCheck },
   { name: 'Departments', href: '/dashboard/departments', icon: Building2 },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
