@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/card'
 import { Loader2, Home, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
-import { Logo } from '@/components/ui/logo'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
@@ -88,7 +88,13 @@ export default function CandidateLoginPage() {
         <Card className="border-border/50 shadow-xl">
           <CardHeader className="space-y-4 text-center">
             <Link href="/" className="flex items-center justify-center">
-              <Logo size="lg" />
+              <Image
+                src="/images/talenttrack-logo.png"
+                alt="TalentTrack ATS"
+                width={220}
+                height={70}
+                className="h-16 w-auto"
+              />
             </Link>
             <div>
               <CardTitle className="text-xl">Candidate Login</CardTitle>
