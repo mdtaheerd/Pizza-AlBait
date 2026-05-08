@@ -109,9 +109,14 @@ export function JobsTable({ jobs }: JobsTableProps) {
                   {job.employment_type ? EMPLOYMENT_TYPE_LABELS[job.employment_type] : '-'}
                 </TableCell>
                 <TableCell>
-                  <Badge variant="secondary" className={JOB_STATUS_COLORS[job.status]}>
-                    {JOB_STATUS_LABELS[job.status]}
-                  </Badge>
+                  <div className="flex flex-col gap-1">
+                    <Badge variant="secondary" className={JOB_STATUS_COLORS[job.status]}>
+                      {JOB_STATUS_LABELS[job.status]}
+                    </Badge>
+                    {job.auto_closed && (
+                      <span className="text-xs text-muted-foreground">Auto-closed</span>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell className="hidden lg:table-cell">
                   <div className="flex items-center gap-1">
