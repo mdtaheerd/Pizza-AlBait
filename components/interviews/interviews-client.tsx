@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -23,6 +23,14 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
   Calendar,
   Clock,
   Video,
@@ -33,12 +41,15 @@ import {
   CalendarClock,
   X,
   CheckCircle,
+  History,
+  CalendarDays,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
 import type { Interview } from '@/lib/types'
 
-const INTERVIEW_TYPE_ICONS = {
+const INTERVIEW_TYPE_ICONS: Record<string, typeof Phone> = {
   phone: Phone,
   video: Video,
   onsite: MapPin,
@@ -63,6 +74,10 @@ interface InterviewWithRelations extends Interview {
     }
     job?: {
       title: string
+      hiring_manager?: {
+        email: string
+        full_name: string
+      }
     }
   }
   interviewer?: {
@@ -72,12 +87,13 @@ interface InterviewWithRelations extends Interview {
 }
 
 interface InterviewsClientProps {
-  groupedInterviews: Record<string, InterviewWithRelations[]>
+  upcomingInterviews: InterviewWithRelations[]
   pastInterviews: InterviewWithRelations[]
 }
 
-export function InterviewsClient({ groupedInterviews: initialGrouped, pastInterviews: initialPast }: InterviewsClientProps) {
-  const [groupedInterviews, setGroupedInterviews] = useState(initialGrouped)
+export function InterviewsClient({ upcomingInterviews: initialUpcoming, pastInterviews: initialPast }: InterviewsClientProps) {
+  const router = useRouter()
+  const [upcomingInterviews, setUpcomingInterviews] = useState(initialUpcoming)
   const [pastInterviews, setPastInterviews] = useState(initialPast)
   const [rescheduleDialog, setRescheduleDialog] = useState(false)
   const [cancelDialog, setCancelDialog] = useState(false)
@@ -98,9 +114,9 @@ export function InterviewsClient({ groupedInterviews: initialGrouped, pastInterv
 
   const openRescheduleDialog = (interview: InterviewWithRelations) => {
     setSelectedInterview(interview)
-    const scheduledDate = new Date(interview.scheduled_at)
-    setNewDate(format(scheduledDate, 'yyyy-MM-dd'))
-    setNewTime(format(scheduledDate, 'HH:mm'))
+    const date = new Date(interview.scheduled_at)
+    setNewDate(format(date, 'yyyy-MM-dd'))
+    setNewTime(format(date, 'HH:mm'))
     setNewDuration(String(interview.duration_minutes || 60))
     setNewLocation(interview.location || '')
     setRescheduleReason('')
@@ -109,83 +125,70 @@ export function InterviewsClient({ groupedInterviews: initialGrouped, pastInterv
     setRescheduleDialog(true)
   }
 
-  const openCancelDialog = (interview: InterviewWithRelations) => {
-    setSelectedInterview(interview)
-    setError(null)
-    setSuccess(null)
-    setCancelDialog(true)
-  }
-
-  const openCompleteDialog = (interview: InterviewWithRelations) => {
-    setSelectedInterview(interview)
-    setError(null)
-    setSuccess(null)
-    setCompleteDialog(true)
-  }
-
   const handleReschedule = async () => {
-    if (!selectedInterview || !newDate || !newTime) {
-      setError('Please select a new date and time')
-      return
-    }
+    if (!selectedInterview || !newDate || !newTime) return
 
     setIsLoading(true)
     setError(null)
 
     try {
-      const newScheduledAt = new Date(`${newDate}T${newTime}`)
-      
+      const scheduledAt = new Date(`${newDate}T${newTime}`)
+
       // Update interview in database
       const { error: updateError } = await supabase
         .from('interviews')
         .update({
-          scheduled_at: newScheduledAt.toISOString(),
+          scheduled_at: scheduledAt.toISOString(),
           duration_minutes: parseInt(newDuration),
           location: newLocation || null,
-          notes: selectedInterview.notes 
-            ? `${selectedInterview.notes}\n\nRescheduled: ${rescheduleReason}` 
-            : `Rescheduled: ${rescheduleReason}`,
+          status: 'scheduled',
         })
         .eq('id', selectedInterview.id)
 
       if (updateError) throw updateError
 
-      // Also update the application's interview details
-      if (selectedInterview.application?.id) {
-        await supabase
-          .from('applications')
-          .update({
-            interview_scheduled_at: newScheduledAt.toISOString(),
-            interview_location: newLocation || null,
-          })
-          .eq('id', selectedInterview.application.id)
-      }
-
-      // Send reschedule notification emails
+      // Send reschedule notification email
       await fetch('/api/send-interview-reschedule', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          interviewId: selectedInterview.id,
           candidateEmail: selectedInterview.application?.candidate?.email,
           candidateName: selectedInterview.application?.candidate?.full_name,
           interviewerEmail: selectedInterview.interviewer?.email,
           interviewerName: selectedInterview.interviewer?.full_name,
+          hiringManagerEmail: selectedInterview.application?.job?.hiring_manager?.email,
+          hiringManagerName: selectedInterview.application?.job?.hiring_manager?.full_name,
           jobTitle: selectedInterview.application?.job?.title,
-          newInterviewDate: newScheduledAt.toISOString(),
+          newDate: scheduledAt.toISOString(),
           newLocation: newLocation,
           reason: rescheduleReason,
         }),
       })
 
-      setSuccess('Interview rescheduled successfully. Notifications sent.')
+      setSuccess('Interview rescheduled successfully')
       setRescheduleDialog(false)
-      
-      // Refresh the page to show updated data
-      window.location.reload()
+      router.refresh()
     } catch (err) {
-      console.error('Failed to reschedule interview:', err)
       setError(err instanceof Error ? err.message : 'Failed to reschedule interview')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleMarkComplete = async () => {
+    if (!selectedInterview) return
+
+    setIsLoading(true)
+    try {
+      await supabase
+        .from('interviews')
+        .update({ status: 'completed' })
+        .eq('id', selectedInterview.id)
+
+      setCompleteDialog(false)
+      router.refresh()
+    } catch (err) {
+      setError('Failed to mark interview as complete')
     } finally {
       setIsLoading(false)
     }
@@ -195,277 +198,230 @@ export function InterviewsClient({ groupedInterviews: initialGrouped, pastInterv
     if (!selectedInterview) return
 
     setIsLoading(true)
-    setError(null)
-
     try {
-      // Update interview status to cancelled
-      const { error: updateError } = await supabase
+      await supabase
         .from('interviews')
         .update({ status: 'cancelled' })
         .eq('id', selectedInterview.id)
 
-      if (updateError) throw updateError
-
-      // Send cancellation notification
-      await fetch('/api/send-interview-notification', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'cancelled',
-          candidateEmail: selectedInterview.application?.candidate?.email,
-          candidateName: selectedInterview.application?.candidate?.full_name,
-          interviewerEmail: selectedInterview.interviewer?.email,
-          jobTitle: selectedInterview.application?.job?.title,
-        }),
-      })
-
-      setSuccess('Interview cancelled successfully.')
       setCancelDialog(false)
-      window.location.reload()
+      router.refresh()
     } catch (err) {
-      console.error('Failed to cancel interview:', err)
-      setError(err instanceof Error ? err.message : 'Failed to cancel interview')
+      setError('Failed to cancel interview')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleComplete = async () => {
-    if (!selectedInterview) return
+  const InterviewRow = ({ interview, showActions = true }: { interview: InterviewWithRelations; showActions?: boolean }) => {
+    const TypeIcon = INTERVIEW_TYPE_ICONS[interview.interview_type || 'video'] || Video
 
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const { error: updateError } = await supabase
-        .from('interviews')
-        .update({ status: 'completed' })
-        .eq('id', selectedInterview.id)
-
-      if (updateError) throw updateError
-
-      setSuccess('Interview marked as completed.')
-      setCompleteDialog(false)
-      window.location.reload()
-    } catch (err) {
-      console.error('Failed to complete interview:', err)
-      setError(err instanceof Error ? err.message : 'Failed to update interview')
-    } finally {
-      setIsLoading(false)
-    }
+    return (
+      <TableRow>
+        <TableCell>
+          <div className="font-medium">{interview.application?.candidate?.full_name || 'Unknown'}</div>
+          <div className="text-sm text-muted-foreground">{interview.application?.candidate?.email}</div>
+        </TableCell>
+        <TableCell>
+          <div className="text-sm">{interview.application?.job?.title || '-'}</div>
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span>{format(new Date(interview.scheduled_at), 'MMM d, yyyy')}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            <span>{format(new Date(interview.scheduled_at), 'h:mm a')}</span>
+            <span>({interview.duration_minutes || 60} min)</span>
+          </div>
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <TypeIcon className="h-4 w-4 text-muted-foreground" />
+            <span className="capitalize">{interview.interview_type || 'video'}</span>
+          </div>
+          {interview.location && (
+            <div className="text-sm text-muted-foreground">{interview.location}</div>
+          )}
+        </TableCell>
+        <TableCell>
+          <div className="text-sm">{interview.interviewer?.full_name || '-'}</div>
+        </TableCell>
+        <TableCell>
+          <Badge className={STATUS_COLORS[interview.status] || STATUS_COLORS.scheduled}>
+            {interview.status.charAt(0).toUpperCase() + interview.status.slice(1).replace('_', ' ')}
+          </Badge>
+        </TableCell>
+        {showActions && (
+          <TableCell>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => openRescheduleDialog(interview)}
+                title="Reschedule"
+              >
+                <CalendarClock className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectedInterview(interview)
+                  setCompleteDialog(true)
+                }}
+                title="Mark Complete"
+                className="text-green-600 hover:text-green-700"
+              >
+                <CheckCircle className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectedInterview(interview)
+                  setCancelDialog(true)
+                }}
+                title="Cancel"
+                className="text-red-600 hover:text-red-700"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </TableCell>
+        )}
+      </TableRow>
+    )
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-balance">Interviews</h1>
-        <p className="text-muted-foreground">
-          Manage scheduled interviews and track feedback
-        </p>
+        <h1 className="text-2xl font-semibold">Interviews</h1>
+        <p className="text-muted-foreground">Manage scheduled interviews and track feedback</p>
       </div>
 
+      {error && (
+        <div className="bg-red-50 text-red-600 p-4 rounded-lg">{error}</div>
+      )}
       {success && (
-        <div className="rounded-md bg-green-50 border border-green-200 p-4 text-green-800">
-          {success}
-        </div>
+        <div className="bg-green-50 text-green-600 p-4 rounded-lg">{success}</div>
       )}
 
-      {/* Upcoming Interviews */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-medium">Upcoming Interviews</h2>
-        {Object.keys(groupedInterviews).length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Calendar className="mb-4 h-12 w-12 text-muted-foreground" />
-              <p className="text-center text-muted-foreground">
-                No interviews scheduled for the next 7 days.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-6">
-            {Object.entries(groupedInterviews).map(([dateKey, interviews]) => (
-              <div key={dateKey}>
-                <h3 className="mb-3 text-sm font-medium text-muted-foreground">
-                  {format(new Date(dateKey), 'EEEE, MMMM d')}
-                </h3>
-                <div className="space-y-3">
-                  {interviews.map((interview) => {
-                    const TypeIcon = INTERVIEW_TYPE_ICONS[interview.interview_type as keyof typeof INTERVIEW_TYPE_ICONS] || Video
-                    return (
-                      <Card key={interview.id}>
-                        <CardContent className="p-4">
-                          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                                <TypeIcon className="h-6 w-6 text-primary" />
-                              </div>
-                              <div>
-                                <p className="font-medium">
-                                  {interview.application?.candidate?.full_name}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {interview.application?.job?.title}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex flex-wrap items-center gap-3">
-                              <Badge variant="secondary" className={STATUS_COLORS[interview.status]}>
-                                {interview.status.replace('_', ' ')}
-                              </Badge>
-                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                <Clock className="h-4 w-4" />
-                                {format(new Date(interview.scheduled_at), 'h:mm a')}
-                                <span className="mx-1">·</span>
-                                {interview.duration_minutes} min
-                              </div>
-                              {interview.interviewer && (
-                                <span className="text-sm text-muted-foreground">
-                                  with {interview.interviewer.full_name}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          
-                          {/* Action buttons */}
-                          {interview.status === 'scheduled' && (
-                            <div className="mt-4 flex flex-wrap gap-2 border-t pt-4">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => openRescheduleDialog(interview)}
-                                className="gap-1"
-                              >
-                                <CalendarClock className="h-4 w-4" />
-                                Reschedule
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => openCompleteDialog(interview)}
-                                className="gap-1 text-green-600 hover:text-green-700"
-                              >
-                                <CheckCircle className="h-4 w-4" />
-                                Mark Complete
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => openCancelDialog(interview)}
-                                className="gap-1 text-red-600 hover:text-red-700"
-                              >
-                                <X className="h-4 w-4" />
-                                Cancel
-                              </Button>
-                            </div>
-                          )}
-
-                          {(interview.location || interview.meeting_link) && (
-                            <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                              {interview.meeting_link ? (
-                                <a
-                                  href={interview.meeting_link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-primary hover:underline"
-                                >
-                                  Join Meeting
-                                </a>
-                              ) : interview.location ? (
-                                <span>{interview.location}</span>
-                              ) : null}
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    )
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Past Interviews */}
-      {pastInterviews.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-medium">Recent Past Interviews</h2>
-          <Card>
-            <CardContent className="p-0">
-              <div className="divide-y">
-                {pastInterviews.map((interview) => (
-                  <div key={interview.id} className="flex items-center justify-between p-4">
-                    <div>
-                      <p className="font-medium">
-                        {interview.application?.candidate?.full_name}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {interview.application?.job?.title}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Badge variant="secondary" className={STATUS_COLORS[interview.status]}>
-                        {interview.status.replace('_', ' ')}
-                      </Badge>
-                      <span className="text-sm text-muted-foreground">
-                        {format(new Date(interview.scheduled_at), 'MMM d, h:mm a')}
-                      </span>
-                    </div>
-                  </div>
+      {/* Upcoming Interviews - Next 7 Days */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CalendarDays className="h-5 w-5 text-blue-600" />
+            Upcoming Interviews (Next 7 Days)
+          </CardTitle>
+          <CardDescription>
+            Interviews scheduled for the next 7 days
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {upcomingInterviews.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">No interviews scheduled for the next 7 days.</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Candidate</TableHead>
+                  <TableHead>Position</TableHead>
+                  <TableHead>Schedule</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Interviewer</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {upcomingInterviews.map((interview) => (
+                  <InterviewRow key={interview.id} interview={interview} />
                 ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Past Interviews - Last 7 Days */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <History className="h-5 w-5 text-gray-600" />
+            Past Interviews (Last 7 Days)
+          </CardTitle>
+          <CardDescription>
+            Interviews from the past 7 days - reschedule to move to upcoming
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {pastInterviews.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <History className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">No interviews in the past 7 days.</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Candidate</TableHead>
+                  <TableHead>Position</TableHead>
+                  <TableHead>Schedule</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Interviewer</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pastInterviews.map((interview) => (
+                  <InterviewRow key={interview.id} interview={interview} showActions={interview.status === 'scheduled'} />
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Reschedule Dialog */}
       <Dialog open={rescheduleDialog} onOpenChange={setRescheduleDialog}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CalendarClock className="h-5 w-5" />
-              Reschedule Interview
-            </DialogTitle>
+            <DialogTitle>Reschedule Interview</DialogTitle>
             <DialogDescription>
-              Reschedule the interview for {selectedInterview?.application?.candidate?.full_name}. 
-              Both the candidate and interviewer will be notified.
+              Reschedule interview for {selectedInterview?.application?.candidate?.full_name}
             </DialogDescription>
           </DialogHeader>
-
-          {error && (
-            <div className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-800">
-              {error}
-            </div>
-          )}
-
-          <div className="grid gap-4 py-4">
+          <div className="space-y-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="newDate">New Date</Label>
+                <Label htmlFor="new-date">New Date</Label>
                 <Input
-                  id="newDate"
+                  id="new-date"
                   type="date"
                   value={newDate}
                   onChange={(e) => setNewDate(e.target.value)}
-                  min={format(new Date(), 'yyyy-MM-dd')}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="newTime">New Time</Label>
+                <Label htmlFor="new-time">New Time</Label>
                 <Input
-                  id="newTime"
+                  id="new-time"
                   type="time"
                   value={newTime}
                   onChange={(e) => setNewTime(e.target.value)}
                 />
               </div>
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="duration">Duration</Label>
+                <Label htmlFor="new-duration">Duration</Label>
                 <Select value={newDuration} onValueChange={setNewDuration}>
                   <SelectTrigger>
                     <SelectValue />
@@ -480,34 +436,51 @@ export function InterviewsClient({ groupedInterviews: initialGrouped, pastInterv
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="location">Location (optional)</Label>
+                <Label htmlFor="new-location">Location</Label>
                 <Input
-                  id="location"
+                  id="new-location"
                   value={newLocation}
                   onChange={(e) => setNewLocation(e.target.value)}
-                  placeholder="Office / Video call"
+                  placeholder="e.g., Google Meet, Office"
                 />
               </div>
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="reason">Reason for rescheduling</Label>
+              <Label htmlFor="reason">Reason for Rescheduling</Label>
               <Textarea
                 id="reason"
                 value={rescheduleReason}
                 onChange={(e) => setRescheduleReason(e.target.value)}
-                placeholder="e.g., Interviewer unavailable, candidate requested change..."
-                rows={3}
+                placeholder="Optional: Explain why the interview is being rescheduled"
               />
             </div>
           </div>
-
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRescheduleDialog(false)} disabled={isLoading}>
+            <Button variant="outline" onClick={() => setRescheduleDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleReschedule} disabled={isLoading}>
-              {isLoading ? 'Rescheduling...' : 'Reschedule & Notify'}
+            <Button onClick={handleReschedule} disabled={isLoading || !newDate || !newTime}>
+              {isLoading ? 'Rescheduling...' : 'Reschedule Interview'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Complete Dialog */}
+      <Dialog open={completeDialog} onOpenChange={setCompleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Mark Interview as Complete</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to mark this interview as completed?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCompleteDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleMarkComplete} disabled={isLoading} className="bg-green-600 hover:bg-green-700">
+              {isLoading ? 'Updating...' : 'Mark Complete'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -519,46 +492,15 @@ export function InterviewsClient({ groupedInterviews: initialGrouped, pastInterv
           <DialogHeader>
             <DialogTitle>Cancel Interview</DialogTitle>
             <DialogDescription>
-              Are you sure you want to cancel this interview with {selectedInterview?.application?.candidate?.full_name}? 
-              They will be notified of the cancellation.
+              Are you sure you want to cancel this interview? The candidate will be notified.
             </DialogDescription>
           </DialogHeader>
-          {error && (
-            <div className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-800">
-              {error}
-            </div>
-          )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCancelDialog(false)} disabled={isLoading}>
+            <Button variant="outline" onClick={() => setCancelDialog(false)}>
               Keep Interview
             </Button>
-            <Button variant="destructive" onClick={handleCancel} disabled={isLoading}>
+            <Button onClick={handleCancel} disabled={isLoading} variant="destructive">
               {isLoading ? 'Cancelling...' : 'Cancel Interview'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Complete Dialog */}
-      <Dialog open={completeDialog} onOpenChange={setCompleteDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Mark Interview as Completed</DialogTitle>
-            <DialogDescription>
-              Mark the interview with {selectedInterview?.application?.candidate?.full_name} as completed?
-            </DialogDescription>
-          </DialogHeader>
-          {error && (
-            <div className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-800">
-              {error}
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCompleteDialog(false)} disabled={isLoading}>
-              Cancel
-            </Button>
-            <Button onClick={handleComplete} disabled={isLoading} className="bg-green-600 hover:bg-green-700">
-              {isLoading ? 'Updating...' : 'Mark Complete'}
             </Button>
           </DialogFooter>
         </DialogContent>

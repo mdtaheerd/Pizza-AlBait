@@ -38,7 +38,8 @@ import {
   UserCheck,
   Send,
   Briefcase,
-  Clock
+  Clock,
+  CalendarClock
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
@@ -82,6 +83,7 @@ export function ApplicationWorkflowActions({
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
   const [interviewResultDialogOpen, setInterviewResultDialogOpen] = useState(false)
   const [offerDialogOpen, setOfferDialogOpen] = useState(false)
+  const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false)
   
   // Form states
   const [interviewDate, setInterviewDate] = useState<Date>()
@@ -94,6 +96,16 @@ export function ApplicationWorkflowActions({
   const [hiringManagerComments, setHiringManagerComments] = useState('')
   const [interviewResult, setInterviewResult] = useState<'hire' | 'reject'>('hire')
   const [sendSelectionEmail, setSendSelectionEmail] = useState(false)
+  
+  // Reschedule form states
+  const [rescheduleDate, setRescheduleDate] = useState<Date | undefined>(
+    application.interview_date ? new Date(application.interview_date) : undefined
+  )
+  const [rescheduleTime, setRescheduleTime] = useState(
+    application.interview_date ? format(new Date(application.interview_date), 'HH:mm') : '10:00'
+  )
+  const [rescheduleLocation, setRescheduleLocation] = useState(application.interview_location || '')
+  const [rescheduleReason, setRescheduleReason] = useState('')
 
   const supabase = createClient()
   const isRecruiter = currentUser.role === 'recruiter' || currentUser.role === 'admin'
@@ -171,6 +183,68 @@ export function ApplicationWorkflowActions({
     } catch (error) {
       console.error('Error scheduling interview:', error)
       alert('Failed to schedule interview')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleReschedule = async () => {
+    if (!rescheduleDate) {
+      alert('Please select a date')
+      return
+    }
+    
+    setIsLoading(true)
+    try {
+      const [hours, minutes] = rescheduleTime.split(':').map(Number)
+      const scheduledDate = new Date(rescheduleDate)
+      scheduledDate.setHours(hours, minutes, 0, 0)
+
+      // Update application
+      const { error } = await supabase
+        .from('applications')
+        .update({
+          interview_date: scheduledDate.toISOString(),
+          interview_location: rescheduleLocation || null,
+        })
+        .eq('id', application.id)
+
+      if (error) throw error
+
+      // Update interview record if exists
+      await supabase
+        .from('interviews')
+        .update({
+          scheduled_at: scheduledDate.toISOString(),
+          location: rescheduleLocation || null,
+          status: 'scheduled',
+        })
+        .eq('application_id', application.id)
+
+      // Send reschedule notification
+      await fetch('/api/send-interview-reschedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidateEmail: application.candidate?.email,
+          candidateName: application.candidate?.full_name,
+          interviewerEmail: application.interviewer_email,
+          interviewerName: application.interviewer_name,
+          hiringManagerEmail: application.job?.hiring_manager?.email,
+          hiringManagerName: application.job?.hiring_manager?.full_name,
+          jobTitle: application.job?.title,
+          newDate: scheduledDate.toISOString(),
+          newLocation: rescheduleLocation,
+          reason: rescheduleReason,
+        }),
+      })
+
+      setRescheduleDialogOpen(false)
+      router.refresh()
+      onUpdate?.()
+    } catch (error) {
+      console.error('Error rescheduling interview:', error)
+      alert('Failed to reschedule interview')
     } finally {
       setIsLoading(false)
     }
@@ -394,6 +468,14 @@ export function ApplicationWorkflowActions({
                 >
                   <UserCheck className="mr-2 h-4 w-4" />
                   Record Interview Result
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setRescheduleDialogOpen(true)}
+                >
+                  <CalendarClock className="mr-2 h-4 w-4" />
+                  Reschedule
                 </Button>
               </div>
             )}
@@ -776,6 +858,83 @@ export function ApplicationWorkflowActions({
             <Button onClick={handleSendOffer} disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Send Offer Email
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reschedule Dialog */}
+      <Dialog open={rescheduleDialogOpen} onOpenChange={setRescheduleDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reschedule Interview</DialogTitle>
+            <DialogDescription>
+              Reschedule the interview for {application.candidate?.full_name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>New Date *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      'w-full justify-start text-left font-normal',
+                      !rescheduleDate && 'text-muted-foreground'
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {rescheduleDate ? format(rescheduleDate, 'PPP') : 'Select date'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={rescheduleDate}
+                    onSelect={setRescheduleDate}
+                    disabled={(date) => date < new Date()}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reschedule_time">New Time *</Label>
+              <Input
+                id="reschedule_time"
+                type="time"
+                value={rescheduleTime}
+                onChange={(e) => setRescheduleTime(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reschedule_location">Location</Label>
+              <Input
+                id="reschedule_location"
+                value={rescheduleLocation}
+                onChange={(e) => setRescheduleLocation(e.target.value)}
+                placeholder="e.g., Google Meet, Office"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reschedule_reason">Reason for Rescheduling</Label>
+              <Textarea
+                id="reschedule_reason"
+                value={rescheduleReason}
+                onChange={(e) => setRescheduleReason(e.target.value)}
+                placeholder="Optional: Explain why the interview is being rescheduled"
+                rows={2}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRescheduleDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleReschedule} disabled={isLoading || !rescheduleDate}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Reschedule & Notify
             </Button>
           </DialogFooter>
         </DialogContent>
