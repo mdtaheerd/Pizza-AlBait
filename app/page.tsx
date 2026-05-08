@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Logo } from '@/components/ui/logo'
 import { 
   Users, 
   Briefcase, 
@@ -42,14 +43,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between h-20">
             {/* TalentTrack ATS Logo */}
             <Link href="/" className="flex items-center">
-              <Image
-                src="/images/talenttrack-logo.png"
-                alt="TalentTrack ATS"
-                width={200}
-                height={60}
-                className="h-14 w-auto"
-                priority
-              />
+              <Logo size="lg" />
             </Link>
             <div className="hidden md:flex items-center gap-8">
               <Link href="/careers" className="text-muted-foreground hover:text-foreground transition-colors font-medium">

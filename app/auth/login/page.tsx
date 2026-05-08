@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
-import Image from 'next/image'
+import { Logo } from '@/components/ui/logo'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Linkedin, Mail, Loader2, Home, Eye, EyeOff } from 'lucide-react'
@@ -79,13 +79,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
           <Link href="/" className="flex items-center justify-center">
-            <Image
-              src="/images/talenttrack-logo.png"
-              alt="TalentTrack ATS"
-              width={200}
-              height={60}
-              className="h-14 w-auto"
-            />
+            <Logo size="lg" />
           </Link>
           
           <Card className="shadow-xl">

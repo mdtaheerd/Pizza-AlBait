@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import { Logo } from '@/components/ui/logo'
 import { cn } from '@/lib/utils'
 import type { Profile } from '@/lib/types'
 import {
@@ -44,13 +44,7 @@ export function MobileSidebar({ profile }: MobileSidebarProps) {
     <div className="flex h-full flex-col">
       <SheetHeader className="border-b px-6 py-4">
         <SheetTitle className="flex items-center justify-center">
-          <Image
-            src="/images/talenttrack-logo.png"
-            alt="TalentTrack ATS"
-            width={140}
-            height={45}
-            className="h-10 w-auto"
-          />
+          <Logo size="md" />
         </SheetTitle>
       </SheetHeader>
       <nav className="flex-1 space-y-1 p-4">

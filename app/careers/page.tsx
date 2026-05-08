@@ -6,7 +6,7 @@ import { MapPin, Clock, Banknote, Search, HardHat, ArrowRight, Users, Briefcase,
 import { EMPLOYMENT_TYPE_LABELS } from '@/lib/types'
 import Link from 'next/link'
 import { CareersSearch } from '@/components/careers/careers-search'
-import Image from 'next/image'
+import { Logo } from '@/components/ui/logo'
 import { autoCloseExpiredJobs } from '@/lib/jobs/auto-close'
 
 interface CareersPageProps {
@@ -68,13 +68,7 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
       <header className="sticky top-0 z-50 border-b bg-white">
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
           <Link href="/" className="flex items-center">
-            <Image
-              src="/images/talenttrack-logo.png"
-              alt="TalentTrack ATS"
-              width={180}
-              height={50}
-              className="h-12 w-auto"
-            />
+            <Logo size="md" />
           </Link>
           <div className="flex items-center gap-4">
             <Button variant="ghost" asChild>

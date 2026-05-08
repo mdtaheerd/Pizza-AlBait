@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import { Logo } from '@/components/ui/logo'
 import { cn } from '@/lib/utils'
 import type { Profile } from '@/lib/types'
 import {
@@ -47,13 +47,7 @@ export function DashboardSidebar({ profile }: DashboardSidebarProps) {
     <aside className="hidden w-64 flex-col bg-sidebar lg:flex">
       {/* Logo */}
       <div className="flex h-20 items-center justify-center border-b border-sidebar-border px-4 bg-white">
-        <Image
-          src="/images/talenttrack-logo.png"
-          alt="TalentTrack ATS"
-          width={160}
-          height={50}
-          className="h-12 w-auto"
-        />
+        <Logo size="md" />
       </div>
 
       {/* Navigation */}
