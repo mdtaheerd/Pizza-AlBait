@@ -127,7 +127,7 @@ export function ApplicationWorkflowActions({
 
       if (error) throw error
 
-      // Send email to interviewer and candidate
+      // Send email to candidate, interviewer, and hiring manager
       await fetch('/api/send-interview-invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -136,10 +136,13 @@ export function ApplicationWorkflowActions({
           candidateEmail: application.candidate?.email,
           candidateName: application.candidate?.full_name,
           interviewerEmail,
+          interviewerEmails: [interviewerEmail],
           interviewerName,
           jobTitle: application.job?.title,
           interviewDate: scheduledDate.toISOString(),
           interviewLocation,
+          hiringManagerEmail: application.job?.hiring_manager?.email,
+          hiringManagerName: application.job?.hiring_manager?.full_name,
         }),
       })
 

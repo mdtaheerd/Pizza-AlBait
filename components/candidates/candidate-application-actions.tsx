@@ -272,7 +272,7 @@ export function CandidateApplicationActions({
 
       if (error) throw error
 
-      // Send email to interviewer(s)
+      // Send email to candidate, interviewer(s), and hiring manager
       await fetch('/api/send-interview-invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -286,6 +286,8 @@ export function CandidateApplicationActions({
           jobTitle: application.job?.title,
           interviewDate: scheduledDate.toISOString(),
           interviewLocation,
+          hiringManagerEmail: application.job?.hiring_manager?.email,
+          hiringManagerName: application.job?.hiring_manager?.full_name,
         }),
       })
 

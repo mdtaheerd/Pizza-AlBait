@@ -17,6 +17,16 @@ export async function POST(request: Request) {
       hiringManagerName,
     } = body
 
+    console.log('[v0] Interview invite request:', {
+      candidateEmail,
+      candidateName,
+      interviewerEmail,
+      interviewerEmails,
+      jobTitle,
+      hiringManagerEmail,
+      hiringManagerName,
+    })
+
     const formattedDate = new Date(interviewDate).toLocaleString('en-US', {
       weekday: 'long',
       year: 'numeric',
