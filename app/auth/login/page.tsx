@@ -81,8 +81,18 @@ export default function LoginPage() {
         window.location.href = '/dashboard'
       }
     } catch (error: unknown) {
-      console.log('[v0] Login catch error:', error)
-      setError(error instanceof Error ? error.message : 'An error occurred')
+      // Log detailed error for debugging but show generic message to user
+      console.error('[SECURITY] Login failure:', error)
+      
+      // Don't reveal whether email exists or not - always show generic message
+      const errorMessage = error instanceof Error ? error.message : ''
+      
+      // Only show specific message for rejected users
+      if (errorMessage.includes('rejected')) {
+        setError(errorMessage)
+      } else {
+        setError('Invalid email or password. Please try again.')
+      }
       setIsLoading(false)
     }
   }

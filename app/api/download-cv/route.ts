@@ -1,15 +1,29 @@
 import { createClient } from '@/lib/supabase/server'
+import { checkApiAuthorization } from '@/lib/api-security'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   try {
+    // Security: Require authentication to download CVs
+    const authResult = await checkApiAuthorization(['admin', 'recruiter', 'hiring_manager'])
+    if (!authResult.authorized) {
+      return authResult.error
+    }
+
     const supabase = await createClient()
     const { searchParams } = new URL(request.url)
     const candidateId = searchParams.get('candidateId')
     const filePath = searchParams.get('path')
 
+    // Security: Validate input parameters
     if (!candidateId && !filePath) {
       return NextResponse.json({ error: 'Missing candidateId or path' }, { status: 400 })
+    }
+
+    // Security: Prevent path traversal attacks
+    if (filePath && (filePath.includes('..') || filePath.includes('//'))) {
+      console.warn('[SECURITY] Path traversal attempt:', filePath)
+      return NextResponse.json({ error: 'Invalid path' }, { status: 400 })
     }
 
     let cvPath = filePath
