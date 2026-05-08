@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     // Send email to candidate
     await sendEmail({
       to: candidateEmail,
-      subject: `Interview Scheduled - ${jobTitle} at CPECC`,
+      subject: `Interview Scheduled - ${jobTitle}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #d32f2f 0%, #f57c00 100%); padding: 30px; text-align: center;">
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
           </div>
           <div style="padding: 30px; background: #ffffff;">
             <p>Dear ${candidateName},</p>
-            <p>We are pleased to inform you that you have been shortlisted for an interview for the position of <strong>${jobTitle}</strong> at China Petroleum Engineering & Construction Corporation (CPECC).</p>
+            <p>We are pleased to inform you that you have been shortlisted for an interview for the position of <strong>${jobTitle}</strong>.</p>
             
             <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="margin-top: 0; color: #d32f2f;">Interview Details</h3>
@@ -51,10 +51,10 @@ export async function POST(request: Request) {
             <p>We look forward to meeting you!</p>
             
             <p>Best regards,<br>
-            <strong>CPECC HR Team</strong></p>
+            <strong>HR Team</strong></p>
           </div>
           <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
-            <p>China Petroleum Engineering & Construction Corporation</p>
+            <p>Sent via TalentTrack ATS</p>
           </div>
         </div>
       `,
@@ -85,7 +85,10 @@ export async function POST(request: Request) {
               <p>Please add this to your calendar.</p>
               
               <p>Best regards,<br>
-              <strong>CPECC HR Team</strong></p>
+              <strong>HR Team</strong></p>
+            </div>
+            <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
+              <p>Sent via TalentTrack ATS</p>
             </div>
           </div>
         `,
@@ -119,7 +122,10 @@ export async function POST(request: Request) {
                   <p>Please add this to your calendar.</p>
                   
                   <p>Best regards,<br>
-                  <strong>CPECC HR Team</strong></p>
+                  <strong>HR Team</strong></p>
+                </div>
+                <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
+                  <p>Sent via TalentTrack ATS</p>
                 </div>
               </div>
             `,
@@ -153,7 +159,10 @@ export async function POST(request: Request) {
               <p>Please add this to your calendar.</p>
               
               <p>Best regards,<br>
-              <strong>CPECC Recruitment System</strong></p>
+              <strong>TalentTrack ATS</strong></p>
+            </div>
+            <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
+              <p>Sent via TalentTrack ATS</p>
             </div>
           </div>
         `,

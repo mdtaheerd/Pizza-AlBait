@@ -30,14 +30,14 @@ export default function HomePage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            {/* Official CPECC Logo */}
+            {/* TalentTrack ATS Logo */}
             <Link href="/" className="flex items-center">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
-                alt="CPECC - China Petroleum Engineering & Construction Corporation"
-                width={400}
-                height={50}
-                className="h-12 w-auto"
+                src="/images/talenttrack-logo.png"
+                alt="TalentTrack ATS"
+                width={200}
+                height={60}
+                className="h-14 w-auto"
                 priority
               />
             </Link>
@@ -69,7 +69,7 @@ export default function HomePage() {
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/cpecc-hero.jpg"
-            alt="CPECC Oil and Gas Industry"
+            alt="Modern Workplace"
             fill
             className="object-cover"
             priority
@@ -81,17 +81,17 @@ export default function HomePage() {
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-600/10 border border-red-600/20 text-red-600 text-sm font-medium mb-6">
               <Globe className="h-4 w-4" />
-              Middle East Onshore Projects
+              Applicant Tracking System
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-              Join{' '}
+              Welcome to{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">
-                CPECC
+                TalentTrack
               </span>{' '}
-              - Build Energy Infrastructure
+              ATS
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
-              China Petroleum Engineering and Construction Corporation - A leading EPC contractor delivering world-class onshore oil & gas projects across the Middle East. Shape the future of energy infrastructure.
+              A modern applicant tracking system to streamline your recruitment process. Manage candidates, track applications, and make data-driven hiring decisions.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" asChild className="bg-red-600 hover:bg-red-700 rounded-xl text-lg px-8 py-6">
@@ -154,17 +154,17 @@ export default function HomePage() {
             
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-                Engineering Excellence in the Middle East
+                Streamline Your Hiring Process
               </h2>
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                China Petroleum Engineering and Construction Corporation (CPECC) is a premier EPC contractor specializing in onshore oil and gas, petrochemical, and energy infrastructure projects across the Middle East. Our integrated approach combines cutting-edge engineering, strategic procurement, and world-class construction capabilities.
+                TalentTrack ATS is a modern applicant tracking system designed to help organizations manage their recruitment process efficiently. From job posting to candidate management, interview scheduling, and offer letters - we have got you covered.
               </p>
               <div className="space-y-4">
                 {[
-                  'Full lifecycle project delivery from concept to commissioning',
-                  'State-of-the-art engineering and design capabilities',
-                  'Global supply chain and procurement excellence',
-                  'Commitment to HSE and sustainable practices'
+                  'Full recruitment lifecycle management',
+                  'Automated candidate screening and tracking',
+                  'Interview scheduling and feedback management',
+                  'Analytics and reporting dashboard'
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <CheckCircle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
@@ -389,18 +389,18 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
-              {/* Official CPECC Footer Logo */}
+              {/* TalentTrack ATS Footer Logo */}
               <div className="mb-4">
                 <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CPECC%20Logo-v2VEWr2wpVlNgvVySqwQDyOe1A3E71.jpg"
-                  alt="CPECC Logo"
-                  width={80}
-                  height={80}
-                  className="rounded-lg w-auto h-auto"
+                  src="/images/talenttrack-logo.png"
+                  alt="TalentTrack ATS"
+                  width={160}
+                  height={50}
+                  className="h-12 w-auto bg-white rounded-lg p-2"
                 />
               </div>
               <p className="text-white/60 text-sm max-w-sm">
-                China Petroleum Engineering and Construction Corporation - Leading EPC contractor for onshore oil & gas projects in the Middle East.
+                TalentTrack ATS - A modern applicant tracking system to streamline your recruitment process.
               </p>
             </div>
             <div>
@@ -423,9 +423,9 @@ export default function HomePage() {
           </div>
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-center md:text-left">
-              <p className="text-white/60 text-sm font-medium mb-1">www.careers.cpecc.ae</p>
+              <p className="text-white/60 text-sm font-medium mb-1">TalentTrack ATS</p>
               <p className="text-white/40 text-sm">
-                &copy; {new Date().getFullYear()} China Petroleum Engineering and Construction Corporation. All rights reserved.
+                &copy; {new Date().getFullYear()} TalentTrack ATS. All rights reserved.
               </p>
             </div>
             <div className="flex items-center gap-4">

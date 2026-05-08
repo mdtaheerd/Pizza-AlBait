@@ -8,7 +8,7 @@ export async function POST(request: Request) {
 
     await sendEmail({
       to: candidateEmail,
-      subject: `Application Update - ${jobTitle} at CPECC`,
+      subject: `Application Update - ${jobTitle}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%); padding: 30px; text-align: center;">
@@ -27,13 +27,11 @@ export async function POST(request: Request) {
             
             <p style="margin-top: 30px;">Best regards,</p>
             <p style="margin-top: 20px;">
-              <strong>CPECC HR Team</strong><br>
-              China Petroleum Engineering & Construction Corporation
+              <strong>HR Team</strong>
             </p>
           </div>
           <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
-            <p style="margin: 0;">China Petroleum Engineering & Construction Corporation</p>
-            <p style="margin: 5px 0 0 0;">Gulf Region</p>
+            <p style="margin: 0;">Sent via TalentTrack ATS</p>
           </div>
         </div>
       `,

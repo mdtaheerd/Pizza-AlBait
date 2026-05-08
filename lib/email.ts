@@ -11,7 +11,7 @@ const createTransporter = () => {
   })
 }
 
-const FROM_NAME = 'CPECC Recruitment'
+const FROM_NAME = 'TalentTrack ATS'
 const getFromEmail = () => process.env.GMAIL_USER || 'noreply@example.com'
 const getAdminEmail = () => process.env.ADMIN_EMAIL || 'cpecchr.auh@gmail.com'
 const getAppUrl = () => process.env.NEXT_PUBLIC_APP_URL || 'https://pizza-al-bait.vercel.app'
@@ -113,7 +113,7 @@ export async function sendAdminApprovalEmail(user: {
           </div>
           
           <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 20px;">
-            This is an automated email from CPECC Recruitment System
+            This is an automated email from TalentTrack ATS
           </p>
         </body>
         </html>
@@ -146,7 +146,7 @@ export async function sendApprovalConfirmationEmail(user: {
     const info = await transporter.sendMail({
       from: `"${FROM_NAME}" <${fromEmail}>`,
       to: user.email,
-      subject: 'Your Registration Has Been Approved - CPECC Recruitment',
+      subject: 'Your Registration Has Been Approved - TalentTrack ATS',
       html: `
         <!DOCTYPE html>
         <html>
@@ -163,7 +163,7 @@ export async function sendApprovalConfirmationEmail(user: {
             <p style="font-size: 16px; margin-bottom: 20px;">Dear ${user.full_name},</p>
             
             <p style="font-size: 16px; margin-bottom: 20px;">
-              Great news! Your registration has been approved. You now have full access to the CPECC Recruitment System.
+              Great news! Your registration has been approved. You now have full access to the TalentTrack ATS.
             </p>
             
             <div style="background: #dcfce7; padding: 15px; border-radius: 8px; border: 1px solid #bbf7d0; margin-bottom: 20px;">
@@ -180,7 +180,7 @@ export async function sendApprovalConfirmationEmail(user: {
           </div>
           
           <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 20px;">
-            This is an automated email from CPECC Recruitment System
+            This is an automated email from TalentTrack ATS
           </p>
         </body>
         </html>
@@ -212,7 +212,7 @@ export async function sendRejectionEmail(user: {
     const info = await transporter.sendMail({
       from: `"${FROM_NAME}" <${fromEmail}>`,
       to: user.email,
-      subject: 'Registration Update - CPECC Recruitment',
+      subject: 'Registration Update - TalentTrack ATS',
       html: `
         <!DOCTYPE html>
         <html>

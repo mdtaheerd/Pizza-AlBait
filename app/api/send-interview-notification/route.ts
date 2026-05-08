@@ -18,8 +18,8 @@ export async function POST(request: Request) {
     } = body
 
     const subject = isRescheduled 
-      ? `Interview Rescheduled - ${jobTitle} at CPECC`
-      : `Interview Scheduled - ${jobTitle} at CPECC`
+      ? `Interview Rescheduled - ${jobTitle}`
+      : `Interview Scheduled - ${jobTitle}`
 
     const headerText = isRescheduled 
       ? 'Interview Rescheduled'
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
     const introText = isRescheduled
       ? `We would like to inform you that your interview for the <strong>${jobTitle}</strong> position has been rescheduled.`
-      : `We are pleased to invite you for an interview for the <strong>${jobTitle}</strong> position at China Petroleum Engineering & Construction Corporation (CPECC).`
+      : `We are pleased to invite you for an interview for the <strong>${jobTitle}</strong> position.`
 
     // Check if location is a URL
     const isUrl = interviewLocation?.startsWith('http://') || interviewLocation?.startsWith('https://')
@@ -77,13 +77,11 @@ export async function POST(request: Request) {
             
             <p style="margin-top: 30px;">Best regards,</p>
             <p>
-              <strong>CPECC HR Team</strong><br>
-              China Petroleum Engineering & Construction Corporation
+              <strong>HR Team</strong>
             </p>
           </div>
           <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
-            <p style="margin: 0;">China Petroleum Engineering & Construction Corporation</p>
-            <p style="margin: 5px 0 0 0;">Gulf Region</p>
+            <p style="margin: 0;">Sent via TalentTrack ATS</p>
           </div>
         </div>
       `,
@@ -138,11 +136,11 @@ export async function POST(request: Request) {
               
               <p style="margin-top: 30px;">Best regards,</p>
               <p>
-                <strong>CPECC Recruitment System</strong>
+                <strong>TalentTrack ATS</strong>
               </p>
             </div>
             <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
-              <p style="margin: 0;">China Petroleum Engineering & Construction Corporation</p>
+              <p style="margin: 0;">Sent via TalentTrack ATS</p>
             </div>
           </div>
         `,
@@ -199,8 +197,11 @@ export async function POST(request: Request) {
                 
                 <p style="margin-top: 30px;">Best regards,</p>
                 <p>
-                  <strong>CPECC Recruitment System</strong>
+                  <strong>TalentTrack ATS</strong>
                 </p>
+              </div>
+              <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
+                <p style="margin: 0;">Sent via TalentTrack ATS</p>
               </div>
             </div>
           `,

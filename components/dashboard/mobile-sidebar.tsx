@@ -43,18 +43,14 @@ export function MobileSidebar({ profile }: MobileSidebarProps) {
   return (
     <div className="flex h-full flex-col">
       <SheetHeader className="border-b px-6 py-4">
-        <SheetTitle className="flex items-center gap-3">
+        <SheetTitle className="flex items-center justify-center">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CPECC%20Logo-v2VEWr2wpVlNgvVySqwQDyOe1A3E71.jpg"
-            alt="CPECC Logo"
-            width={40}
-            height={40}
-            className="rounded"
+            src="/images/talenttrack-logo.png"
+            alt="TalentTrack ATS"
+            width={140}
+            height={45}
+            className="h-10 w-auto"
           />
-          <div>
-            <span className="text-sm font-bold tracking-tight">CPECC</span>
-            <span className="text-[10px] text-muted-foreground block">Recruitment Portal</span>
-          </div>
         </SheetTitle>
       </SheetHeader>
       <nav className="flex-1 space-y-1 p-4">

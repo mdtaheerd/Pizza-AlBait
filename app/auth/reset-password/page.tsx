@@ -104,11 +104,11 @@ export default function ResetPasswordPage() {
             <CardHeader className="text-center space-y-4">
               <Link href="/" className="flex items-center justify-center">
                 <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
-                  alt="CPECC"
-                  width={280}
-                  height={40}
-                  className="h-10 w-auto"
+                  src="/images/talenttrack-logo.png"
+                  alt="TalentTrack ATS"
+                  width={200}
+                  height={60}
+                  className="h-14 w-auto"
                 />
               </Link>
               <CardTitle className="text-xl">Invalid or Expired Link</CardTitle>
@@ -153,11 +153,11 @@ export default function ResetPasswordPage() {
             <CardHeader className="text-center space-y-4">
               <Link href="/" className="flex items-center justify-center">
                 <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
-                  alt="CPECC"
-                  width={280}
-                  height={40}
-                  className="h-10 w-auto"
+                  src="/images/talenttrack-logo.png"
+                  alt="TalentTrack ATS"
+                  width={200}
+                  height={60}
+                  className="h-14 w-auto"
                 />
               </Link>
               <div className="flex justify-center">
@@ -200,11 +200,11 @@ export default function ResetPasswordPage() {
         <div className="flex flex-col gap-6">
           <Link href="/" className="flex items-center justify-center">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
-              alt="CPECC - China Petroleum Engineering & Construction Corporation"
-              width={280}
-              height={40}
-              className="h-10 w-auto"
+              src="/images/talenttrack-logo.png"
+              alt="TalentTrack ATS"
+              width={200}
+              height={60}
+              className="h-14 w-auto"
             />
           </Link>
           

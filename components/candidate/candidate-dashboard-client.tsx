@@ -68,11 +68,11 @@ export function CandidateDashboardClient({ candidate, openJobs, userEmail }: Can
           <div className="flex items-center gap-4">
             <Link href="/">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
-                alt="CPECC"
-                width={200}
-                height={30}
-                className="h-8 w-auto"
+                src="/images/talenttrack-logo.png"
+                alt="TalentTrack ATS"
+                width={160}
+                height={40}
+                className="h-10 w-auto"
               />
             </Link>
             <Badge variant="outline" className="hidden sm:inline-flex">Candidate Portal</Badge>
