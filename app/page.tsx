@@ -96,6 +96,15 @@ export default function HomePage() {
                       </div>
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/auth/login" className="flex items-center gap-3 cursor-pointer py-2">
+                      <ShieldCheck className="h-5 w-5 text-red-600" />
+                      <div>
+                        <p className="font-medium">Admin Login</p>
+                        <p className="text-xs text-muted-foreground">System administration</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button asChild className="bg-red-600 hover:bg-red-700 rounded-xl">
