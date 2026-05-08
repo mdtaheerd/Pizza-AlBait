@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
 import Image from 'next/image'
+import { AnimatedTeamIllustration } from '@/components/animated-team-illustration'
 
 export default function HomePage() {
   return (
@@ -138,16 +139,16 @@ export default function HomePage() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-border/50">
               <div>
-                <p className="text-3xl font-bold text-foreground">100+</p>
-                <p className="text-sm text-muted-foreground">Onshore Projects</p>
+                <p className="text-3xl font-bold text-foreground">500+</p>
+                <p className="text-sm text-muted-foreground">Jobs Posted</p>
               </div>
               <div>
                 <p className="text-3xl font-bold text-foreground">10,000+</p>
-                <p className="text-sm text-muted-foreground">Employees</p>
+                <p className="text-sm text-muted-foreground">Candidates</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-foreground">40+</p>
-                <p className="text-sm text-muted-foreground">Years Experience</p>
+                <p className="text-3xl font-bold text-foreground">95%</p>
+                <p className="text-sm text-muted-foreground">Hiring Success</p>
               </div>
             </div>
           </div>
@@ -160,12 +161,7 @@ export default function HomePage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="relative">
               <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-2xl">
-                <Image
-                  src="/images/team-epc.jpg"
-                  alt="Our Team"
-                  fill
-                  className="object-cover"
-                />
+                <AnimatedTeamIllustration />
               </div>
               <div className="absolute -bottom-6 -right-6 bg-card rounded-2xl p-6 shadow-xl border border-border">
                 <div className="flex items-center gap-4">
@@ -173,8 +169,8 @@ export default function HomePage() {
                     <Shield className="h-6 w-6 text-red-600" />
                   </div>
                   <div>
-                    <p className="font-bold text-foreground">ISO Certified</p>
-                    <p className="text-sm text-muted-foreground">Quality & Safety</p>
+                    <p className="font-bold text-foreground">Smart Hiring</p>
+                    <p className="text-sm text-muted-foreground">Efficient & Modern</p>
                   </div>
                 </div>
               </div>
