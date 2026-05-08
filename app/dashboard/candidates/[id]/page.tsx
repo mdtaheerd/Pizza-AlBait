@@ -38,7 +38,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
 
   const { data: applications } = await supabase
     .from('applications')
-    .select('*, job:jobs(id, title, department:departments(name)), locker:profiles!applications_locked_by_fkey(full_name, email)')
+    .select('*, job:jobs(id, title, department:departments(name), created_by, hiring_manager:profiles!jobs_created_by_fkey(email, full_name)), locker:profiles!applications_locked_by_fkey(full_name, email)')
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
 

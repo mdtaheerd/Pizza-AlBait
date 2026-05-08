@@ -72,19 +72,29 @@ export function JobForm({ job, departments }: JobFormProps) {
           .update(jobData)
           .eq('id', job.id)
 
-        if (updateError) throw updateError
+        if (updateError) {
+          console.error('[v0] Job update error:', updateError)
+          throw new Error(updateError.message || 'Failed to update job')
+        }
       } else {
-        const { error: insertError } = await supabase
+        const { data, error: insertError } = await supabase
           .from('jobs')
           .insert(jobData)
+          .select()
 
-        if (insertError) throw insertError
+        if (insertError) {
+          console.error('[v0] Job insert error:', insertError)
+          throw new Error(insertError.message || 'Failed to create job')
+        }
+        console.log('[v0] Job created successfully:', data)
       }
 
       router.push('/dashboard/jobs')
       router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      console.error('[v0] Job form error:', err)
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred'
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }

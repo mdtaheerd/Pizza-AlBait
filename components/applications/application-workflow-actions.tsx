@@ -127,7 +127,26 @@ export function ApplicationWorkflowActions({
 
       if (error) throw error
 
-      // Send email to interviewer and candidate
+      // Create interview record in interviews table
+      const { error: interviewError } = await supabase
+        .from('interviews')
+        .insert({
+          application_id: application.id,
+          scheduled_at: scheduledDate.toISOString(),
+          duration_minutes: 60,
+          interview_type: 'video',
+          location: interviewLocation || null,
+          meeting_link: null,
+          interviewer_id: currentUser.id,
+          status: 'scheduled',
+          notes: `Interviewer: ${interviewerName} (${interviewerEmail})`,
+        })
+
+      if (interviewError) {
+        console.error('[v0] Failed to create interview record:', interviewError)
+      }
+
+      // Send email to candidate, interviewer, and hiring manager
       await fetch('/api/send-interview-invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -136,10 +155,13 @@ export function ApplicationWorkflowActions({
           candidateEmail: application.candidate?.email,
           candidateName: application.candidate?.full_name,
           interviewerEmail,
+          interviewerEmails: [interviewerEmail],
           interviewerName,
           jobTitle: application.job?.title,
           interviewDate: scheduledDate.toISOString(),
           interviewLocation,
+          hiringManagerEmail: application.job?.hiring_manager?.email,
+          hiringManagerName: application.job?.hiring_manager?.full_name,
         }),
       })
 

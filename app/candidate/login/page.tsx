@@ -91,9 +91,9 @@ export default function CandidateLoginPage() {
               <Image
                 src="/images/talenttrack-logo.png"
                 alt="TalentTrack ATS"
-                width={200}
-                height={60}
-                className="h-14 w-auto"
+                width={220}
+                height={70}
+                className="h-16 w-auto"
               />
             </Link>
             <div>

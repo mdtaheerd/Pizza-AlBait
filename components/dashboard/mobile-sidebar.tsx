@@ -47,9 +47,9 @@ export function MobileSidebar({ profile }: MobileSidebarProps) {
           <Image
             src="/images/talenttrack-logo.png"
             alt="TalentTrack ATS"
-            width={140}
-            height={45}
-            className="h-10 w-auto"
+            width={160}
+            height={50}
+            className="h-12 w-auto"
           />
         </SheetTitle>
       </SheetHeader>

@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button'
 import { MapPin, Clock, Banknote, Search, HardHat, ArrowRight, Users, Briefcase, Shield, Linkedin, Globe } from 'lucide-react'
 import { EMPLOYMENT_TYPE_LABELS } from '@/lib/types'
 import Link from 'next/link'
-import { CareersSearch } from '@/components/careers/careers-search'
 import Image from 'next/image'
+import { CareersSearch } from '@/components/careers/careers-search'
 import { autoCloseExpiredJobs } from '@/lib/jobs/auto-close'
 
 interface CareersPageProps {
@@ -71,9 +71,9 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
             <Image
               src="/images/talenttrack-logo.png"
               alt="TalentTrack ATS"
-              width={180}
-              height={50}
-              className="h-12 w-auto"
+              width={200}
+              height={60}
+              className="h-14 w-auto"
             />
           </Link>
           <div className="flex items-center gap-4">

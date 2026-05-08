@@ -46,6 +46,27 @@ export default function LoginPage() {
       console.log('[v0] Login successful, user:', data.user?.email)
       console.log('[v0] Session exists:', !!data.session)
       
+      // Check user's approval status
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, approval_status')
+        .eq('id', data.user?.id)
+        .single()
+      
+      console.log('[v0] User profile:', profile)
+      
+      // Block rejected users
+      if (profile?.approval_status === 'rejected') {
+        await supabase.auth.signOut()
+        throw new Error('Your account has been rejected. Please contact the administrator.')
+      }
+      
+      // Redirect pending users to pending approval page
+      if (profile?.role !== 'candidate' && profile?.role !== 'admin' && profile?.approval_status === 'pending') {
+        window.location.href = '/auth/pending-approval'
+        return
+      }
+      
       // Wait a moment for the session to be set in cookies
       await new Promise(resolve => setTimeout(resolve, 500))
       
@@ -53,11 +74,25 @@ export default function LoginPage() {
       const { data: sessionCheck } = await supabase.auth.getSession()
       console.log('[v0] Session check after login:', !!sessionCheck.session)
       
-      // Use window.location for full page reload to ensure cookies are sent
-      window.location.href = '/dashboard'
+      // Redirect based on role
+      if (profile?.role === 'candidate') {
+        window.location.href = '/candidate/dashboard'
+      } else {
+        window.location.href = '/dashboard'
+      }
     } catch (error: unknown) {
-      console.log('[v0] Login catch error:', error)
-      setError(error instanceof Error ? error.message : 'An error occurred')
+      // Log detailed error for debugging but show generic message to user
+      console.error('[SECURITY] Login failure:', error)
+      
+      // Don't reveal whether email exists or not - always show generic message
+      const errorMessage = error instanceof Error ? error.message : ''
+      
+      // Only show specific message for rejected users
+      if (errorMessage.includes('rejected')) {
+        setError(errorMessage)
+      } else {
+        setError('Invalid email or password. Please try again.')
+      }
       setIsLoading(false)
     }
   }
@@ -82,9 +117,9 @@ export default function LoginPage() {
             <Image
               src="/images/talenttrack-logo.png"
               alt="TalentTrack ATS"
-              width={200}
-              height={60}
-              className="h-14 w-auto"
+              width={220}
+              height={70}
+              className="h-16 w-auto"
             />
           </Link>
           

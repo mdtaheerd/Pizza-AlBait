@@ -30,13 +30,13 @@ export default async function PipelinePage({ searchParams }: PipelinePageProps) 
     .select('id, title')
     .order('title')
 
-  // Build query for applications with locker info
+  // Build query for applications with locker info and hiring manager
   let applicationsQuery = supabase
     .from('applications')
     .select(`
       *,
       candidate:candidates(*),
-      job:jobs(id, title, department:departments(name)),
+      job:jobs(id, title, department:departments(name), created_by, hiring_manager:profiles!jobs_created_by_fkey(email, full_name)),
       locker:profiles!applications_locked_by_fkey(id, full_name, email)
     `)
     .order('updated_at', { ascending: false })

@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Briefcase, Users, FileText, TrendingUp, TrendingDown, Clock, Building2, Globe, UserCircle } from 'lucide-react'
+import { Briefcase, Users, FileText, TrendingUp, TrendingDown, Clock, Building2, Globe, UserCircle, Calendar } from 'lucide-react'
 import { subDays, format, differenceInYears } from 'date-fns'
 import { PipelineChart } from '@/components/analytics/pipeline-chart'
 import { ApplicationsChart } from '@/components/analytics/applications-chart'
@@ -27,6 +27,8 @@ export default async function AnalyticsPage() {
     { data: candidates },
     { data: jobs },
     { data: departments },
+    { data: interviews },
+    { count: totalInterviews },
   ] = await Promise.all([
     supabase.from('jobs').select('*', { count: 'exact', head: true }),
     supabase.from('jobs').select('*', { count: 'exact', head: true }).eq('status', 'open'),
@@ -38,6 +40,8 @@ export default async function AnalyticsPage() {
     supabase.from('candidates').select('source, nationality, gender, date_of_birth'),
     supabase.from('jobs').select('id, title, department_id'),
     supabase.from('departments').select('id, name'),
+    supabase.from('interviews').select('id, status, interview_type, scheduled_at'),
+    supabase.from('interviews').select('*', { count: 'exact', head: true }),
   ])
 
   // Create department lookup
@@ -197,6 +201,34 @@ export default async function AnalyticsPage() {
   // Calculate average time to hire (simplified - just using hired applications)
   const hiredApplications = (applications || []).filter((app) => app.stage === 'hired')
   const avgTimeToHire = hiredApplications.length > 0 ? 14 : 0 // Placeholder - would need more data
+
+  // Calculate interview statistics
+  const scheduledInterviews = (interviews || []).filter((i) => i.status === 'scheduled').length
+  const completedInterviews = (interviews || []).filter((i) => i.status === 'completed').length
+  const cancelledInterviews = (interviews || []).filter((i) => i.status === 'cancelled').length
+  
+  // Interview type breakdown
+  const interviewTypeCount: Record<string, number> = {}
+  ;(interviews || []).forEach((interview) => {
+    const type = interview.interview_type || 'other'
+    interviewTypeCount[type] = (interviewTypeCount[type] || 0) + 1
+  })
+
+  const interviewTypeLabels: Record<string, string> = {
+    phone: 'Phone',
+    video: 'Video',
+    onsite: 'On-site',
+    technical: 'Technical',
+    panel: 'Panel',
+    other: 'Other',
+  }
+
+  const interviewTypeData = Object.entries(interviewTypeCount)
+    .map(([type, count]) => ({
+      name: interviewTypeLabels[type] || type,
+      value: count,
+    }))
+    .sort((a, b) => b.value - a.value)
 
   const stats = [
     {
@@ -366,16 +398,81 @@ export default async function AnalyticsPage() {
         </Card>
       </div>
 
-      {/* Source Distribution */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Candidate Sources</CardTitle>
-          <CardDescription>Where candidates are coming from</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <SourceChart data={sourceChartData} />
-        </CardContent>
-      </Card>
+      {/* Interview Analytics */}
+      <div className="grid gap-6 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Interviews</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalInterviews || 0}</div>
+            <p className="text-xs text-muted-foreground">All time</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Scheduled</CardTitle>
+            <Clock className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">{scheduledInterviews}</div>
+            <p className="text-xs text-muted-foreground">Upcoming interviews</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <TrendingUp className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{completedInterviews}</div>
+            <p className="text-xs text-muted-foreground">Interviews conducted</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Cancelled</CardTitle>
+            <TrendingDown className="h-4 w-4 text-red-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{cancelledInterviews}</div>
+            <p className="text-xs text-muted-foreground">Interviews cancelled</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Interview Types & Source Distribution */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Interview Types
+            </CardTitle>
+            <CardDescription>Distribution by interview format</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {interviewTypeData.length > 0 ? (
+              <DemographicsChart data={interviewTypeData} title="Interview Types" />
+            ) : (
+              <div className="flex h-[200px] items-center justify-center text-muted-foreground">
+                No interview data available yet
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Candidate Sources</CardTitle>
+            <CardDescription>Where candidates are coming from</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SourceChart data={sourceChartData} />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
