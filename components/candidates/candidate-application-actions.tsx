@@ -272,6 +272,25 @@ export function CandidateApplicationActions({
 
       if (error) throw error
 
+      // Create interview record in interviews table
+      const { error: interviewError } = await supabase
+        .from('interviews')
+        .insert({
+          application_id: application.id,
+          scheduled_at: scheduledDate.toISOString(),
+          duration_minutes: 60,
+          interview_type: 'video',
+          location: interviewLocation || null,
+          meeting_link: null,
+          interviewer_id: currentUser.id,
+          status: 'scheduled',
+          notes: `Interviewer: ${interviewerName} (${emailsArray.join(', ')})`,
+        })
+
+      if (interviewError) {
+        console.error('[v0] Failed to create interview record:', interviewError)
+      }
+
       // Send email to candidate, interviewer(s), and hiring manager
       await fetch('/api/send-interview-invite', {
         method: 'POST',
