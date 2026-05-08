@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Loader2, Home } from 'lucide-react'
+import { Loader2, Home, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -21,6 +21,7 @@ export default function CandidateLoginPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
   
   const [formData, setFormData] = useState({
     email: '',
@@ -54,10 +55,12 @@ export default function CandidateLoginPage() {
         .single()
 
       if (profile?.role === 'candidate') {
-        router.push('/candidate/dashboard')
+        router.refresh()
+        window.location.href = '/candidate/dashboard'
       } else {
         // If not a candidate, redirect to regular dashboard
-        router.push('/dashboard')
+        router.refresh()
+        window.location.href = '/dashboard'
       }
     } catch (err) {
       console.error('[v0] Login error:', err)
@@ -124,14 +127,29 @@ export default function CandidateLoginPage() {
                     Forgot password?
                   </Link>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  placeholder="Enter your password"
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    placeholder="Enter your password"
+                    required
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               {error && (

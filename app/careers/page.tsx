@@ -7,6 +7,7 @@ import { EMPLOYMENT_TYPE_LABELS } from '@/lib/types'
 import Link from 'next/link'
 import { CareersSearch } from '@/components/careers/careers-search'
 import Image from 'next/image'
+import { autoCloseExpiredJobs } from '@/lib/jobs/auto-close'
 
 interface CareersPageProps {
   searchParams: Promise<{ search?: string; department?: string }>
@@ -15,6 +16,9 @@ interface CareersPageProps {
 export default async function CareersPage({ searchParams }: CareersPageProps) {
   const { search, department } = await searchParams
   const supabase = await createClient()
+  
+  // Auto-close any expired jobs before showing the listings
+  await autoCloseExpiredJobs()
 
   const { data: departments } = await supabase
     .from('departments')
