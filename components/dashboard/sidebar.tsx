@@ -16,6 +16,7 @@ import {
   Building2,
   Linkedin,
   UserCheck,
+  ClipboardList,
 } from 'lucide-react'
 
 interface DashboardSidebarProps {
@@ -29,6 +30,7 @@ const navigation = [
   { name: 'Pipeline', href: '/dashboard/pipeline', icon: Briefcase },
   { name: 'Interviews', href: '/dashboard/interviews', icon: Calendar },
   { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+  { name: 'Reports', href: '/dashboard/reports', icon: ClipboardList },
 ]
 
 const adminNavigation = [
