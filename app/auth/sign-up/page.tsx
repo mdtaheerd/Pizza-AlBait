@@ -40,7 +40,7 @@ export default function SignUpPage() {
     setError(null)
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -54,6 +54,26 @@ export default function SignUpPage() {
         },
       })
       if (error) throw error
+
+      // Send notification to admin for non-candidate signups
+      if (role !== 'candidate' && data.user) {
+        try {
+          await fetch('/api/auth/notify-admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: data.user.id,
+              email,
+              fullName,
+              role,
+            }),
+          })
+        } catch (notifyError) {
+          // Don't block signup if notification fails
+          console.error('Failed to notify admin:', notifyError)
+        }
+      }
+
       router.push('/auth/sign-up-success')
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'An error occurred')
