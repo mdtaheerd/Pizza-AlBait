@@ -32,16 +32,32 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log('[v0] Starting login for:', email)
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
-      if (error) throw error
-      router.refresh()
+      
+      if (error) {
+        console.log('[v0] Login error:', error.message)
+        throw error
+      }
+      
+      console.log('[v0] Login successful, user:', data.user?.email)
+      console.log('[v0] Session exists:', !!data.session)
+      
+      // Wait a moment for the session to be set in cookies
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Verify the session is set
+      const { data: sessionCheck } = await supabase.auth.getSession()
+      console.log('[v0] Session check after login:', !!sessionCheck.session)
+      
+      // Use window.location for full page reload to ensure cookies are sent
       window.location.href = '/dashboard'
     } catch (error: unknown) {
+      console.log('[v0] Login catch error:', error)
       setError(error instanceof Error ? error.message : 'An error occurred')
-    } finally {
       setIsLoading(false)
     }
   }
