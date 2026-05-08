@@ -19,16 +19,9 @@ import {
   Package,
   Wrench,
   Cog,
-  ChevronDown,
   UserCircle,
   UserCog
 } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -61,29 +54,19 @@ export default function HomePage() {
                 Departments
               </Link>
             </div>
-            <div className="flex items-center gap-3">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-1">
-                    Sign In
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem asChild>
-                    <Link href="/candidate/login" className="flex items-center gap-2 cursor-pointer">
-                      <UserCircle className="h-4 w-4" />
-                      Candidate Login
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/auth/login" className="flex items-center gap-2 cursor-pointer">
-                      <UserCog className="h-4 w-4" />
-                      Recruiter / Admin Login
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" asChild className="flex items-center gap-2">
+                <Link href="/candidate/login">
+                  <UserCircle className="h-4 w-4" />
+                  Candidate Login
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="flex items-center gap-2">
+                <Link href="/auth/login">
+                  <UserCog className="h-4 w-4" />
+                  Recruiter Login
+                </Link>
+              </Button>
               <Button asChild className="bg-red-600 hover:bg-red-700 rounded-xl">
                 <Link href="/careers">View Jobs</Link>
               </Button>
