@@ -18,8 +18,17 @@ import {
   ShieldCheck,
   Package,
   Wrench,
-  Cog
+  Cog,
+  ChevronDown,
+  UserCircle,
+  UserCog
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -53,9 +62,28 @@ export default function HomePage() {
               </Link>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="ghost" asChild>
-                <Link href="/auth/login">Sign In</Link>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-1">
+                    Sign In
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href="/candidate/login" className="flex items-center gap-2 cursor-pointer">
+                      <UserCircle className="h-4 w-4" />
+                      Candidate Login
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/auth/login" className="flex items-center gap-2 cursor-pointer">
+                      <UserCog className="h-4 w-4" />
+                      Recruiter / Admin Login
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button asChild className="bg-red-600 hover:bg-red-700 rounded-xl">
                 <Link href="/careers">View Jobs</Link>
               </Button>
