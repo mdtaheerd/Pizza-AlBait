@@ -19,9 +19,10 @@ import {
   Package,
   Wrench,
   Cog,
-  ChevronDown,
   UserCircle,
-  UserCog
+  UserCog,
+  ChevronDown,
+  LogIn
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -54,9 +55,6 @@ export default function HomePage() {
               <Link href="/careers" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
                 Open Positions
               </Link>
-              <Link href="#about" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
-                About Us
-              </Link>
               <Link href="#departments" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
                 Departments
               </Link>
@@ -64,22 +62,38 @@ export default function HomePage() {
             <div className="flex items-center gap-3">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-1">
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <LogIn className="h-4 w-4" />
                     Sign In
                     <ChevronDown className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem asChild>
-                    <Link href="/candidate/login" className="flex items-center gap-2 cursor-pointer">
-                      <UserCircle className="h-4 w-4" />
-                      Candidate Login
+                    <Link href="/candidate/login" className="flex items-center gap-3 cursor-pointer py-2">
+                      <UserCircle className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <p className="font-medium">Candidate Login</p>
+                        <p className="text-xs text-muted-foreground">Apply for jobs</p>
+                      </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/auth/login" className="flex items-center gap-2 cursor-pointer">
-                      <UserCog className="h-4 w-4" />
-                      Recruiter / Admin Login
+                    <Link href="/auth/login" className="flex items-center gap-3 cursor-pointer py-2">
+                      <UserCog className="h-5 w-5 text-green-600" />
+                      <div>
+                        <p className="font-medium">Recruiter Login</p>
+                        <p className="text-xs text-muted-foreground">Manage applications</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/auth/login" className="flex items-center gap-3 cursor-pointer py-2">
+                      <Briefcase className="h-5 w-5 text-purple-600" />
+                      <div>
+                        <p className="font-medium">Hiring Manager Login</p>
+                        <p className="text-xs text-muted-foreground">Review candidates</p>
+                      </div>
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -435,7 +449,6 @@ export default function HomePage() {
               <h4 className="font-semibold mb-4">Quick Links</h4>
               <div className="space-y-2">
                 <Link href="/careers" className="block text-white/60 hover:text-white text-sm">Open Positions</Link>
-                <Link href="#about" className="block text-white/60 hover:text-white text-sm">About Us</Link>
                 <Link href="#departments" className="block text-white/60 hover:text-white text-sm">Departments</Link>
               </div>
             </div>
