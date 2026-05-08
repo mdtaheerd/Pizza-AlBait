@@ -21,6 +21,17 @@ export default async function DashboardLayout({
     .eq('id', user.id)
     .single()
 
+  // Block rejected users - sign them out and redirect to login
+  if (profile?.approval_status === 'rejected') {
+    await supabase.auth.signOut()
+    redirect('/auth/login?error=rejected')
+  }
+
+  // Block pending users - redirect to pending approval page
+  if (profile?.role !== 'candidate' && profile?.role !== 'admin' && profile?.approval_status === 'pending') {
+    redirect('/auth/pending-approval')
+  }
+
   return (
     <div className="flex h-svh overflow-hidden bg-muted/30">
       <DashboardSidebar profile={profile} />
