@@ -22,8 +22,7 @@ import {
   UserCircle,
   UserCog,
   ChevronDown,
-  LogIn,
-  ShieldCheck
+  LogIn
 } from 'lucide-react'
 import {
   DropdownMenu,
