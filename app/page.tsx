@@ -31,7 +31,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
 import Image from 'next/image'
-import { AnimatedTeamIllustration } from '@/components/animated-team-illustration'
 
 export default function HomePage() {
   return (
@@ -161,7 +160,12 @@ export default function HomePage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="relative">
               <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-2xl">
-                <AnimatedTeamIllustration />
+                <Image
+                  src="/images/team-hiring-3d.jpg"
+                  alt="Modern Recruitment Team"
+                  fill
+                  className="object-cover"
+                />
               </div>
               <div className="absolute -bottom-6 -right-6 bg-card rounded-2xl p-6 shadow-xl border border-border">
                 <div className="flex items-center gap-4">
