@@ -190,17 +190,17 @@ export default function CandidateRegisterPage() {
           <CardHeader className="space-y-4 text-center">
             <Link href="/" className="flex items-center justify-center">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
-                alt="CPECC - China Petroleum Engineering & Construction Corporation"
-                width={280}
-                height={40}
-                className="h-10 w-auto"
+                src="/images/talenttrack-logo.png"
+                alt="TalentTrack ATS"
+                width={200}
+                height={60}
+                className="h-14 w-auto"
               />
             </Link>
             <div>
               <CardTitle className="text-xl">Create Candidate Account</CardTitle>
               <CardDescription>
-                Register to apply for jobs at CPECC
+                Register to apply for jobs
               </CardDescription>
             </div>
           </CardHeader>

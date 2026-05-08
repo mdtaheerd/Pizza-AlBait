@@ -8,7 +8,7 @@ export async function POST(request: Request) {
 
     await sendEmail({
       to: candidateEmail,
-      subject: `Congratulations! You've Been Selected - ${jobTitle} at CPECC`,
+      subject: `Congratulations! You've Been Selected - ${jobTitle}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%); padding: 30px; text-align: center;">
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
           <div style="padding: 30px; background: #ffffff;">
             <p>Dear ${candidateName},</p>
             
-            <p>We are delighted to inform you that you have been <strong>selected</strong> for the position of <strong>${jobTitle}</strong> at China Petroleum Engineering & Construction Corporation (CPECC)!</p>
+            <p>We are delighted to inform you that you have been <strong>selected</strong> for the position of <strong>${jobTitle}</strong>!</p>
             
             <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4caf50;">
               <p style="margin: 0; font-size: 18px; color: #2e7d32;">
@@ -34,13 +34,13 @@ export async function POST(request: Request) {
             
             <p>If you have any questions in the meantime, please don't hesitate to reach out.</p>
             
-            <p>We look forward to welcoming you to the CPECC team!</p>
+            <p>We look forward to welcoming you to the team!</p>
             
             <p>Best regards,<br>
-            <strong>CPECC HR Team</strong></p>
+            <strong>HR Team</strong></p>
           </div>
           <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
-            <p>China Petroleum Engineering & Construction Corporation</p>
+            <p>Sent via TalentTrack ATS</p>
           </div>
         </div>
       `,

@@ -4,12 +4,59 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { MapPin, Clock, Banknote, ArrowLeft, Building2 } from 'lucide-react'
+import { SocialShareButtons } from '@/components/careers/social-share-buttons'
 import Link from 'next/link'
 import { EMPLOYMENT_TYPE_LABELS, CURRENCY_SYMBOLS, type SalaryCurrency } from '@/lib/types'
 import { CareersHeader } from '@/components/careers/careers-header'
+import type { Metadata } from 'next'
 
 interface JobDetailPageProps {
   params: Promise<{ id: string }>
+}
+
+// Generate dynamic metadata for social sharing (LinkedIn, Facebook, WhatsApp, etc.)
+export async function generateMetadata({ params }: JobDetailPageProps): Promise<Metadata> {
+  const { id } = await params
+  const supabase = await createClient()
+
+  const { data: job } = await supabase
+    .from('jobs')
+    .select(`
+      title,
+      description,
+      location,
+      department:departments(name)
+    `)
+    .eq('id', id)
+    .eq('status', 'open')
+    .single()
+
+  if (!job) {
+    return {
+      title: 'Job Not Found | TalentTrack ATS',
+    }
+  }
+
+  const title = `${job.title}${job.department?.name ? ` - ${job.department.name}` : ''} | TalentTrack ATS`
+  const description = job.description 
+    ? job.description.substring(0, 160) + (job.description.length > 160 ? '...' : '')
+    : `Apply for the ${job.title} position${job.location ? ` in ${job.location}` : ''}. Join our team today!`
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title: `${job.title}${job.location ? ` in ${job.location}` : ''} - Job Opening`,
+      description,
+      type: 'website',
+      siteName: 'TalentTrack ATS',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${job.title} - Job Opening`,
+      description,
+    },
+  }
 }
 
 export default async function JobDetailPage({ params }: JobDetailPageProps) {
@@ -94,10 +141,18 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
             </div>
           </div>
 
-          {/* Apply Button */}
-          <Button size="lg" asChild>
-            <Link href={`/careers/${id}/apply`}>Apply for this position</Link>
-          </Button>
+          {/* Apply Button and Share */}
+          <div className="flex flex-wrap items-center gap-4">
+            <Button size="lg" asChild>
+              <Link href={`/careers/${id}/apply`}>Apply for this position</Link>
+            </Button>
+            <SocialShareButtons 
+              jobTitle={job.title} 
+              jobId={id}
+              department={job.department?.name}
+              location={job.location}
+            />
+          </div>
 
           {/* Job Description */}
           {job.description && (

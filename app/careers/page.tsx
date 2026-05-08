@@ -65,11 +65,11 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
           <Link href="/" className="flex items-center">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
-              alt="CPECC - China Petroleum Engineering & Construction Corporation"
-              width={300}
-              height={40}
-              className="h-10 w-auto"
+              src="/images/talenttrack-logo.png"
+              alt="TalentTrack ATS"
+              width={180}
+              height={50}
+              className="h-12 w-auto"
             />
           </Link>
           <div className="flex items-center gap-4">
@@ -88,7 +88,7 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/middle-east-construction.jpg"
-            alt="CPECC Middle East Construction"
+            alt="Professional Team"
             fill
             className="object-cover"
             priority
@@ -103,14 +103,14 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
           </div>
           
           <h1 className="text-4xl font-bold tracking-tight text-balance sm:text-5xl">
-            Join
+            Find Your Next
             <span className="mx-2 bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">
-              CPECC
+              Career
             </span>
-            in the Middle East
+            Opportunity
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground text-pretty leading-relaxed">
-            China Petroleum Engineering and Construction Corporation - Join our team of engineers, project managers, and industry experts working on world-class onshore oil & gas projects across the Middle East.
+            Browse open positions and apply to join our growing team. We are always looking for talented individuals to help us achieve our goals.
           </p>
           
           <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
@@ -233,7 +233,7 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
       {/* Why Join Us */}
       <section className="border-t bg-muted/30 py-16">
         <div className="mx-auto max-w-5xl px-6">
-          <h2 className="text-2xl font-bold text-center mb-8">Why Join CPECC?</h2>
+          <h2 className="text-2xl font-bold text-center mb-8">Why Join Us?</h2>
           <div className="grid md:grid-cols-3 gap-6">
             <Card className="border-0 shadow-md">
               <CardContent className="p-6 text-center">
@@ -272,11 +272,11 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CPECC%20Logo-v2VEWr2wpVlNgvVySqwQDyOe1A3E71.jpg"
-                alt="CPECC Logo"
-                width={60}
-                height={60}
-                className="rounded-lg w-auto h-auto"
+                src="/images/talenttrack-logo.png"
+                alt="TalentTrack ATS"
+                width={140}
+                height={45}
+                className="h-10 w-auto bg-white rounded-lg p-2"
               />
             </div>
             <div className="flex items-center gap-4">
@@ -286,8 +286,8 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-white/10 text-center text-white/60 text-sm">
-            <p className="mb-2">www.careers.cpecc.ae</p>
-            <p>&copy; {new Date().getFullYear()} China Petroleum Engineering and Construction Corporation (CPECC). All rights reserved.</p>
+            <p className="mb-2">TalentTrack ATS</p>
+            <p>&copy; {new Date().getFullYear()} TalentTrack ATS. All rights reserved.</p>
           </div>
         </div>
       </footer>

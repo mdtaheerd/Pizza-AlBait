@@ -63,6 +63,8 @@ interface CandidateApplicationActionsProps {
       salary_min?: number | null
       salary_max?: number | null
       salary_currency?: string
+      created_by?: string | null
+      hiring_manager?: { email: string; full_name: string } | null
     }
   }
   currentUser: Profile
@@ -190,6 +192,8 @@ export function CandidateApplicationActions({
             interviewTime: format(scheduledDate, 'h:mm a'),
             interviewLocation: rescheduleLocation,
             interviewerEmails: emailsArray,
+            hiringManagerEmail: application.job?.hiring_manager?.email,
+            hiringManagerName: application.job?.hiring_manager?.full_name,
             isRescheduled: true,
           }),
         })
@@ -298,6 +302,8 @@ export function CandidateApplicationActions({
             interviewTime: format(scheduledDate, 'h:mm a'),
             interviewLocation,
             interviewerEmails: emailsArray,
+            hiringManagerEmail: application.job?.hiring_manager?.email,
+            hiringManagerName: application.job?.hiring_manager?.full_name,
             isRescheduled: false,
           }),
         })
