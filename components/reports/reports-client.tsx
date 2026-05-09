@@ -85,8 +85,8 @@ interface ExtendedJob {
   status: string
   created_at: string
   closing_date?: string | null
-  department?: { id: string; name: string } | null
-  creator?: { id: string; full_name: string; email: string } | null
+  department?: { id: string; name: string }[] | { id: string; name: string } | null
+  creator?: { id: string; full_name: string; email: string }[] | { id: string; full_name: string; email: string } | null
 }
 
 interface ReportsClientProps {

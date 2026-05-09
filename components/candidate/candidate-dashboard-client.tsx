@@ -40,7 +40,7 @@ interface CandidateDashboardClientProps {
     })[]
   }) | null
   openJobs: (Pick<Job, 'id' | 'title' | 'location' | 'employment_type' | 'closing_date'> & {
-    department?: { id: string; name: string } | null
+    department?: { id: string; name: string }[] | { id: string; name: string } | null
   })[]
   userEmail: string
 }

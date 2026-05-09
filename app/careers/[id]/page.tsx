@@ -62,15 +62,15 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               <h1 className="text-3xl font-bold text-balance">{job.title}</h1>
               {job.employment_type && (
                 <Badge variant="secondary" className="mt-1">
-                  {EMPLOYMENT_TYPE_LABELS[job.employment_type]}
+                  {EMPLOYMENT_TYPE_LABELS[job.employment_type as keyof typeof EMPLOYMENT_TYPE_LABELS]}
                 </Badge>
               )}
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-4 text-muted-foreground">
-              {job.department?.name && (
+              {Array.isArray(job.department) && job.department[0]?.name && (
                 <span className="flex items-center gap-1">
                   <Building2 className="h-4 w-4" />
-                  {job.department.name}
+                  {job.department[0].name}
                 </span>
               )}
               {job.location && (
@@ -82,7 +82,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               {job.employment_type && (
                 <span className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
-                  {EMPLOYMENT_TYPE_LABELS[job.employment_type]}
+                  {EMPLOYMENT_TYPE_LABELS[job.employment_type as keyof typeof EMPLOYMENT_TYPE_LABELS]}
                 </span>
               )}
               {formatSalary(job.salary_min, job.salary_max, job.salary_currency) && (
