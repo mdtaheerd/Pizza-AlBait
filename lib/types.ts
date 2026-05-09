@@ -218,20 +218,6 @@ export const LOCK_STATUS_COLORS: Record<LockStatus, string> = {
   released: 'bg-slate-100 text-slate-700 border-slate-200',
 }
 
-export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
-
-export const APPROVAL_STATUS_LABELS: Record<ApprovalStatus, string> = {
-  pending: 'Pending',
-  approved: 'Approved',
-  rejected: 'Rejected',
-}
-
-export const APPROVAL_STATUS_COLORS: Record<ApprovalStatus, string> = {
-  pending: 'bg-amber-100 text-amber-700 border-amber-200',
-  approved: 'bg-green-100 text-green-700 border-green-200',
-  rejected: 'bg-red-100 text-red-700 border-red-200',
-}
-
 export const HISTORY_ACTION_LABELS: Record<HistoryActionType, string> = {
   applied: 'Applied',
   screened: 'Screened',
@@ -273,59 +259,3 @@ export const CURRENCY_SYMBOLS: Record<SalaryCurrency, string> = {
   GBP: '£',
   CNY: '¥',
 }
-
-export const COUNTRY_CODES: { code: string; name: string; dial_code: string }[] = [
-  { code: 'AE', name: 'United Arab Emirates', dial_code: '+971' },
-  { code: 'SA', name: 'Saudi Arabia', dial_code: '+966' },
-  { code: 'QA', name: 'Qatar', dial_code: '+974' },
-  { code: 'KW', name: 'Kuwait', dial_code: '+965' },
-  { code: 'BH', name: 'Bahrain', dial_code: '+973' },
-  { code: 'OM', name: 'Oman', dial_code: '+968' },
-  { code: 'IN', name: 'India', dial_code: '+91' },
-  { code: 'PK', name: 'Pakistan', dial_code: '+92' },
-  { code: 'PH', name: 'Philippines', dial_code: '+63' },
-  { code: 'BD', name: 'Bangladesh', dial_code: '+880' },
-  { code: 'NP', name: 'Nepal', dial_code: '+977' },
-  { code: 'LK', name: 'Sri Lanka', dial_code: '+94' },
-  { code: 'EG', name: 'Egypt', dial_code: '+20' },
-  { code: 'JO', name: 'Jordan', dial_code: '+962' },
-  { code: 'LB', name: 'Lebanon', dial_code: '+961' },
-  { code: 'SY', name: 'Syria', dial_code: '+963' },
-  { code: 'IQ', name: 'Iraq', dial_code: '+964' },
-  { code: 'YE', name: 'Yemen', dial_code: '+967' },
-  { code: 'US', name: 'United States', dial_code: '+1' },
-  { code: 'GB', name: 'United Kingdom', dial_code: '+44' },
-  { code: 'CA', name: 'Canada', dial_code: '+1' },
-  { code: 'AU', name: 'Australia', dial_code: '+61' },
-  { code: 'DE', name: 'Germany', dial_code: '+49' },
-  { code: 'FR', name: 'France', dial_code: '+33' },
-  { code: 'CN', name: 'China', dial_code: '+86' },
-]
-
-export const COUNTRIES: { value: string; label: string }[] = [
-  { value: 'AE', label: 'United Arab Emirates' },
-  { value: 'SA', label: 'Saudi Arabia' },
-  { value: 'QA', label: 'Qatar' },
-  { value: 'KW', label: 'Kuwait' },
-  { value: 'BH', label: 'Bahrain' },
-  { value: 'OM', label: 'Oman' },
-  { value: 'IN', label: 'India' },
-  { value: 'PK', label: 'Pakistan' },
-  { value: 'PH', label: 'Philippines' },
-  { value: 'BD', label: 'Bangladesh' },
-  { value: 'NP', label: 'Nepal' },
-  { value: 'LK', label: 'Sri Lanka' },
-  { value: 'EG', label: 'Egypt' },
-  { value: 'JO', label: 'Jordan' },
-  { value: 'LB', label: 'Lebanon' },
-  { value: 'SY', label: 'Syria' },
-  { value: 'IQ', label: 'Iraq' },
-  { value: 'YE', label: 'Yemen' },
-  { value: 'US', label: 'United States' },
-  { value: 'GB', label: 'United Kingdom' },
-  { value: 'CA', label: 'Canada' },
-  { value: 'AU', label: 'Australia' },
-  { value: 'DE', label: 'Germany' },
-  { value: 'FR', label: 'France' },
-  { value: 'CN', label: 'China' },
-]

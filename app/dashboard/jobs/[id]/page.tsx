@@ -12,8 +12,6 @@ import {
   EMPLOYMENT_TYPE_LABELS,
   STAGE_LABELS,
   STAGE_COLORS,
-  CURRENCY_SYMBOLS,
-  type SalaryCurrency,
 } from '@/lib/types'
 import type { Application } from '@/lib/types'
 
@@ -51,15 +49,16 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     return acc
   }, {} as Record<string, number>)
 
-  const formatSalary = (min: number | null, max: number | null, currency: SalaryCurrency = 'USD') => {
+  const formatSalary = (min: number | null, max: number | null) => {
     if (!min && !max) return null
-    const symbol = CURRENCY_SYMBOLS[currency] || '$'
     const formatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
       maximumFractionDigits: 0,
     })
-    if (min && max) return `${symbol}${formatter.format(min)} - ${symbol}${formatter.format(max)}`
-    if (min) return `From ${symbol}${formatter.format(min)}`
-    if (max) return `Up to ${symbol}${formatter.format(max)}`
+    if (min && max) return `${formatter.format(min)} - ${formatter.format(max)}`
+    if (min) return `From ${formatter.format(min)}`
+    if (max) return `Up to ${formatter.format(max)}`
     return null
   }
 
@@ -89,10 +88,10 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                 {EMPLOYMENT_TYPE_LABELS[job.employment_type]}
               </span>
             )}
-            {formatSalary(job.salary_min, job.salary_max, job.salary_currency) && (
+            {formatSalary(job.salary_min, job.salary_max) && (
               <span className="flex items-center gap-1">
                 <Banknote className="h-4 w-4" />
-                {formatSalary(job.salary_min, job.salary_max, job.salary_currency)}
+                {formatSalary(job.salary_min, job.salary_max)}
               </span>
             )}
           </div>
