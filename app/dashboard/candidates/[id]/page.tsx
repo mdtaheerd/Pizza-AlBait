@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Pencil, Mail, Phone, Linkedin, Globe, FileText, Plus, AlertTriangle, Lock, Download, Calendar, Briefcase } from 'lucide-react'
+import { Pencil, Mail, Phone, Linkedin, Globe, FileText, Plus, AlertTriangle, Lock, Download, Calendar, Briefcase, CalendarClock } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { STAGE_LABELS, STAGE_COLORS, LOCK_STATUS_LABELS, LOCK_STATUS_COLORS } from '@/lib/types'
@@ -38,7 +38,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
 
   const { data: applications } = await supabase
     .from('applications')
-    .select('*, job:jobs(id, title, department:departments(name), created_by, hiring_manager:profiles!jobs_created_by_fkey(email, full_name)), locker:profiles!applications_locked_by_fkey(full_name, email)')
+    .select('*, job:jobs(id, title, department:departments(name), created_by, hiring_manager:profiles!jobs_created_by_fkey(email, full_name)), locker:profiles!applications_locked_by_fkey(full_name, email), interview_date, interview_location, interviewer_name, interviewer_email')
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
 
@@ -277,6 +277,16 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
                         {application.job.department.name}
                       </p>
                     )}
+                    {/* Show interview date if scheduled */}
+                    {application.interview_date && (
+                      <div className="mt-1 flex items-center gap-2 text-sm text-blue-600">
+                        <Calendar className="h-3 w-3" />
+                        <span>Interview: {format(new Date(application.interview_date), 'PPp')}</span>
+                        {application.interview_location && (
+                          <span className="text-muted-foreground">at {application.interview_location}</span>
+                        )}
+                      </div>
+                    )}
                     {/* Show lock status */}
                     {application.lock_status && application.lock_status !== 'available' && (
                       <div className="mt-1 flex items-center gap-2">
@@ -293,6 +303,19 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
                     )}
                   </div>
                   <div className="flex items-center gap-3">
+                    {/* Reschedule button for interview_scheduled stage */}
+                    {(application.stage === 'interview_scheduled' || application.stage === 'shortlisted') && application.interview_date && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        asChild
+                      >
+                        <Link href={`/dashboard/pipeline?reschedule=${application.id}`}>
+                          <CalendarClock className="mr-2 h-4 w-4" />
+                          Reschedule
+                        </Link>
+                      </Button>
+                    )}
                     <Badge variant="secondary" className={STAGE_COLORS[application.stage]}>
                       {STAGE_LABELS[application.stage]}
                     </Badge>
