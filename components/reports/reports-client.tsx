@@ -45,7 +45,22 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 
-interface ExtendedApplication extends Application {
+interface ExtendedApplication {
+  id: string
+  candidate_id: string
+  job_id: string
+  stage: string
+  rating: number | null
+  notes: string | null
+  applied_at: string
+  updated_at: string
+  interview_date?: string | null
+  interview_location?: string | null
+  recruiter_comments?: string | null
+  hiring_manager_comments?: string | null
+  offer_sent_at?: string | null
+  hired_at?: string | null
+  rejection_comments?: string | null
   candidate?: {
     id: string
     full_name: string
@@ -97,6 +112,20 @@ interface ReportsClientProps {
 }
 
 type ReportType = 'all' | 'screening' | 'interview' | 'offered' | 'hired' | 'rejected' | 'jobs' | 'analytics'
+
+// Helper to get department name from array or object
+function getDepartmentName(dept: { id: string; name: string }[] | { id: string; name: string } | null | undefined): string | null {
+  if (!dept) return null
+  if (Array.isArray(dept)) return dept[0]?.name || null
+  return dept.name
+}
+
+// Helper to get creator info from array or object
+function getCreator(creator: { id: string; full_name: string; email: string }[] | { id: string; full_name: string; email: string } | null | undefined): { full_name: string; email: string } | null {
+  if (!creator) return null
+  if (Array.isArray(creator)) return creator[0] || null
+  return creator
+}
 
 export function ReportsClient({ applications, jobs, currentUser }: ReportsClientProps) {
   const [activeReport, setActiveReport] = useState<ReportType>('all')
@@ -151,7 +180,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
         app.candidate?.full_name?.toLowerCase().includes(query) ||
         app.candidate?.email?.toLowerCase().includes(query) ||
         app.job?.title?.toLowerCase().includes(query) ||
-        app.job?.department?.name?.toLowerCase().includes(query)
+        getDepartmentName(app.job?.department)?.toLowerCase().includes(query)
       )
     }
 
@@ -184,7 +213,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
     // Positions per department
     const positionsByDept: Record<string, number> = {}
     jobs.forEach(job => {
-      const deptName = job.department?.name || 'Unassigned'
+      const deptName = getDepartmentName(job.department) || 'Unassigned'
       positionsByDept[deptName] = (positionsByDept[deptName] || 0) + 1
     })
 
@@ -241,7 +270,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
     // Department-wise open vs closed positions
     const deptOpenClosed: Record<string, { open: number; closed: number }> = {}
     jobs.forEach(job => {
-      const deptName = job.department?.name || 'Unassigned'
+      const deptName = getDepartmentName(job.department) || 'Unassigned'
       if (!deptOpenClosed[deptName]) {
         deptOpenClosed[deptName] = { open: 0, closed: 0 }
       }
@@ -298,7 +327,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
     ]
 
     const rows = filteredApplications.map(app => [
-      app.job?.department?.name || '',
+      getDepartmentName(app.job?.department) || '',
       app.job?.title || '',
       app.job?.published_at ? format(new Date(app.job.published_at), 'yyyy-MM-dd') : '',
       app.job?.closing_date ? format(new Date(app.job.closing_date), 'yyyy-MM-dd') : '',
@@ -316,7 +345,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
       STAGE_LABELS[app.stage as keyof typeof STAGE_LABELS] || app.stage,
       app.interview_date ? format(new Date(app.interview_date), 'yyyy-MM-dd HH:mm') : '',
       app.rejection_comments || '',
-      app.job?.creator?.full_name || ''
+      getCreator(app.job?.creator)?.full_name || ''
     ])
 
     const csvContent = [
@@ -337,12 +366,13 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
     
     const rows = jobs.map(job => {
       const appCount = applications.filter(a => a.job_id === job.id).length
+      const creator = getCreator(job.creator)
       return [
         job.title,
-        job.department?.name || '',
+        getDepartmentName(job.department) || '',
         job.status,
-        job.creator?.full_name || '',
-        job.creator?.email || '',
+        creator?.full_name || '',
+        creator?.email || '',
         format(new Date(job.created_at), 'yyyy-MM-dd'),
         job.closing_date ? format(new Date(job.closing_date), 'yyyy-MM-dd') : '',
         appCount.toString()
@@ -534,7 +564,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                     <TableBody>
                       {filteredApplications.map(app => (
                         <TableRow key={app.id}>
-                          <TableCell>{app.job?.department?.name || '-'}</TableCell>
+                          <TableCell>{getDepartmentName(app.job?.department) || '-'}</TableCell>
                           <TableCell className="font-medium">{app.job?.title || '-'}</TableCell>
                           <TableCell className="text-sm">
                             {app.job?.published_at 
@@ -592,7 +622,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                               {app.rejection_comments || '-'}
                             </TableCell>
                           )}
-                          <TableCell className="text-sm">{app.job?.creator?.full_name || '-'}</TableCell>
+                          <TableCell className="text-sm">{getCreator(app.job?.creator)?.full_name || '-'}</TableCell>
                         </TableRow>
                       ))}
                       {filteredApplications.length === 0 && (
@@ -643,18 +673,19 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                   <TableBody>
                     {jobs.map(job => {
                       const appCount = applications.filter(a => a.job_id === job.id).length
+                      const creator = getCreator(job.creator)
                       return (
                         <TableRow key={job.id}>
                           <TableCell className="font-medium">{job.title}</TableCell>
-                          <TableCell>{job.department?.name || '-'}</TableCell>
+                          <TableCell>{getDepartmentName(job.department) || '-'}</TableCell>
                           <TableCell>
                             <Badge variant={job.status === 'open' ? 'default' : 'secondary'}>
                               {job.status}
                             </Badge>
                           </TableCell>
-                          <TableCell>{job.creator?.full_name || '-'}</TableCell>
+                          <TableCell>{creator?.full_name || '-'}</TableCell>
                           <TableCell className="text-sm text-muted-foreground">
-                            {job.creator?.email || '-'}
+                            {creator?.email || '-'}
                           </TableCell>
                           <TableCell>{format(new Date(job.created_at), 'MMM d, yyyy')}</TableCell>
                           <TableCell>
