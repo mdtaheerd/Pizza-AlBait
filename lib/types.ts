@@ -1,4 +1,5 @@
 export type UserRole = 'admin' | 'recruiter' | 'hiring_manager'
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
 export type JobStatus = 'draft' | 'open' | 'paused' | 'closed'
 export type EmploymentType = 'full_time' | 'part_time' | 'contract' | 'internship' | 'remote'
 export type ApplicationStage = 'applied' | 'screening' | 'shortlisted' | 'interview_scheduled' | 'assessment' | 'offered' | 'hired' | 'rejected'
@@ -24,6 +25,7 @@ export interface Profile {
   role: UserRole
   department_id: string | null
   avatar_url: string | null
+  approval_status: ApprovalStatus
   created_at: string
   updated_at: string
   department?: Department | null
@@ -45,6 +47,7 @@ export interface Job {
   created_at: string
   updated_at: string
   published_at: string | null
+  closing_date: string | null
   department?: Department | null
   creator?: Profile | null
   _count?: {
@@ -69,6 +72,13 @@ export interface Candidate {
   global_locked_by: string | null
   global_locked_at: string | null
   global_lock_job_id: string | null
+  country_code: string | null
+  nationality: string | null
+  current_salary: number | null
+  current_salary_currency: SalaryCurrency | null
+  expected_salary: number | null
+  expected_salary_currency: SalaryCurrency | null
+  notice_period_days: number | null
   created_at: string
   updated_at: string
   applications?: Application[]
@@ -93,6 +103,17 @@ export interface Application {
   interview_location?: string | null
   interviewer_name?: string | null
   interviewer_email?: string | null
+  interviewer_emails?: string[] | null
+  interview_status?: string | null
+  recruiter_comments?: string | null
+  hiring_manager_comments?: string | null
+  screening_summary?: string | null
+  salary_expectation?: string | null
+  benefits_expectation?: string | null
+  notice_period?: string | null
+  offer_sent_at?: string | null
+  hired_at?: string | null
+  rejection_comments?: string | null
   candidate?: Candidate
   job?: Job
   assignee?: Profile | null
@@ -265,3 +286,40 @@ export const CURRENCY_SYMBOLS: Record<SalaryCurrency, string> = {
   GBP: '£',
   CNY: '¥',
 }
+
+export const APPROVAL_STATUS_LABELS: Record<ApprovalStatus, string> = {
+  pending: 'Pending',
+  approved: 'Approved',
+  rejected: 'Rejected',
+}
+
+export const APPROVAL_STATUS_COLORS: Record<ApprovalStatus, string> = {
+  pending: 'bg-amber-100 text-amber-700',
+  approved: 'bg-green-100 text-green-700',
+  rejected: 'bg-red-100 text-red-700',
+}
+
+export const COUNTRIES = [
+  { code: 'AE', name: 'United Arab Emirates' },
+  { code: 'SA', name: 'Saudi Arabia' },
+  { code: 'QA', name: 'Qatar' },
+  { code: 'KW', name: 'Kuwait' },
+  { code: 'BH', name: 'Bahrain' },
+  { code: 'OM', name: 'Oman' },
+  { code: 'US', name: 'United States' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'IN', name: 'India' },
+  { code: 'PK', name: 'Pakistan' },
+  { code: 'PH', name: 'Philippines' },
+  { code: 'EG', name: 'Egypt' },
+  { code: 'JO', name: 'Jordan' },
+  { code: 'LB', name: 'Lebanon' },
+  { code: 'SY', name: 'Syria' },
+  { code: 'IQ', name: 'Iraq' },
+  { code: 'YE', name: 'Yemen' },
+  { code: 'BD', name: 'Bangladesh' },
+  { code: 'NP', name: 'Nepal' },
+  { code: 'LK', name: 'Sri Lanka' },
+]
+
+export const COUNTRY_CODES = COUNTRIES.map(c => c.code)

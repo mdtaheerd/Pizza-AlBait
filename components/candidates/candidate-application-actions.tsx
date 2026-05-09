@@ -542,7 +542,6 @@ export function CandidateApplicationActions({
 
     switch (stage) {
       case 'applied':
-      case 'new':
         return isRecruiter ? (
           <div className="flex flex-wrap gap-2">
             <Button
