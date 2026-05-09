@@ -78,14 +78,15 @@ export default function SignUpPage() {
       
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
-          <Link href="/" className="flex items-center justify-center">
+          <Link href="/" className="flex items-center justify-center gap-3">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
-              alt="CPECC - China Petroleum Engineering & Construction Corporation"
-              width={280}
-              height={40}
-              className="h-10 w-auto"
+              src="/pizza-albait-logo.jpg"
+              alt="Pizza Al-Bait"
+              width={50}
+              height={50}
+              className="rounded"
             />
+            <span className="text-xl font-bold text-slate-800">Pizza Al-Bait</span>
           </Link>
           
           <Card className="shadow-xl">

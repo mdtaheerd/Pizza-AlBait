@@ -8,22 +8,20 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'CPECC Careers | www.careers.cpecc.ae',
-  description: 'Join CPECC - China Petroleum Engineering & Construction Corporation. Leading EPC contractor for onshore oil & gas projects in the Middle East. Explore career opportunities.',
+  title: 'Pizza Al-Bait Careers | Join Our Team',
+  description: 'Join Pizza Al-Bait - A leading restaurant brand. Explore career opportunities and be part of our growing family.',
   generator: 'v0.app',
-  metadataBase: new URL('https://www.careers.cpecc.ae'),
   openGraph: {
-    title: 'CPECC Careers | www.careers.cpecc.ae',
-    description: 'Join CPECC - Leading EPC contractor for onshore oil & gas projects in the Middle East.',
-    url: 'https://www.careers.cpecc.ae',
-    siteName: 'CPECC Careers',
+    title: 'Pizza Al-Bait Careers | Join Our Team',
+    description: 'Join Pizza Al-Bait - Explore career opportunities and be part of our growing family.',
+    siteName: 'Pizza Al-Bait Careers',
     locale: 'en_AE',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CPECC Careers | www.careers.cpecc.ae',
-    description: 'Join CPECC - Leading EPC contractor for onshore oil & gas projects in the Middle East.',
+    title: 'Pizza Al-Bait Careers | Join Our Team',
+    description: 'Join Pizza Al-Bait - Explore career opportunities and be part of our growing family.',
   },
   icons: {
     icon: [

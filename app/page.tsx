@@ -7,18 +7,14 @@ import {
   Briefcase, 
   BarChart3, 
   Building2,
-  Linkedin,
   ArrowRight,
   CheckCircle,
-  Globe,
-  Shield,
-  Calculator,
-  FileText,
-  HardHat,
-  ShieldCheck,
-  Package,
-  Wrench,
-  Cog
+  UtensilsCrossed,
+  ChefHat,
+  Truck,
+  Store,
+  Clock,
+  Heart
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -30,16 +26,16 @@ export default function HomePage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            {/* Official CPECC Logo */}
-            <Link href="/" className="flex items-center">
+            <Link href="/" className="flex items-center gap-3">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
-                alt="CPECC - China Petroleum Engineering & Construction Corporation"
-                width={400}
+                src="/pizza-albait-logo.jpg"
+                alt="Pizza Al-Bait"
+                width={50}
                 height={50}
-                className="h-12 w-auto"
+                className="rounded"
                 priority
               />
+              <span className="text-xl font-bold text-slate-800">Pizza Al-Bait</span>
             </Link>
             <div className="hidden md:flex items-center gap-8">
               <Link href="/careers" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
@@ -65,33 +61,22 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-20 min-h-[90vh] flex items-center">
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="/images/cpecc-hero.jpg"
-            alt="CPECC Oil and Gas Industry"
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/60" />
-        </div>
-        
+      <section className="relative pt-20 min-h-[90vh] flex items-center bg-gradient-to-br from-red-50 to-orange-50">
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-600/10 border border-red-600/20 text-red-600 text-sm font-medium mb-6">
-              <Globe className="h-4 w-4" />
-              Middle East Onshore Projects
+              <UtensilsCrossed className="h-4 w-4" />
+              Now Hiring Across All Locations
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
               Join{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">
-                CPECC
+                Pizza Al-Bait
               </span>{' '}
-              - Build Energy Infrastructure
+              - Where Passion Meets Pizza
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
-              China Petroleum Engineering and Construction Corporation - A leading EPC contractor delivering world-class onshore oil & gas projects across the Middle East. Shape the future of energy infrastructure.
+              Be part of a growing family that serves delicious, authentic pizza with love. We are looking for passionate individuals to join our team across multiple locations.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" asChild className="bg-red-600 hover:bg-red-700 rounded-xl text-lg px-8 py-6">
@@ -110,16 +95,16 @@ export default function HomePage() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-border/50">
               <div>
-                <p className="text-3xl font-bold text-foreground">100+</p>
-                <p className="text-sm text-muted-foreground">Onshore Projects</p>
+                <p className="text-3xl font-bold text-foreground">10+</p>
+                <p className="text-sm text-muted-foreground">Locations</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-foreground">10,000+</p>
-                <p className="text-sm text-muted-foreground">Employees</p>
+                <p className="text-3xl font-bold text-foreground">500+</p>
+                <p className="text-sm text-muted-foreground">Team Members</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-foreground">40+</p>
-                <p className="text-sm text-muted-foreground">Years Experience</p>
+                <p className="text-3xl font-bold text-foreground">5+</p>
+                <p className="text-sm text-muted-foreground">Years of Excellence</p>
               </div>
             </div>
           </div>
@@ -131,22 +116,17 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="relative">
-              <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-2xl">
-                <Image
-                  src="/images/team-epc.jpg"
-                  alt="Our Team"
-                  fill
-                  className="object-cover"
-                />
+              <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-red-100 to-orange-100 flex items-center justify-center">
+                <ChefHat className="h-32 w-32 text-red-600/30" />
               </div>
               <div className="absolute -bottom-6 -right-6 bg-card rounded-2xl p-6 shadow-xl border border-border">
                 <div className="flex items-center gap-4">
                   <div className="h-12 w-12 rounded-full bg-red-600/10 flex items-center justify-center">
-                    <Shield className="h-6 w-6 text-red-600" />
+                    <Heart className="h-6 w-6 text-red-600" />
                   </div>
                   <div>
-                    <p className="font-bold text-foreground">ISO Certified</p>
-                    <p className="text-sm text-muted-foreground">Quality & Safety</p>
+                    <p className="font-bold text-foreground">Made with Love</p>
+                    <p className="text-sm text-muted-foreground">Quality & Care</p>
                   </div>
                 </div>
               </div>
@@ -154,17 +134,17 @@ export default function HomePage() {
             
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-                Engineering Excellence in the Middle East
+                A Family of Pizza Lovers
               </h2>
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                China Petroleum Engineering and Construction Corporation (CPECC) is a premier EPC contractor specializing in onshore oil and gas, petrochemical, and energy infrastructure projects across the Middle East. Our integrated approach combines cutting-edge engineering, strategic procurement, and world-class construction capabilities.
+                Pizza Al-Bait is more than just a restaurant - it is a family committed to serving the best pizza experience. We believe in fresh ingredients, authentic recipes, and creating memorable moments for our customers.
               </p>
               <div className="space-y-4">
                 {[
-                  'Full lifecycle project delivery from concept to commissioning',
-                  'State-of-the-art engineering and design capabilities',
-                  'Global supply chain and procurement excellence',
-                  'Commitment to HSE and sustainable practices'
+                  'Competitive salaries and benefits',
+                  'Career growth and advancement opportunities',
+                  'Fun and friendly work environment',
+                  'Training and development programs'
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <CheckCircle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
@@ -182,25 +162,23 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Career Departments
+              Career Opportunities
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Join our team of experts across various disciplines
+              Join our team in various roles across our locations
             </p>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {[
-              { name: 'Engineering', icon: Building2, openings: 15, description: 'Technical & design' },
-              { name: 'Project Planning & Control', icon: FileText, openings: 12, description: 'Planning & scheduling' },
-              { name: 'Quality Control', icon: ShieldCheck, openings: 8, description: 'QA/QC assurance' },
-              { name: 'HSE', icon: Shield, openings: 10, description: 'Health, Safety & Environment' },
-              { name: 'Procurement', icon: Package, openings: 9, description: 'Materials & equipment' },
-              { name: 'Construction', icon: HardHat, openings: 20, description: 'Site construction' },
-              { name: 'Commissioning', icon: Cog, openings: 7, description: 'Plant startup' },
-              { name: 'Commercial and Finance', icon: Calculator, openings: 10, description: 'Finance & contracts' },
-              { name: 'Marketing', icon: BarChart3, openings: 5, description: 'Brand & communications' },
-              { name: 'HR & Administration', icon: Users, openings: 6, description: 'People operations' }
+              { name: 'Kitchen Staff', icon: ChefHat, openings: 15, description: 'Pizza makers & cooks' },
+              { name: 'Delivery', icon: Truck, openings: 12, description: 'Delivery drivers' },
+              { name: 'Store Operations', icon: Store, openings: 8, description: 'Cashiers & servers' },
+              { name: 'Management', icon: Building2, openings: 5, description: 'Store managers' },
+              { name: 'Customer Service', icon: Users, openings: 10, description: 'Support team' },
+              { name: 'Shift Leaders', icon: Clock, openings: 7, description: 'Team supervisors' },
+              { name: 'Marketing', icon: BarChart3, openings: 3, description: 'Brand & promotions' },
+              { name: 'HR & Admin', icon: Briefcase, openings: 4, description: 'People operations' }
             ].map((dept) => (
               <Card key={dept.name} className="border border-border/50 hover:border-red-600/30 hover:shadow-lg transition-all duration-300 cursor-pointer group overflow-hidden">
                 <CardContent className="p-4">
@@ -230,115 +208,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Services Section */}
-      <section className="py-20 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Our Core Capabilities
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Delivering integrated EPC solutions across the energy value chain
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-muted/30 overflow-hidden group hover:shadow-xl transition-all duration-300">
-              <div className="relative h-48">
-                <Image
-                  src="/images/construction-site.jpg"
-                  alt="Engineering"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent" />
-              </div>
-              <CardContent className="p-6 relative -mt-8">
-                <div className="h-14 w-14 rounded-xl bg-red-600/10 flex items-center justify-center mb-4 border border-red-600/20">
-                  <Building2 className="h-7 w-7 text-red-600" />
-                </div>
-                <h3 className="text-xl font-bold text-foreground mb-2">Engineering</h3>
-                <p className="text-muted-foreground">
-                  Advanced engineering solutions with cutting-edge technology and experienced professionals delivering innovative designs.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-muted/30 overflow-hidden group hover:shadow-xl transition-all duration-300">
-              <div className="relative h-48">
-                <Image
-                  src="/images/middle-east-construction.jpg"
-                  alt="Procurement"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent" />
-              </div>
-              <CardContent className="p-6 relative -mt-8">
-                <div className="h-14 w-14 rounded-xl bg-orange-500/10 flex items-center justify-center mb-4 border border-orange-500/20">
-                  <Globe className="h-7 w-7 text-orange-500" />
-                </div>
-                <h3 className="text-xl font-bold text-foreground mb-2">Procurement</h3>
-                <p className="text-muted-foreground">
-                  Global supply chain management ensuring quality materials and equipment delivery on time and within budget.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-muted/30 overflow-hidden group hover:shadow-xl transition-all duration-300">
-              <div className="relative h-48">
-                <Image
-                  src="/images/oil-pipeline.jpg"
-                  alt="Construction"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent" />
-              </div>
-              <CardContent className="p-6 relative -mt-8">
-                <div className="h-14 w-14 rounded-xl bg-red-600/10 flex items-center justify-center mb-4 border border-red-600/20">
-                  <Shield className="h-7 w-7 text-red-600" />
-                </div>
-                <h3 className="text-xl font-bold text-foreground mb-2">Construction</h3>
-                <p className="text-muted-foreground">
-                  World-class construction execution with stringent safety standards and proven project management methodologies.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* LinkedIn Integration CTA */}
-      <section className="py-20 bg-gradient-to-br from-[#0077B5] to-[#005582] relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
-        </div>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-white/10 mb-6">
-            <Linkedin className="h-8 w-8 text-white" />
-          </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Connect with Us on LinkedIn
-          </h2>
-          <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">
-            Follow our company page for the latest job openings, industry insights, and company news. Apply directly using your LinkedIn profile.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-[#0077B5] hover:bg-white/90 rounded-xl text-lg px-8">
-              <Linkedin className="mr-2 h-5 w-5" />
-              Follow Our Company
-            </Button>
-            <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 rounded-xl text-lg px-8">
-              Import Your Profile
-            </Button>
-          </div>
-        </div>
-      </section>
-
       {/* Recruiter CTA */}
-      <section className="py-20">
+      <section className="py-20 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Card className="border-0 shadow-2xl bg-gradient-to-br from-card via-card to-muted/50 overflow-hidden">
             <CardContent className="p-8 md:p-12">
@@ -369,7 +240,7 @@ export default function HomePage() {
                     { icon: Users, label: 'Candidate Pipeline', desc: 'Track all applicants' },
                     { icon: Briefcase, label: 'Job Management', desc: 'Create & manage postings' },
                     { icon: BarChart3, label: 'Analytics', desc: 'Hiring metrics & reports' },
-                    { icon: Linkedin, label: 'LinkedIn Import', desc: 'Import candidates' }
+                    { icon: Clock, label: 'Scheduling', desc: 'Interview scheduling' }
                   ].map((item) => (
                     <div key={item.label} className="p-4 rounded-xl bg-muted/50 border border-border/50">
                       <item.icon className="h-6 w-6 text-red-600 mb-2" />
@@ -389,50 +260,40 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
-              {/* Official CPECC Footer Logo */}
-              <div className="mb-4">
+              <div className="flex items-center gap-3 mb-4">
                 <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CPECC%20Logo-v2VEWr2wpVlNgvVySqwQDyOe1A3E71.jpg"
-                  alt="CPECC Logo"
-                  width={80}
-                  height={80}
-                  className="rounded-lg w-auto h-auto"
+                  src="/pizza-albait-logo.jpg"
+                  alt="Pizza Al-Bait Logo"
+                  width={50}
+                  height={50}
+                  className="rounded"
                 />
+                <span className="text-xl font-bold">Pizza Al-Bait</span>
               </div>
-              <p className="text-white/60 text-sm max-w-sm">
-                China Petroleum Engineering and Construction Corporation - Leading EPC contractor for onshore oil & gas projects in the Middle East.
+              <p className="text-slate-400 mb-4 max-w-md">
+                Join our growing family of pizza lovers. We are committed to delivering excellence in every slice and creating opportunities for passionate individuals.
               </p>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Quick Links</h4>
-              <div className="space-y-2">
-                <Link href="/careers" className="block text-white/60 hover:text-white text-sm">Open Positions</Link>
-                <Link href="#about" className="block text-white/60 hover:text-white text-sm">About Us</Link>
-                <Link href="#departments" className="block text-white/60 hover:text-white text-sm">Departments</Link>
-              </div>
+              <h3 className="font-semibold mb-4">Quick Links</h3>
+              <ul className="space-y-2 text-slate-400">
+                <li><Link href="/careers" className="hover:text-white transition-colors">Open Positions</Link></li>
+                <li><Link href="/auth/login" className="hover:text-white transition-colors">Recruiter Login</Link></li>
+                <li><Link href="/auth/sign-up" className="hover:text-white transition-colors">Create Account</Link></li>
+              </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Departments</h4>
-              <div className="space-y-2">
-                <span className="block text-white/60 text-sm">Marketing</span>
-                <span className="block text-white/60 text-sm">Project Planning & Control</span>
-                <span className="block text-white/60 text-sm">Commercial and Finance</span>
-                <span className="block text-white/60 text-sm">HR & Administration</span>
-              </div>
+              <h3 className="font-semibold mb-4">Contact</h3>
+              <ul className="space-y-2 text-slate-400">
+                <li>careers@pizzaalbait.com</li>
+                <li>+971 XX XXX XXXX</li>
+              </ul>
             </div>
           </div>
-          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-center md:text-left">
-              <p className="text-white/60 text-sm font-medium mb-1">www.careers.cpecc.ae</p>
-              <p className="text-white/40 text-sm">
-                &copy; {new Date().getFullYear()} China Petroleum Engineering and Construction Corporation. All rights reserved.
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link href="#" className="text-white/40 hover:text-white transition-colors">
-                <Linkedin className="h-5 w-5" />
-              </Link>
-            </div>
+          <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-slate-400 text-sm">
+              &copy; {new Date().getFullYear()} Pizza Al-Bait. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>

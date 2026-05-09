@@ -63,14 +63,15 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-white">
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex items-center gap-3">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
-              alt="CPECC - China Petroleum Engineering & Construction Corporation"
-              width={300}
-              height={40}
-              className="h-10 w-auto"
+              src="/pizza-albait-logo.jpg"
+              alt="Pizza Al-Bait"
+              width={50}
+              height={50}
+              className="rounded"
             />
+            <span className="text-xl font-bold text-slate-800">Pizza Al-Bait</span>
           </Link>
           <div className="flex items-center gap-4">
             <Button variant="ghost" asChild>
@@ -83,19 +84,8 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
         </div>
       </header>
 
-      {/* Hero Section with Background */}
-      <section className="relative overflow-hidden border-b">
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="/images/middle-east-construction.jpg"
-            alt="CPECC Middle East Construction"
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/90 to-background" />
-        </div>
-        
+      {/* Hero Section */}
+      <section className="relative overflow-hidden border-b bg-gradient-to-br from-red-50 to-orange-50">
         <div className="relative z-10 mx-auto max-w-5xl px-6 py-20 text-center">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card/80 backdrop-blur px-4 py-1.5 text-sm shadow-sm">
             <Users className="h-4 w-4 text-red-600" />
@@ -105,35 +95,27 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
           <h1 className="text-4xl font-bold tracking-tight text-balance sm:text-5xl">
             Join
             <span className="mx-2 bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">
-              CPECC
+              Pizza Al-Bait
             </span>
-            in the Middle East
+            Team
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground text-pretty leading-relaxed">
-            China Petroleum Engineering and Construction Corporation - Join our team of engineers, project managers, and industry experts working on world-class onshore oil & gas projects across the Middle East.
+            Be part of our growing family. We are looking for passionate individuals who love great food and excellent customer service.
           </p>
           
           <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-2 bg-card/50 backdrop-blur px-3 py-1.5 rounded-full">
               <Shield className="h-4 w-4 text-red-600" />
-              World-class HSE standards
+              Great work environment
             </div>
             <div className="flex items-center gap-2 bg-card/50 backdrop-blur px-3 py-1.5 rounded-full">
               <Globe className="h-4 w-4 text-red-600" />
-              Middle East onshore projects
+              Multiple locations
             </div>
             <div className="flex items-center gap-2 bg-card/50 backdrop-blur px-3 py-1.5 rounded-full">
               <Briefcase className="h-4 w-4 text-red-600" />
               Competitive packages
             </div>
-          </div>
-
-          {/* LinkedIn CTA */}
-          <div className="mt-8">
-            <Button size="lg" className="bg-[#0077B5] hover:bg-[#005582] rounded-xl text-lg">
-              <Linkedin className="mr-2 h-5 w-5" />
-              Apply with LinkedIn
-            </Button>
           </div>
         </div>
       </section>

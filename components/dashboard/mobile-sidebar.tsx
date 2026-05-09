@@ -45,14 +45,14 @@ export function MobileSidebar({ profile }: MobileSidebarProps) {
       <SheetHeader className="border-b px-6 py-4">
         <SheetTitle className="flex items-center gap-3">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CPECC%20Logo-v2VEWr2wpVlNgvVySqwQDyOe1A3E71.jpg"
-            alt="CPECC Logo"
+            src="/pizza-albait-logo.jpg"
+            alt="Pizza Al-Bait Logo"
             width={40}
             height={40}
             className="rounded"
           />
           <div>
-            <span className="text-sm font-bold tracking-tight">CPECC</span>
+            <span className="text-sm font-bold tracking-tight">Pizza Al-Bait</span>
             <span className="text-[10px] text-muted-foreground block">Recruitment Portal</span>
           </div>
         </SheetTitle>
