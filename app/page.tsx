@@ -13,6 +13,7 @@ import {
   Heart
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function HomePage() {
   return (
@@ -21,11 +22,15 @@ export default function HomePage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-bold">
-                ATS
-              </div>
-              <span className="text-xl font-bold text-slate-800">ATS</span>
+            <Link href="/" className="flex items-center">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pxapD8smtnaNSYCYo9mTLtPDa75C80.png"
+                alt="TalentTrack ATS"
+                width={180}
+                height={50}
+                className="h-12 w-auto"
+                priority
+              />
             </Link>
             <div className="hidden md:flex items-center gap-8">
               <Link href="/careers" className="text-muted-foreground hover:text-foreground transition-colors font-medium">

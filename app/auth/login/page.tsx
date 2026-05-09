@@ -12,6 +12,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Linkedin, Mail, Loader2, Home } from 'lucide-react'
@@ -59,11 +60,14 @@ export default function LoginPage() {
       
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
-          <Link href="/" className="flex items-center justify-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-bold">
-              ATS
-            </div>
-            <span className="text-xl font-bold text-slate-800">ATS</span>
+          <Link href="/" className="flex items-center justify-center">
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pxapD8smtnaNSYCYo9mTLtPDa75C80.png"
+              alt="TalentTrack ATS"
+              width={200}
+              height={56}
+              className="h-14 w-auto"
+            />
           </Link>
           
           <Card className="shadow-xl">

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import type { Profile } from '@/lib/types'
@@ -42,14 +43,14 @@ export function MobileSidebar({ profile }: MobileSidebarProps) {
   return (
     <div className="flex h-full flex-col">
       <SheetHeader className="border-b px-6 py-4">
-        <SheetTitle className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-bold text-sm">
-            ATS
-          </div>
-          <div>
-            <span className="text-sm font-bold tracking-tight">ATS</span>
-            <span className="text-[10px] text-muted-foreground block">Applicant Tracking</span>
-          </div>
+        <SheetTitle className="flex items-center">
+          <Image
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pxapD8smtnaNSYCYo9mTLtPDa75C80.png"
+            alt="TalentTrack ATS"
+            width={160}
+            height={45}
+            className="h-10 w-auto"
+          />
         </SheetTitle>
       </SheetHeader>
       <nav className="flex-1 space-y-1 p-4">

@@ -8,20 +8,20 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'ATS | Applicant Tracking System',
-  description: 'Modern applicant tracking system for managing your recruitment pipeline, candidates, and hiring process.',
+  title: 'TalentTrack ATS | Applicant Tracking System',
+  description: 'TalentTrack ATS - Modern applicant tracking system for managing your recruitment pipeline, candidates, and hiring process.',
   generator: 'v0.app',
   openGraph: {
-    title: 'ATS | Applicant Tracking System',
-    description: 'Modern applicant tracking system for managing your recruitment pipeline.',
-    siteName: 'ATS',
+    title: 'TalentTrack ATS | Applicant Tracking System',
+    description: 'TalentTrack ATS - Modern applicant tracking system for managing your recruitment pipeline.',
+    siteName: 'TalentTrack ATS',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ATS | Applicant Tracking System',
-    description: 'Modern applicant tracking system for managing your recruitment pipeline.',
+    title: 'TalentTrack ATS | Applicant Tracking System',
+    description: 'TalentTrack ATS - Modern applicant tracking system for managing your recruitment pipeline.',
   },
   icons: {
     icon: [

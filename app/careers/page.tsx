@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { MapPin, Clock, Banknote, Search, HardHat, ArrowRight, Users, Briefcase, Shield, Linkedin, Globe } from 'lucide-react'
 import { EMPLOYMENT_TYPE_LABELS } from '@/lib/types'
 import Link from 'next/link'
+import Image from 'next/image'
 import { CareersSearch } from '@/components/careers/careers-search'
 
 interface CareersPageProps {
@@ -62,11 +63,14 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-white">
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-bold">
-              ATS
-            </div>
-            <span className="text-xl font-bold text-slate-800">ATS</span>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pxapD8smtnaNSYCYo9mTLtPDa75C80.png"
+              alt="TalentTrack ATS"
+              width={180}
+              height={50}
+              className="h-12 w-auto"
+            />
           </Link>
           <div className="flex items-center gap-4">
             <Button variant="ghost" asChild>
