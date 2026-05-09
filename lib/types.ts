@@ -89,6 +89,10 @@ export interface Application {
   lock_status: LockStatus
   applied_at: string
   updated_at: string
+  interview_date?: string | null
+  interview_location?: string | null
+  interviewer_name?: string | null
+  interviewer_email?: string | null
   candidate?: Candidate
   job?: Job
   assignee?: Profile | null

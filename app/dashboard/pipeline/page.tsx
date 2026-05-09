@@ -45,7 +45,16 @@ export default async function PipelinePage({ searchParams }: PipelinePageProps) 
     applicationsQuery = applicationsQuery.eq('job_id', jobFilter)
   }
 
-  const { data: applications } = await applicationsQuery
+  const { data: applications, error: applicationsError } = await applicationsQuery
+
+  console.log('[v0] Pipeline - User:', user?.email)
+  console.log('[v0] Pipeline - Profile role:', profile?.role)
+  console.log('[v0] Pipeline - Job filter:', jobFilter)
+  console.log('[v0] Pipeline - Applications count:', applications?.length)
+  console.log('[v0] Pipeline - Applications error:', applicationsError)
+  if (applications?.length) {
+    console.log('[v0] Pipeline - Sample stages:', applications.slice(0, 3).map(a => a.stage))
+  }
 
   return (
     <div className="flex h-full flex-col space-y-4">
