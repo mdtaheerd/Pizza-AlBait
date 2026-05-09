@@ -254,18 +254,17 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center mb-4">
                 <Image
-                  src="/pizza-albait-logo.jpg"
-                  alt="Pizza Al-Bait Logo"
-                  width={50}
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pxapD8smtnaNSYCYo9mTLtPDa75C80.png"
+                  alt="TalentTrack ATS"
+                  width={180}
                   height={50}
-                  className="rounded"
+                  className="h-12 w-auto bg-white rounded-lg p-1"
                 />
-                <span className="text-xl font-bold">Pizza Al-Bait</span>
               </div>
               <p className="text-slate-400 mb-4 max-w-md">
-                Join our growing family of pizza lovers. We are committed to delivering excellence in every slice and creating opportunities for passionate individuals.
+                Modern applicant tracking system for managing your recruitment pipeline, candidates, and hiring process efficiently.
               </p>
             </div>
             <div>
@@ -279,14 +278,13 @@ export default function HomePage() {
             <div>
               <h3 className="font-semibold mb-4">Contact</h3>
               <ul className="space-y-2 text-slate-400">
-                <li>careers@pizzaalbait.com</li>
-                <li>+971 XX XXX XXXX</li>
+                <li>cpecchr.auh@gmail.com</li>
               </ul>
             </div>
           </div>
           <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-slate-400 text-sm">
-              &copy; {new Date().getFullYear()} Pizza Al-Bait. All rights reserved.
+              &copy; {new Date().getFullYear()} TalentTrack ATS. All rights reserved.
             </p>
           </div>
         </div>
