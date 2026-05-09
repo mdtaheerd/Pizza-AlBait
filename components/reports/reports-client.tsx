@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import type { Application, Department, Profile } from '@/lib/types'
-import { STAGE_LABELS, STAGE_COLORS } from '@/lib/types'
+import type { Application, Department, Profile, SalaryCurrency } from '@/lib/types'
+import { STAGE_LABELS, STAGE_COLORS, CURRENCY_SYMBOLS } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -104,10 +104,21 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
 
-  // Format salary with currency - always use AED
-  const formatSalary = (amount: number | null | undefined) => {
+  // Format salary with currency
+  const formatSalary = (amount: number | null | undefined, currency: SalaryCurrency = 'AED') => {
     if (!amount) return 'N/A'
-    return `AED ${amount.toLocaleString()}`
+    const symbol = CURRENCY_SYMBOLS[currency] || 'AED '
+    return `${symbol}${amount.toLocaleString()}`
+  }
+
+  // Format job salary range with currency
+  const formatJobSalary = (min: number | null, max: number | null, currency: SalaryCurrency = 'USD') => {
+    if (!min && !max) return 'N/A'
+    const symbol = CURRENCY_SYMBOLS[currency] || '$'
+    if (min && max) return `${symbol}${min.toLocaleString()} - ${symbol}${max.toLocaleString()}`
+    if (min) return `From ${symbol}${min.toLocaleString()}`
+    if (max) return `Up to ${symbol}${max.toLocaleString()}`
+    return 'N/A'
   }
 
   // Filter applications based on report type
@@ -299,9 +310,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
       app.candidate?.nationality || '',
       formatSalary(app.candidate?.current_salary),
       formatSalary(app.candidate?.expected_salary),
-      app.job?.salary_min && app.job?.salary_max 
-        ? `${formatSalary(app.job.salary_min)} - ${formatSalary(app.job.salary_max)}`
-        : 'N/A',
+      formatJobSalary(app.job?.salary_min ?? null, app.job?.salary_max ?? null, app.job?.salary_currency),
       app.candidate?.notice_period_days?.toString() || '',
       format(new Date(app.applied_at), 'yyyy-MM-dd'),
       STAGE_LABELS[app.stage as keyof typeof STAGE_LABELS] || app.stage,
@@ -558,11 +567,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                             {formatSalary(app.candidate?.expected_salary)}
                           </TableCell>
                           <TableCell className="text-sm">
-                            {app.job?.salary_min && app.job?.salary_max ? (
-                              <span>
-                                {formatSalary(app.job.salary_min)} - {formatSalary(app.job.salary_max)}
-                              </span>
-                            ) : '-'}
+                            {formatJobSalary(app.job?.salary_min ?? null, app.job?.salary_max ?? null, app.job?.salary_currency)}
                           </TableCell>
                           <TableCell>
                             {app.candidate?.notice_period_days !== null && app.candidate?.notice_period_days !== undefined
