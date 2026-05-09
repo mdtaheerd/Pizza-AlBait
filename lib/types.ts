@@ -1,7 +1,7 @@
 export type UserRole = 'admin' | 'recruiter' | 'hiring_manager'
 export type JobStatus = 'draft' | 'open' | 'paused' | 'closed'
 export type EmploymentType = 'full_time' | 'part_time' | 'contract' | 'internship' | 'remote'
-export type ApplicationStage = 'applied' | 'screening' | 'interview' | 'assessment' | 'offer' | 'hired' | 'rejected'
+export type ApplicationStage = 'applied' | 'screening' | 'shortlisted' | 'interview_scheduled' | 'assessment' | 'offered' | 'hired' | 'rejected'
 export type InterviewType = 'phone' | 'video' | 'onsite' | 'technical' | 'panel'
 export type InterviewStatus = 'scheduled' | 'completed' | 'cancelled' | 'no_show'
 export type CandidateSource = 'career_page' | 'linkedin' | 'referral' | 'agency' | 'other'
@@ -89,6 +89,10 @@ export interface Application {
   lock_status: LockStatus
   applied_at: string
   updated_at: string
+  interview_date?: string | null
+  interview_location?: string | null
+  interviewer_name?: string | null
+  interviewer_email?: string | null
   candidate?: Candidate
   job?: Job
   assignee?: Profile | null
@@ -163,9 +167,10 @@ export interface PipelineColumn {
 export const STAGE_LABELS: Record<ApplicationStage, string> = {
   applied: 'Applied',
   screening: 'Screening',
-  interview: 'Interview',
+  shortlisted: 'Shortlisted',
+  interview_scheduled: 'Interview',
   assessment: 'Assessment',
-  offer: 'Offer',
+  offered: 'Offered',
   hired: 'Hired',
   rejected: 'Rejected',
 }
@@ -173,9 +178,10 @@ export const STAGE_LABELS: Record<ApplicationStage, string> = {
 export const STAGE_COLORS: Record<ApplicationStage, string> = {
   applied: 'bg-slate-100 text-slate-700',
   screening: 'bg-blue-100 text-blue-700',
-  interview: 'bg-amber-100 text-amber-700',
+  shortlisted: 'bg-cyan-100 text-cyan-700',
+  interview_scheduled: 'bg-amber-100 text-amber-700',
   assessment: 'bg-purple-100 text-purple-700',
-  offer: 'bg-emerald-100 text-emerald-700',
+  offered: 'bg-emerald-100 text-emerald-700',
   hired: 'bg-green-100 text-green-700',
   rejected: 'bg-red-100 text-red-700',
 }
