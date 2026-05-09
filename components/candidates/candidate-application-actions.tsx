@@ -542,7 +542,6 @@ export function CandidateApplicationActions({
 
     switch (stage) {
       case 'applied':
-      case 'new':
         return isRecruiter ? (
           <div className="flex flex-wrap gap-2">
             <Button
@@ -666,20 +665,6 @@ export function CandidateApplicationActions({
             )}
           </div>
         )
-
-      case 'interviewed':
-        return (isRecruiter || isHiringManager) ? (
-          <div className="flex flex-wrap gap-2">
-            <Button
-              size="sm"
-              onClick={() => setInterviewResultDialogOpen(true)}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Move to Offer / Reject
-            </Button>
-          </div>
-        ) : null
 
       case 'offered':
         return isRecruiter ? (

@@ -189,7 +189,7 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
                       <div className="flex items-center gap-2">
                         {job.employment_type && (
                           <Badge variant="secondary" className="shrink-0">
-                            {EMPLOYMENT_TYPE_LABELS[job.employment_type]}
+                            {EMPLOYMENT_TYPE_LABELS[job.employment_type as keyof typeof EMPLOYMENT_TYPE_LABELS]}
                           </Badge>
                         )}
                         <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-1 group-hover:text-red-600" />
@@ -207,7 +207,7 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
                       {job.employment_type && (
                         <span className="flex items-center gap-1.5">
                           <Clock className="h-4 w-4" />
-                          {EMPLOYMENT_TYPE_LABELS[job.employment_type]}
+                          {EMPLOYMENT_TYPE_LABELS[job.employment_type as keyof typeof EMPLOYMENT_TYPE_LABELS]}
                         </span>
                       )}
                       {formatSalary(job.salary_min, job.salary_max) && (

@@ -343,20 +343,20 @@ export default function CandidateRegisterPage() {
                         <CommandGroup className="max-h-64 overflow-auto">
                           {COUNTRIES.map((country) => (
                             <CommandItem
-                              key={country}
-                              value={country}
+                              key={country.code}
+                              value={country.name}
                               onSelect={() => {
-                                setFormData({ ...formData, nationality: country })
+                                setFormData({ ...formData, nationality: country.name })
                                 setNationalityOpen(false)
                               }}
                             >
                               <Check
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  formData.nationality === country ? "opacity-100" : "opacity-0"
+                                  formData.nationality === country.name ? "opacity-100" : "opacity-0"
                                 )}
                               />
-                              {country}
+                              {country.flag} {country.name}
                             </CommandItem>
                           ))}
                         </CommandGroup>

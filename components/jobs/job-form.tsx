@@ -160,7 +160,7 @@ export function JobForm({ job, departments }: JobFormProps) {
               <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
-                onValueChange={(value) => setFormData({ ...formData, status: value })}
+                onValueChange={(value) => setFormData({ ...formData, status: value as JobStatus })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
@@ -180,7 +180,7 @@ export function JobForm({ job, departments }: JobFormProps) {
             <Label htmlFor="salary_currency">Salary Currency</Label>
             <Select
               value={formData.salary_currency}
-              onValueChange={(value) => setFormData({ ...formData, salary_currency: value })}
+              onValueChange={(value) => setFormData({ ...formData, salary_currency: value as SalaryCurrency })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select currency" />

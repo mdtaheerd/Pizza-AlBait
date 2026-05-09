@@ -40,7 +40,7 @@ interface CandidateDashboardClientProps {
     })[]
   }) | null
   openJobs: (Pick<Job, 'id' | 'title' | 'location' | 'employment_type' | 'closing_date'> & {
-    department?: { id: string; name: string } | null
+    department?: { id: string; name: string }[] | { id: string; name: string } | null
   })[]
   userEmail: string
 }
@@ -234,8 +234,8 @@ export function CandidateDashboardClient({ candidate, openJobs, userEmail }: Can
                     <div className="flex-1">
                       <h3 className="font-medium">{job.title}</h3>
                       <div className="flex flex-wrap gap-2 mt-1 text-sm text-muted-foreground">
-                        {job.department?.name && (
-                          <span>{job.department.name}</span>
+                        {(Array.isArray(job.department) ? job.department[0]?.name : job.department?.name) && (
+                          <span>{Array.isArray(job.department) ? job.department[0]?.name : job.department?.name}</span>
                         )}
                         {job.location && (
                           <span className="flex items-center gap-1">

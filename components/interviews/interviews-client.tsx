@@ -47,7 +47,7 @@ import {
 import { format } from 'date-fns'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import type { Interview } from '@/lib/types'
+// Using local interface to avoid type conflicts with Interview's application property
 
 const INTERVIEW_TYPE_ICONS: Record<string, typeof Phone> = {
   phone: Phone,
@@ -64,7 +64,18 @@ const STATUS_COLORS: Record<string, string> = {
   no_show: 'bg-amber-100 text-amber-700',
 }
 
-interface InterviewWithRelations extends Interview {
+interface InterviewWithRelations {
+  id: string
+  application_id: string
+  scheduled_at: string
+  duration_minutes: number
+  interview_type: string
+  location: string | null
+  meeting_link: string | null
+  notes: string | null
+  status: string
+  created_at: string
+  updated_at: string
   application?: {
     id: string
     candidate?: {
@@ -83,7 +94,7 @@ interface InterviewWithRelations extends Interview {
   interviewer?: {
     full_name: string
     email: string
-  }
+  } | null
 }
 
 interface InterviewsClientProps {
