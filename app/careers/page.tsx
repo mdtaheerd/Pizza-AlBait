@@ -3,11 +3,10 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { MapPin, Clock, Banknote, Search, HardHat, ArrowRight, Users, Briefcase, Shield, Linkedin, Globe } from 'lucide-react'
-import { EMPLOYMENT_TYPE_LABELS, CURRENCY_SYMBOLS, type SalaryCurrency } from '@/lib/types'
+import { EMPLOYMENT_TYPE_LABELS } from '@/lib/types'
 import Link from 'next/link'
-import Image from 'next/image'
 import { CareersSearch } from '@/components/careers/careers-search'
-import { autoCloseExpiredJobs } from '@/lib/jobs/auto-close'
+import Image from 'next/image'
 
 interface CareersPageProps {
   searchParams: Promise<{ search?: string; department?: string }>
@@ -16,9 +15,6 @@ interface CareersPageProps {
 export default async function CareersPage({ searchParams }: CareersPageProps) {
   const { search, department } = await searchParams
   const supabase = await createClient()
-  
-  // Auto-close any expired jobs before showing the listings
-  await autoCloseExpiredJobs()
 
   const { data: departments } = await supabase
     .from('departments')
@@ -49,15 +45,16 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
       )
     : jobs || []
 
-  const formatSalary = (min: number | null, max: number | null, currency: SalaryCurrency = 'USD') => {
+  const formatSalary = (min: number | null, max: number | null) => {
     if (!min && !max) return null
-    const symbol = CURRENCY_SYMBOLS[currency] || '$'
     const formatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
       maximumFractionDigits: 0,
     })
-    if (min && max) return `${symbol}${formatter.format(min)} - ${symbol}${formatter.format(max)}`
-    if (min) return `From ${symbol}${formatter.format(min)}`
-    if (max) return `Up to ${symbol}${formatter.format(max)}`
+    if (min && max) return `${formatter.format(min)} - ${formatter.format(max)}`
+    if (min) return `From ${formatter.format(min)}`
+    if (max) return `Up to ${formatter.format(max)}`
     return null
   }
 
@@ -68,11 +65,11 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
           <Link href="/" className="flex items-center">
             <Image
-              src="/images/talenttrack-logo.png"
-              alt="TalentTrack ATS"
-              width={200}
-              height={60}
-              className="h-14 w-auto"
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
+              alt="CPECC - China Petroleum Engineering & Construction Corporation"
+              width={300}
+              height={40}
+              className="h-10 w-auto"
             />
           </Link>
           <div className="flex items-center gap-4">
@@ -91,7 +88,7 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/middle-east-construction.jpg"
-            alt="Professional Team"
+            alt="CPECC Middle East Construction"
             fill
             className="object-cover"
             priority
@@ -106,14 +103,14 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
           </div>
           
           <h1 className="text-4xl font-bold tracking-tight text-balance sm:text-5xl">
-            Find Your Next
+            Join
             <span className="mx-2 bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">
-              Career
+              CPECC
             </span>
-            Opportunity
+            in the Middle East
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground text-pretty leading-relaxed">
-            Browse open positions and apply to join our growing team. We are always looking for talented individuals to help us achieve our goals.
+            China Petroleum Engineering and Construction Corporation - Join our team of engineers, project managers, and industry experts working on world-class onshore oil & gas projects across the Middle East.
           </p>
           
           <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
@@ -213,10 +210,10 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
                           {EMPLOYMENT_TYPE_LABELS[job.employment_type]}
                         </span>
                       )}
-                      {formatSalary(job.salary_min, job.salary_max, job.salary_currency) && (
+                      {formatSalary(job.salary_min, job.salary_max) && (
                         <span className="flex items-center gap-1.5">
                           <Banknote className="h-4 w-4" />
-                          {formatSalary(job.salary_min, job.salary_max, job.salary_currency)}
+                          {formatSalary(job.salary_min, job.salary_max)}
                         </span>
                       )}
                     </div>
@@ -236,7 +233,7 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
       {/* Why Join Us */}
       <section className="border-t bg-muted/30 py-16">
         <div className="mx-auto max-w-5xl px-6">
-          <h2 className="text-2xl font-bold text-center mb-8">Why Join Us?</h2>
+          <h2 className="text-2xl font-bold text-center mb-8">Why Join CPECC?</h2>
           <div className="grid md:grid-cols-3 gap-6">
             <Card className="border-0 shadow-md">
               <CardContent className="p-6 text-center">
@@ -275,11 +272,11 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
               <Image
-                src="/images/talenttrack-logo.png"
-                alt="TalentTrack ATS"
-                width={140}
-                height={45}
-                className="h-10 w-auto bg-white rounded-lg p-2"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CPECC%20Logo-v2VEWr2wpVlNgvVySqwQDyOe1A3E71.jpg"
+                alt="CPECC Logo"
+                width={60}
+                height={60}
+                className="rounded-lg w-auto h-auto"
               />
             </div>
             <div className="flex items-center gap-4">
@@ -289,8 +286,8 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-white/10 text-center text-white/60 text-sm">
-            <p className="mb-2">TalentTrack ATS</p>
-            <p>&copy; {new Date().getFullYear()} TalentTrack ATS. All rights reserved.</p>
+            <p className="mb-2">www.careers.cpecc.ae</p>
+            <p>&copy; {new Date().getFullYear()} China Petroleum Engineering and Construction Corporation (CPECC). All rights reserved.</p>
           </div>
         </div>
       </footer>

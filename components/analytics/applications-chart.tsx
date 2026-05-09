@@ -22,43 +22,39 @@ export function ApplicationsChart({ data }: ApplicationsChartProps) {
       <AreaChart data={data} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
         <defs>
           <linearGradient id="colorApplications" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#10B981" stopOpacity={0.4} />
-            <stop offset="95%" stopColor="#10B981" stopOpacity={0.05} />
+            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+        <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis
           dataKey="date"
-          tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+          tick={{ fontSize: 12 }}
           tickLine={false}
           axisLine={false}
           interval="preserveStartEnd"
         />
         <YAxis
-          tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+          tick={{ fontSize: 12 }}
           tickLine={false}
           axisLine={false}
           allowDecimals={false}
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: 'hsl(var(--card))',
+            backgroundColor: 'hsl(var(--background))',
             border: '1px solid hsl(var(--border))',
             borderRadius: '8px',
-            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
           }}
           formatter={(value: number) => [value, 'Applications']}
-          labelStyle={{ color: 'hsl(var(--foreground))' }}
         />
         <Area
           type="monotone"
           dataKey="applications"
-          stroke="#10B981"
-          strokeWidth={3}
+          stroke="#3b82f6"
+          strokeWidth={2}
           fillOpacity={1}
           fill="url(#colorApplications)"
-          dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }}
-          activeDot={{ r: 6, fill: '#10B981', stroke: '#fff', strokeWidth: 2 }}
         />
       </AreaChart>
     </ResponsiveContainer>

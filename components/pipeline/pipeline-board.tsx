@@ -32,10 +32,9 @@ interface PipelineBoardProps {
 const STAGES: ApplicationStage[] = [
   'applied',
   'screening',
-  'shortlisted',
-  'interview_scheduled',
+  'interview',
   'assessment',
-  'offered',
+  'offer',
   'hired',
   'rejected',
 ]

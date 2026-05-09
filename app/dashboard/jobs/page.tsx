@@ -3,13 +3,9 @@ import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import { JobsTable } from '@/components/jobs/jobs-table'
-import { autoCloseExpiredJobs } from '@/lib/jobs/auto-close'
 
 export default async function JobsPage() {
   const supabase = await createClient()
-
-  // Auto-close any expired jobs before fetching the list
-  await autoCloseExpiredJobs()
 
   const { data: jobs } = await supabase
     .from('jobs')

@@ -17,13 +17,9 @@ import { STAGE_LABELS, STAGE_COLORS } from '@/lib/types'
 import type { Application, Interview } from '@/lib/types'
 import { format } from 'date-fns'
 import Link from 'next/link'
-import { autoCloseExpiredJobs } from '@/lib/jobs/auto-close'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
-  
-  // Auto-close any expired jobs when dashboard loads
-  await autoCloseExpiredJobs()
 
   const [
     { count: totalJobs },
