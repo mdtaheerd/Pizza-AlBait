@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { MapPin, Clock, Banknote, Search, HardHat, ArrowRight, Users, Briefcase, Shield, Linkedin, Globe } from 'lucide-react'
-import { EMPLOYMENT_TYPE_LABELS } from '@/lib/types'
+import { EMPLOYMENT_TYPE_LABELS, CURRENCY_SYMBOLS, type SalaryCurrency } from '@/lib/types'
 import Link from 'next/link'
 import Image from 'next/image'
 import { CareersSearch } from '@/components/careers/careers-search'
@@ -49,16 +49,15 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
       )
     : jobs || []
 
-  const formatSalary = (min: number | null, max: number | null) => {
+  const formatSalary = (min: number | null, max: number | null, currency: SalaryCurrency = 'USD') => {
     if (!min && !max) return null
+    const symbol = CURRENCY_SYMBOLS[currency] || '$'
     const formatter = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
       maximumFractionDigits: 0,
     })
-    if (min && max) return `${formatter.format(min)} - ${formatter.format(max)}`
-    if (min) return `From ${formatter.format(min)}`
-    if (max) return `Up to ${formatter.format(max)}`
+    if (min && max) return `${symbol}${formatter.format(min)} - ${symbol}${formatter.format(max)}`
+    if (min) return `From ${symbol}${formatter.format(min)}`
+    if (max) return `Up to ${symbol}${formatter.format(max)}`
     return null
   }
 
@@ -214,10 +213,10 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
                           {EMPLOYMENT_TYPE_LABELS[job.employment_type]}
                         </span>
                       )}
-                      {formatSalary(job.salary_min, job.salary_max) && (
+                      {formatSalary(job.salary_min, job.salary_max, job.salary_currency) && (
                         <span className="flex items-center gap-1.5">
                           <Banknote className="h-4 w-4" />
-                          {formatSalary(job.salary_min, job.salary_max)}
+                          {formatSalary(job.salary_min, job.salary_max, job.salary_currency)}
                         </span>
                       )}
                     </div>
