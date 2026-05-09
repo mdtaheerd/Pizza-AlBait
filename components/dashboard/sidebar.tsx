@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import type { Profile } from '@/lib/types'
@@ -43,16 +42,12 @@ export function DashboardSidebar({ profile }: DashboardSidebarProps) {
     <aside className="hidden w-64 flex-col bg-sidebar lg:flex">
       {/* Logo */}
       <div className="flex h-20 items-center justify-center border-b border-sidebar-border px-4 bg-white">
-        <Image
-          src="/pizza-albait-logo.jpg"
-          alt="Pizza Al-Bait Logo"
-          width={50}
-          height={50}
-          className="rounded"
-        />
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-bold text-sm">
+          ATS
+        </div>
         <div className="ml-3">
-          <span className="text-sm font-bold text-slate-800 block">Pizza Al-Bait</span>
-          <span className="text-[10px] text-slate-500 block leading-tight">Recruitment Portal</span>
+          <span className="text-sm font-bold text-slate-800 block">ATS</span>
+          <span className="text-[10px] text-slate-500 block leading-tight">Applicant Tracking</span>
         </div>
       </div>
 

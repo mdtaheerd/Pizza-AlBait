@@ -6,7 +6,6 @@ import { MapPin, Clock, Banknote, Search, HardHat, ArrowRight, Users, Briefcase,
 import { EMPLOYMENT_TYPE_LABELS } from '@/lib/types'
 import Link from 'next/link'
 import { CareersSearch } from '@/components/careers/careers-search'
-import Image from 'next/image'
 
 interface CareersPageProps {
   searchParams: Promise<{ search?: string; department?: string }>
@@ -64,14 +63,10 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
       <header className="sticky top-0 z-50 border-b bg-white">
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-3">
-            <Image
-              src="/pizza-albait-logo.jpg"
-              alt="Pizza Al-Bait"
-              width={50}
-              height={50}
-              className="rounded"
-            />
-            <span className="text-xl font-bold text-slate-800">Pizza Al-Bait</span>
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-bold">
+              ATS
+            </div>
+            <span className="text-xl font-bold text-slate-800">ATS</span>
           </Link>
           <div className="flex items-center gap-4">
             <Button variant="ghost" asChild>
@@ -85,35 +80,34 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b bg-gradient-to-br from-red-50 to-orange-50">
+      <section className="relative overflow-hidden border-b bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="relative z-10 mx-auto max-w-5xl px-6 py-20 text-center">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card/80 backdrop-blur px-4 py-1.5 text-sm shadow-sm">
-            <Users className="h-4 w-4 text-red-600" />
+            <Users className="h-4 w-4 text-blue-600" />
             <span className="text-muted-foreground">{filteredJobs.length} Open Positions</span>
           </div>
           
           <h1 className="text-4xl font-bold tracking-tight text-balance sm:text-5xl">
-            Join
-            <span className="mx-2 bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">
-              Pizza Al-Bait
+            Find Your Next
+            <span className="mx-2 bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
+              Opportunity
             </span>
-            Team
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground text-pretty leading-relaxed">
-            Be part of our growing family. We are looking for passionate individuals who love great food and excellent customer service.
+            Browse our open positions and take the next step in your career. We are always looking for talented individuals to join our team.
           </p>
           
           <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-2 bg-card/50 backdrop-blur px-3 py-1.5 rounded-full">
-              <Shield className="h-4 w-4 text-red-600" />
+              <Shield className="h-4 w-4 text-blue-600" />
               Great work environment
             </div>
             <div className="flex items-center gap-2 bg-card/50 backdrop-blur px-3 py-1.5 rounded-full">
-              <Globe className="h-4 w-4 text-red-600" />
+              <Globe className="h-4 w-4 text-blue-600" />
               Multiple locations
             </div>
             <div className="flex items-center gap-2 bg-card/50 backdrop-blur px-3 py-1.5 rounded-full">
-              <Briefcase className="h-4 w-4 text-red-600" />
+              <Briefcase className="h-4 w-4 text-blue-600" />
               Competitive packages
             </div>
           </div>

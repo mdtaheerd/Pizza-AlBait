@@ -8,20 +8,20 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Pizza Al-Bait Careers | Join Our Team',
-  description: 'Join Pizza Al-Bait - A leading restaurant brand. Explore career opportunities and be part of our growing family.',
+  title: 'ATS | Applicant Tracking System',
+  description: 'Modern applicant tracking system for managing your recruitment pipeline, candidates, and hiring process.',
   generator: 'v0.app',
   openGraph: {
-    title: 'Pizza Al-Bait Careers | Join Our Team',
-    description: 'Join Pizza Al-Bait - Explore career opportunities and be part of our growing family.',
-    siteName: 'Pizza Al-Bait Careers',
-    locale: 'en_AE',
+    title: 'ATS | Applicant Tracking System',
+    description: 'Modern applicant tracking system for managing your recruitment pipeline.',
+    siteName: 'ATS',
+    locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Pizza Al-Bait Careers | Join Our Team',
-    description: 'Join Pizza Al-Bait - Explore career opportunities and be part of our growing family.',
+    title: 'ATS | Applicant Tracking System',
+    description: 'Modern applicant tracking system for managing your recruitment pipeline.',
   },
   icons: {
     icon: [

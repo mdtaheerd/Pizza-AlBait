@@ -9,15 +9,10 @@ import {
   Building2,
   ArrowRight,
   CheckCircle,
-  UtensilsCrossed,
-  ChefHat,
-  Truck,
-  Store,
   Clock,
   Heart
 } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
 
 export default function HomePage() {
   return (
@@ -27,15 +22,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <Link href="/" className="flex items-center gap-3">
-              <Image
-                src="/pizza-albait-logo.jpg"
-                alt="Pizza Al-Bait"
-                width={50}
-                height={50}
-                className="rounded"
-                priority
-              />
-              <span className="text-xl font-bold text-slate-800">Pizza Al-Bait</span>
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-bold">
+                ATS
+              </div>
+              <span className="text-xl font-bold text-slate-800">ATS</span>
             </Link>
             <div className="hidden md:flex items-center gap-8">
               <Link href="/careers" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
@@ -52,7 +42,7 @@ export default function HomePage() {
               <Button variant="ghost" asChild>
                 <Link href="/auth/login">Sign In</Link>
               </Button>
-              <Button asChild className="bg-red-600 hover:bg-red-700 rounded-xl">
+              <Button asChild className="bg-blue-600 hover:bg-blue-700 rounded-xl">
                 <Link href="/careers">View Jobs</Link>
               </Button>
             </div>
@@ -61,27 +51,26 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-20 min-h-[90vh] flex items-center bg-gradient-to-br from-red-50 to-orange-50">
+      <section className="relative pt-20 min-h-[90vh] flex items-center bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-600/10 border border-red-600/20 text-red-600 text-sm font-medium mb-6">
-              <UtensilsCrossed className="h-4 w-4" />
-              Now Hiring Across All Locations
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600/10 border border-blue-600/20 text-blue-600 text-sm font-medium mb-6">
+              <Briefcase className="h-4 w-4" />
+              Applicant Tracking System
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-              Join{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">
-                Pizza Al-Bait
-              </span>{' '}
-              - Where Passion Meets Pizza
+              Streamline Your{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+                Hiring Process
+              </span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
-              Be part of a growing family that serves delicious, authentic pizza with love. We are looking for passionate individuals to join our team across multiple locations.
+              A modern applicant tracking system to manage your recruitment pipeline, track candidates, and hire the best talent efficiently.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" asChild className="bg-red-600 hover:bg-red-700 rounded-xl text-lg px-8 py-6">
+              <Button size="lg" asChild className="bg-blue-600 hover:bg-blue-700 rounded-xl text-lg px-8 py-6">
                 <Link href="/careers">
-                  Explore Opportunities
+                  View Open Positions
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -95,38 +84,38 @@ export default function HomePage() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-border/50">
               <div>
-                <p className="text-3xl font-bold text-foreground">10+</p>
-                <p className="text-sm text-muted-foreground">Locations</p>
+                <p className="text-3xl font-bold text-foreground">100+</p>
+                <p className="text-sm text-muted-foreground">Companies</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-foreground">500+</p>
-                <p className="text-sm text-muted-foreground">Team Members</p>
+                <p className="text-3xl font-bold text-foreground">10K+</p>
+                <p className="text-sm text-muted-foreground">Candidates</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-foreground">5+</p>
-                <p className="text-sm text-muted-foreground">Years of Excellence</p>
+                <p className="text-3xl font-bold text-foreground">95%</p>
+                <p className="text-sm text-muted-foreground">Satisfaction</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* About Section */}
+      {/* Features Section */}
       <section id="about" className="py-20 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="relative">
-              <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-red-100 to-orange-100 flex items-center justify-center">
-                <ChefHat className="h-32 w-32 text-red-600/30" />
+              <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+                <Users className="h-32 w-32 text-blue-600/30" />
               </div>
               <div className="absolute -bottom-6 -right-6 bg-card rounded-2xl p-6 shadow-xl border border-border">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-full bg-red-600/10 flex items-center justify-center">
-                    <Heart className="h-6 w-6 text-red-600" />
+                  <div className="h-12 w-12 rounded-full bg-blue-600/10 flex items-center justify-center">
+                    <CheckCircle className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
-                    <p className="font-bold text-foreground">Made with Love</p>
-                    <p className="text-sm text-muted-foreground">Quality & Care</p>
+                    <p className="font-bold text-foreground">Trusted Platform</p>
+                    <p className="text-sm text-muted-foreground">Reliable & Secure</p>
                   </div>
                 </div>
               </div>
@@ -134,20 +123,20 @@ export default function HomePage() {
             
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-                A Family of Pizza Lovers
+                Modern Recruitment Made Simple
               </h2>
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                Pizza Al-Bait is more than just a restaurant - it is a family committed to serving the best pizza experience. We believe in fresh ingredients, authentic recipes, and creating memorable moments for our customers.
+                Our applicant tracking system helps organizations streamline their hiring process. From job posting to candidate onboarding, manage everything in one place.
               </p>
               <div className="space-y-4">
                 {[
-                  'Competitive salaries and benefits',
-                  'Career growth and advancement opportunities',
-                  'Fun and friendly work environment',
-                  'Training and development programs'
+                  'Track candidates through every stage',
+                  'Collaborate with your hiring team',
+                  'Schedule interviews effortlessly',
+                  'Generate insightful reports'
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
+                    <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
                     <span className="text-foreground">{item}</span>
                   </div>
                 ))}
@@ -162,31 +151,31 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Career Opportunities
+              Browse by Department
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Join our team in various roles across our locations
+              Find opportunities across different teams and functions
             </p>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {[
-              { name: 'Kitchen Staff', icon: ChefHat, openings: 15, description: 'Pizza makers & cooks' },
-              { name: 'Delivery', icon: Truck, openings: 12, description: 'Delivery drivers' },
-              { name: 'Store Operations', icon: Store, openings: 8, description: 'Cashiers & servers' },
-              { name: 'Management', icon: Building2, openings: 5, description: 'Store managers' },
-              { name: 'Customer Service', icon: Users, openings: 10, description: 'Support team' },
-              { name: 'Shift Leaders', icon: Clock, openings: 7, description: 'Team supervisors' },
-              { name: 'Marketing', icon: BarChart3, openings: 3, description: 'Brand & promotions' },
-              { name: 'HR & Admin', icon: Briefcase, openings: 4, description: 'People operations' }
+              { name: 'Engineering', icon: Building2, openings: 15, description: 'Software & hardware' },
+              { name: 'Product', icon: Briefcase, openings: 8, description: 'Product management' },
+              { name: 'Design', icon: Heart, openings: 6, description: 'UX & visual design' },
+              { name: 'Marketing', icon: BarChart3, openings: 5, description: 'Growth & brand' },
+              { name: 'Sales', icon: Users, openings: 10, description: 'Business development' },
+              { name: 'Operations', icon: Clock, openings: 7, description: 'Business ops' },
+              { name: 'HR', icon: Users, openings: 4, description: 'People operations' },
+              { name: 'Finance', icon: BarChart3, openings: 3, description: 'Accounting & finance' }
             ].map((dept) => (
-              <Card key={dept.name} className="border border-border/50 hover:border-red-600/30 hover:shadow-lg transition-all duration-300 cursor-pointer group overflow-hidden">
+              <Card key={dept.name} className="border border-border/50 hover:border-blue-600/30 hover:shadow-lg transition-all duration-300 cursor-pointer group overflow-hidden">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <div className="h-10 w-10 rounded-lg bg-red-600/10 flex items-center justify-center group-hover:bg-red-600 group-hover:scale-110 transition-all duration-300">
-                      <dept.icon className="h-5 w-5 text-red-600 group-hover:text-white transition-colors" />
+                    <div className="h-10 w-10 rounded-lg bg-blue-600/10 flex items-center justify-center group-hover:bg-blue-600 group-hover:scale-110 transition-all duration-300">
+                      <dept.icon className="h-5 w-5 text-blue-600 group-hover:text-white transition-colors" />
                     </div>
-                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
                       {dept.openings} jobs
                     </span>
                   </div>
@@ -198,7 +187,7 @@ export default function HomePage() {
           </div>
           
           <div className="text-center mt-10">
-            <Button size="lg" asChild className="rounded-xl bg-red-600 hover:bg-red-700">
+            <Button size="lg" asChild className="rounded-xl bg-blue-600 hover:bg-blue-700">
               <Link href="/careers">
                 View All Open Positions
                 <ArrowRight className="ml-2 h-4 w-4" />

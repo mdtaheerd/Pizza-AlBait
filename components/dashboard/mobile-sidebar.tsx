@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import type { Profile } from '@/lib/types'
@@ -44,16 +43,12 @@ export function MobileSidebar({ profile }: MobileSidebarProps) {
     <div className="flex h-full flex-col">
       <SheetHeader className="border-b px-6 py-4">
         <SheetTitle className="flex items-center gap-3">
-          <Image
-            src="/pizza-albait-logo.jpg"
-            alt="Pizza Al-Bait Logo"
-            width={40}
-            height={40}
-            className="rounded"
-          />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-bold text-sm">
+            ATS
+          </div>
           <div>
-            <span className="text-sm font-bold tracking-tight">Pizza Al-Bait</span>
-            <span className="text-[10px] text-muted-foreground block">Recruitment Portal</span>
+            <span className="text-sm font-bold tracking-tight">ATS</span>
+            <span className="text-[10px] text-muted-foreground block">Applicant Tracking</span>
           </div>
         </SheetTitle>
       </SheetHeader>

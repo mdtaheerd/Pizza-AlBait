@@ -1,6 +1,5 @@
 import { Linkedin, Home } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 
 export function CareersHeader() {
@@ -8,14 +7,10 @@ export function CareersHeader() {
     <header className="sticky top-0 z-50 border-b bg-white">
       <div className="mx-auto flex h-20 max-w-5xl items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-3">
-          <Image
-            src="/pizza-albait-logo.jpg"
-            alt="Pizza Al-Bait"
-            width={40}
-            height={40}
-            className="rounded"
-          />
-          <span className="font-bold text-lg">Pizza Al-Bait</span>
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-bold text-sm">
+            ATS
+          </div>
+          <span className="font-bold text-lg">ATS</span>
         </Link>
         <nav className="flex items-center gap-4">
           <Button variant="ghost" size="sm" asChild>
