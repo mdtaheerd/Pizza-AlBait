@@ -64,7 +64,7 @@ const STATUS_COLORS: Record<string, string> = {
   no_show: 'bg-amber-100 text-amber-700',
 }
 
-interface InterviewWithRelations extends Interview {
+interface InterviewWithRelations extends Omit<Interview, 'interviewer'> {
   application?: {
     id: string
     candidate?: {
@@ -83,7 +83,7 @@ interface InterviewWithRelations extends Interview {
   interviewer?: {
     full_name: string
     email: string
-  }
+  } | null
 }
 
 interface InterviewsClientProps {
