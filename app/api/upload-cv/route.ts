@@ -37,14 +37,23 @@ export async function POST(request: NextRequest) {
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
     const filePath = `cvs/${timestamp}_${sanitizedName}`
 
-    // Upload to Vercel Blob with public access (default for most stores)
-    const blob = await put(filePath, file, {
-      access: 'public',
-    })
+    // Upload to Vercel Blob - try public first, fallback to private if it fails
+    let blob
+    try {
+      blob = await put(filePath, file, {
+        access: 'public',
+      })
+    } catch (publicError) {
+      // If public access fails, try private access
+      console.log('[v0] Public upload failed, trying private:', publicError)
+      blob = await put(filePath, file, {
+        access: 'private',
+      })
+    }
 
     return NextResponse.json({
       success: true,
-      url: blob.url,
+      url: blob.url || `/api/download-cv?pathname=${encodeURIComponent(blob.pathname)}`,
       filename: file.name,
       size: file.size,
       path: blob.pathname

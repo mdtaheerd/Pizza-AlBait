@@ -135,17 +135,37 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
           return
         }
 
-        // Update candidate with new CV if uploaded
+        // Update candidate with new info (including CV, gender, nationality if provided)
+        const updateData: Record<string, unknown> = {
+          // Always update these fields if provided in the form
+          phone: formData.phone || null,
+          linkedin_url: formData.linkedin_url || null,
+          portfolio_url: formData.portfolio_url || null,
+        }
+        
+        // Update gender and nationality if provided (they might not exist for old candidates)
+        if (formData.gender) {
+          updateData.gender = formData.gender
+        }
+        if (formData.nationality) {
+          updateData.nationality = formData.nationality
+        }
+        
+        // Update CV info if uploaded
         if (uploadedCvUrl) {
-          await supabase
-            .from('candidates')
-            .update({
-              resume_url: uploadedCvUrl,
-              cv_uploaded_at: new Date().toISOString(),
-              cv_filename: cvFile?.name,
-              cv_size_bytes: cvFile?.size
-            })
-            .eq('id', candidateId)
+          updateData.resume_url = uploadedCvUrl
+          updateData.cv_uploaded_at = new Date().toISOString()
+          updateData.cv_filename = cvFile?.name
+          updateData.cv_size_bytes = cvFile?.size
+        }
+
+        const { error: updateError } = await supabase
+          .from('candidates')
+          .update(updateData)
+          .eq('id', candidateId)
+        
+        if (updateError) {
+          throw updateError
         }
       } else {
         // Create new candidate with CV info
@@ -186,16 +206,19 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
 
       setIsSubmitted(true)
     } catch (err) {
-      console.error('[v0] Application submission error:', err)
+      console.error('Application submission error:', err)
       const errorMessage = err instanceof Error ? err.message : 'An error occurred'
-      // Provide more helpful error messages
+      // Provide user-friendly error messages
       if (errorMessage.includes('violates row-level security policy')) {
         setError('Unable to submit application. Please try again or contact support.')
       } else if (errorMessage.includes('duplicate key')) {
         setError('You have already applied for this position.')
+      } else if (errorMessage.includes('Failed to fetch') || errorMessage.includes('network')) {
+        setError('Network error. Please check your internet connection and try again.')
+      } else if (errorMessage.includes('upload') || errorMessage.includes('CV')) {
+        setError('Failed to upload your CV. Please try a different file or contact support.')
       } else {
-        // Show the actual error message for better debugging
-        setError(errorMessage)
+        setError('Unable to submit application. Please try again or contact support.')
       }
       setIsUploading(false)
     } finally {

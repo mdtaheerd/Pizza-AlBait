@@ -6,11 +6,18 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Mail, Home } from 'lucide-react'
+import { Mail, Home, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
-export default function SignUpSuccessPage() {
+export default async function SignUpSuccessPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ reregistered?: string }>
+}) {
+  const params = await searchParams
+  const isReregistered = params.reregistered === 'true'
+
   return (
     <div className="flex min-h-svh w-full items-center justify-center bg-muted/30 p-6 md:p-10">
       {/* Home Button */}
@@ -36,12 +43,21 @@ export default function SignUpSuccessPage() {
           </Link>
           <Card>
             <CardHeader className="text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-                <Mail className="h-6 w-6 text-green-600" />
+              <div className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full ${isReregistered ? 'bg-blue-100' : 'bg-green-100'}`}>
+                {isReregistered ? (
+                  <RefreshCw className="h-6 w-6 text-blue-600" />
+                ) : (
+                  <Mail className="h-6 w-6 text-green-600" />
+                )}
               </div>
-              <CardTitle className="text-2xl">Check your email</CardTitle>
+              <CardTitle className="text-2xl">
+                {isReregistered ? 'Re-registration Submitted' : 'Check your email'}
+              </CardTitle>
               <CardDescription>
-                {"We've sent you a confirmation link. Please check your email to verify your account."}
+                {isReregistered 
+                  ? 'Your request for re-approval has been submitted. An administrator will review your account and you will be notified once approved.'
+                  : "We've sent you a confirmation link. Please check your email to verify your account."
+                }
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center space-y-4">

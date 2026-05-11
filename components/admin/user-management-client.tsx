@@ -183,7 +183,7 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
     }
   }
 
-  const UserTable = ({ userList, showActions = false, showRevokeAction = false }: { userList: Profile[], showActions?: boolean, showRevokeAction?: boolean }) => (
+  const UserTable = ({ userList, showActions = false, showRevokeAction = false, showReapproveAction = false }: { userList: Profile[], showActions?: boolean, showRevokeAction?: boolean, showReapproveAction?: boolean }) => (
     <Table>
       <TableHeader>
         <TableRow>
@@ -192,7 +192,7 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
           <TableHead>Role</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Registered</TableHead>
-          {(showActions || showRevokeAction) && <TableHead className="text-right">Actions</TableHead>}
+          {(showActions || showRevokeAction || showReapproveAction) && <TableHead className="text-right">Actions</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -271,6 +271,26 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
                   <span className="text-xs text-muted-foreground">Current user</span>
                 </TableCell>
               )}
+              {showReapproveAction && (
+                <TableCell className="text-right">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-green-600 border-green-200 hover:bg-green-50"
+                    onClick={() => handleApprove(user.id)}
+                    disabled={loading === user.id}
+                  >
+                    {loading === user.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <UserCheck className="h-4 w-4 mr-1" />
+                        Re-approve
+                      </>
+                    )}
+                  </Button>
+                </TableCell>
+              )}
             </TableRow>
           ))
         )}
@@ -334,9 +354,20 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
               <Badge className="ml-2 bg-amber-500 text-white">{pendingUsers.length}</Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="approved">Approved</TabsTrigger>
-          <TabsTrigger value="rejected">Rejected</TabsTrigger>
-          <TabsTrigger value="all">All Users</TabsTrigger>
+          <TabsTrigger value="approved">
+            Approved
+            <Badge variant="outline" className="ml-2">{approvedUsers.length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="rejected">
+            Rejected
+            {rejectedUsers.length > 0 && (
+              <Badge variant="outline" className="ml-2">{rejectedUsers.length}</Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="all">
+            All Users
+            <Badge variant="outline" className="ml-2">{users.length}</Badge>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="pending">
@@ -367,7 +398,7 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
               <CardTitle>Rejected Users</CardTitle>
             </CardHeader>
             <CardContent>
-              <UserTable userList={filterUsers(rejectedUsers)} />
+              <UserTable userList={filterUsers(rejectedUsers)} showReapproveAction={true} />
             </CardContent>
           </Card>
         </TabsContent>

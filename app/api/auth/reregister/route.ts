@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
+
+// Use service role client for admin operations
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function POST(request: NextRequest) {
   try {
     const { email } = await request.json()
 
-    const supabase = await createClient()
-
-    // Check if user exists and is rejected
-    const { data: profile, error: fetchError } = await supabase
+    // Check if user exists and their approval status
+    const { data: profile, error: fetchError } = await supabaseAdmin
       .from('profiles')
       .select('id, approval_status, role')
       .eq('email', email)
@@ -24,10 +28,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (profile.approval_status === 'rejected') {
-      // Reset status to pending for re-registration
-      const { error: updateError } = await supabase
+      // Reset status to pending for re-registration using admin client
+      const { error: updateError } = await supabaseAdmin
         .from('profiles')
-        .update({ approval_status: 'pending' })
+        .update({ 
+          approval_status: 'pending',
+          approved_by: null,
+          approved_at: null
+        })
         .eq('id', profile.id)
 
       if (updateError) {
