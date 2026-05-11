@@ -98,14 +98,27 @@ interface InterviewWithRelations {
 }
 
 interface InterviewsClientProps {
-  upcomingInterviews: InterviewWithRelations[]
-  pastInterviews: InterviewWithRelations[]
+  interviews: InterviewWithRelations[]
+  currentUserId: string
 }
 
-export function InterviewsClient({ upcomingInterviews: initialUpcoming, pastInterviews: initialPast }: InterviewsClientProps) {
+export function InterviewsClient({ interviews, currentUserId }: InterviewsClientProps) {
   const router = useRouter()
-  const [upcomingInterviews, setUpcomingInterviews] = useState(initialUpcoming)
-  const [pastInterviews, setPastInterviews] = useState(initialPast)
+  
+  // Split interviews into upcoming and past based on current date
+  const now = new Date()
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+  const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+  
+  const upcomingInterviews = interviews.filter(i => {
+    const date = new Date(i.scheduled_at)
+    return date >= now && date <= sevenDaysFromNow
+  }).sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
+  
+  const pastInterviews = interviews.filter(i => {
+    const date = new Date(i.scheduled_at)
+    return date < now && date >= sevenDaysAgo
+  }).sort((a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime())
   const [rescheduleDialog, setRescheduleDialog] = useState(false)
   const [cancelDialog, setCancelDialog] = useState(false)
   const [completeDialog, setCompleteDialog] = useState(false)
@@ -353,7 +366,7 @@ export function InterviewsClient({ upcomingInterviews: initialUpcoming, pastInte
               </TableHeader>
               <TableBody>
                 {upcomingInterviews.map((interview) => (
-                  <InterviewRow key={interview.id} interview={interview} />
+                  <InterviewRow key={interview.id} interview={interview} showActions={true} />
                 ))}
               </TableBody>
             </Table>
