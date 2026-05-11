@@ -179,7 +179,18 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
 
       setIsSubmitted(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      console.error('[v0] Application submission error:', err)
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred'
+      // Provide more helpful error messages
+      if (errorMessage.includes('violates row-level security policy')) {
+        setError('Unable to submit application. Please try again or contact support.')
+      } else if (errorMessage.includes('duplicate key')) {
+        setError('You have already applied for this position.')
+      } else if (errorMessage.includes('Failed to upload')) {
+        setError('Failed to upload your CV. Please try again with a smaller file.')
+      } else {
+        setError(errorMessage)
+      }
       setIsUploading(false)
     } finally {
       setIsLoading(false)
