@@ -9,7 +9,7 @@ export function CareersHeader() {
       <div className="mx-auto flex h-20 max-w-5xl items-center justify-between px-6">
         <Link href="/" className="flex items-center">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pxapD8smtnaNSYCYo9mTLtPDa75C80.png"
+            src="/images/talenttrack-logo.png"
             alt="TalentTrack ATS"
             width={180}
             height={50}
@@ -36,7 +36,7 @@ export function CareersHeader() {
           >
             <Linkedin className="h-5 w-5" />
           </a>
-          <Button asChild className="bg-blue-600 hover:bg-blue-700">
+          <Button asChild className="bg-red-600 hover:bg-red-700">
             <Link href="/auth/login">Recruiter Login</Link>
           </Button>
         </nav>

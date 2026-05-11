@@ -15,6 +15,8 @@ import {
   Settings,
   Building2,
   Linkedin,
+  UserCheck,
+  ClipboardList,
 } from 'lucide-react'
 
 interface DashboardSidebarProps {
@@ -28,9 +30,11 @@ const navigation = [
   { name: 'Pipeline', href: '/dashboard/pipeline', icon: Briefcase },
   { name: 'Interviews', href: '/dashboard/interviews', icon: Calendar },
   { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+  { name: 'Reports', href: '/dashboard/reports', icon: ClipboardList },
 ]
 
 const adminNavigation = [
+  { name: 'User Approvals', href: '/dashboard/users', icon: UserCheck },
   { name: 'Departments', href: '/dashboard/departments', icon: Building2 },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
@@ -44,11 +48,11 @@ export function DashboardSidebar({ profile }: DashboardSidebarProps) {
       {/* Logo */}
       <div className="flex h-20 items-center justify-center border-b border-sidebar-border px-4 bg-white">
         <Image
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pxapD8smtnaNSYCYo9mTLtPDa75C80.png"
+          src="/images/talenttrack-logo.png"
           alt="TalentTrack ATS"
           width={180}
-          height={50}
-          className="h-12 w-auto"
+          height={56}
+          className="h-14 w-auto"
         />
       </div>
 
