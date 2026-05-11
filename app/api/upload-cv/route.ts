@@ -1,6 +1,8 @@
 import { put } from '@vercel/blob'
 import { NextRequest, NextResponse } from 'next/server'
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
@@ -23,25 +25,22 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Validate file size (10MB max)
-    if (file.size > 10 * 1024 * 1024) {
+    // Validate file size (5MB max)
+    if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json({ 
-        error: 'File too large. Maximum size is 10MB.' 
+        error: 'File too large. Maximum size is 5MB.' 
       }, { status: 400 })
     }
 
     // Generate unique filename
-    const fileExt = file.name.split('.').pop()
     const timestamp = Date.now()
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
     const filePath = `cvs/${timestamp}_${sanitizedName}`
 
-    // Upload to Vercel Blob (public storage for CV files)
+    // Upload to Vercel Blob with public access (default for most stores)
     const blob = await put(filePath, file, {
       access: 'public',
     })
-
-    console.log('[v0] CV uploaded successfully:', blob.url)
 
     return NextResponse.json({
       success: true,
@@ -52,9 +51,12 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('[v0] CV upload error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    console.error('[v0] CV upload error:', errorMessage)
+    
+    // Return actual error for debugging
     return NextResponse.json({ 
-      error: 'Failed to upload file. Please try again.' 
+      error: `Upload failed: ${errorMessage}` 
     }, { status: 500 })
   }
 }

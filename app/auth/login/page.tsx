@@ -119,7 +119,9 @@ export default function LoginPage() {
               alt="CPECC"
               width={80}
               height={80}
+              priority
               className="h-20 w-auto"
+              style={{ height: 'auto' }}
             />
           </Link>
           
