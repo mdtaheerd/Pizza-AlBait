@@ -36,25 +36,41 @@ export async function POST(request: NextRequest) {
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
     const filePath = `cvs/${timestamp}_${sanitizedName}`
 
-    // Upload to Vercel Blob (public storage for CV files)
+    // Upload to Vercel Blob (private store - most common for user-connected stores)
     const blob = await put(filePath, file, {
-      access: 'public',
+      access: 'private',
     })
 
-    console.log('[v0] CV uploaded successfully:', blob.url)
+    console.log('[v0] CV uploaded successfully:', blob.pathname)
 
+    // For private blobs, we store the pathname and use download-cv API to serve files
     return NextResponse.json({
       success: true,
-      url: blob.url,
+      url: blob.pathname, // Use pathname for private blobs
       filename: file.name,
       size: file.size,
       path: blob.pathname
     })
 
   } catch (error) {
-    console.error('[v0] CV upload error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    console.error('[v0] CV upload error:', errorMessage, error)
+    
+    // Check for specific blob errors
+    if (errorMessage.includes('access')) {
+      return NextResponse.json({ 
+        error: 'Storage configuration error. Please contact support.' 
+      }, { status: 500 })
+    }
+    
+    if (errorMessage.includes('size') || errorMessage.includes('too large')) {
+      return NextResponse.json({ 
+        error: 'File too large. Please upload a smaller file.' 
+      }, { status: 400 })
+    }
+    
     return NextResponse.json({ 
-      error: 'Failed to upload file. Please try again.' 
+      error: `Upload failed: ${errorMessage}` 
     }, { status: 500 })
   }
 }

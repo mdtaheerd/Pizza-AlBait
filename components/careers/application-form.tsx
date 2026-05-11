@@ -182,9 +182,8 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
         setError('Unable to submit application. Please try again or contact support.')
       } else if (errorMessage.includes('duplicate key')) {
         setError('You have already applied for this position.')
-      } else if (errorMessage.includes('Failed to upload')) {
-        setError('Failed to upload your CV. Please try again with a smaller file.')
       } else {
+        // Show the actual error message for better debugging
         setError(errorMessage)
       }
       setIsUploading(false)
