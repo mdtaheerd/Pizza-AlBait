@@ -160,9 +160,10 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
           </CardHeader>
           <CardContent>
             {job.description ? (
-              <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                {job.description}
-              </p>
+              <div 
+                className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-semibold prose-p:leading-relaxed prose-ul:my-2 prose-li:my-0"
+                dangerouslySetInnerHTML={{ __html: job.description }}
+              />
             ) : (
               <p className="text-sm text-muted-foreground">No description provided.</p>
             )}
@@ -176,9 +177,10 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
           </CardHeader>
           <CardContent>
             {job.requirements ? (
-              <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                {job.requirements}
-              </p>
+              <div 
+                className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-semibold prose-p:leading-relaxed prose-ul:my-2 prose-li:my-0"
+                dangerouslySetInnerHTML={{ __html: job.requirements }}
+              />
             ) : (
               <p className="text-sm text-muted-foreground">No requirements provided.</p>
             )}
