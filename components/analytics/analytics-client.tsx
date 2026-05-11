@@ -24,10 +24,11 @@ import {
   Briefcase, Users, FileText, TrendingUp, Calendar, Download, 
   FolderOpen, Filter, Building2, User, Globe, UserCircle
 } from 'lucide-react'
-import { format, isWithinInterval, parseISO, differenceInYears } from 'date-fns'
+import { format, parseISO, differenceInYears } from 'date-fns'
 import { PipelineChart } from '@/components/analytics/pipeline-chart'
 import { DepartmentChart } from '@/components/analytics/department-chart'
 import { DemographicsChart } from '@/components/analytics/demographics-chart'
+import { NationalityChart } from '@/components/analytics/nationality-chart'
 import { STAGE_LABELS, type ApplicationStage } from '@/lib/types'
 
 interface Application {
@@ -121,13 +122,16 @@ export function AnalyticsClient({
   const filteredApplications = useMemo(() => {
     let filtered = applications
 
-    // Date filter
+    // Date filter - compare dates properly
     if (startDate || endDate) {
       filtered = filtered.filter(app => {
         const appDate = parseISO(app.applied_at)
         const start = startDate ? parseISO(startDate) : new Date(0)
-        const end = endDate ? parseISO(endDate) : new Date()
-        return isWithinInterval(appDate, { start, end })
+        // Set end date to end of day to include all applications on that date
+        const end = endDate ? new Date(parseISO(endDate).setHours(23, 59, 59, 999)) : new Date()
+        
+        // Simple date comparison
+        return appDate >= start && appDate <= end
       })
     }
 
@@ -174,8 +178,8 @@ export function AnalyticsClient({
       filtered = filtered.filter(interview => {
         const intDate = parseISO(interview.scheduled_at)
         const start = startDate ? parseISO(startDate) : new Date(0)
-        const end = endDate ? parseISO(endDate) : new Date()
-        return isWithinInterval(intDate, { start, end })
+        const end = endDate ? new Date(parseISO(endDate).setHours(23, 59, 59, 999)) : new Date()
+        return intDate >= start && intDate <= end
       })
     }
     return filtered
@@ -559,7 +563,9 @@ export function AnalyticsClient({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Genders</SelectItem>
-                  {uniqueGenders.map(gender => (
+                  <SelectItem value="Male">Male</SelectItem>
+                  <SelectItem value="Female">Female</SelectItem>
+                  {uniqueGenders.filter(g => g !== 'Male' && g !== 'Female').map(gender => (
                     <SelectItem key={gender} value={gender}>{gender}</SelectItem>
                   ))}
                 </SelectContent>
@@ -681,7 +687,7 @@ export function AnalyticsClient({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <DemographicsChart data={nationalityData} title="Nationality" />
+            <NationalityChart data={nationalityData} />
           </CardContent>
         </Card>
         <Card>
