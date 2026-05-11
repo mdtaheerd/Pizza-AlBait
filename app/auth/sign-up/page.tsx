@@ -40,6 +40,30 @@ export default function SignUpPage() {
     setError(null)
 
     try {
+      // First check if user was previously rejected and allow re-registration
+      const reregisterResponse = await fetch('/api/auth/reregister', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const reregisterResult = await reregisterResponse.json()
+
+      if (reregisterResult.wasRejected) {
+        // User was rejected and has been reset to pending
+        router.push('/auth/sign-up-success?reregistered=true')
+        return
+      }
+
+      if (reregisterResult.isPending) {
+        setError('Your registration is already pending approval. Please wait for admin review.')
+        return
+      }
+
+      if (reregisterResult.isApproved) {
+        setError('You already have an approved account. Please login instead.')
+        return
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,

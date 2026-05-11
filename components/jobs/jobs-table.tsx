@@ -77,18 +77,23 @@ export function JobsTable({ jobs }: JobsTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[80px]">Job ID</TableHead>
               <TableHead>Title</TableHead>
               <TableHead className="hidden md:table-cell">Department</TableHead>
+              <TableHead className="hidden lg:table-cell">Recruiter</TableHead>
               <TableHead className="hidden sm:table-cell">Type</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="hidden lg:table-cell">Applications</TableHead>
-              <TableHead className="hidden lg:table-cell">Created</TableHead>
+              <TableHead className="hidden xl:table-cell">Created</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {jobs.map((job) => (
               <TableRow key={job.id}>
+                <TableCell className="font-mono text-sm text-muted-foreground">
+                  {job.job_number ? `#${job.job_number}` : '-'}
+                </TableCell>
                 <TableCell>
                   <div>
                     <Link
@@ -105,6 +110,9 @@ export function JobsTable({ jobs }: JobsTableProps) {
                 <TableCell className="hidden md:table-cell">
                   {job.department?.name || '-'}
                 </TableCell>
+                <TableCell className="hidden lg:table-cell">
+                  {job.recruiter?.full_name || '-'}
+                </TableCell>
                 <TableCell className="hidden sm:table-cell">
                   {job.employment_type ? EMPLOYMENT_TYPE_LABELS[job.employment_type] : '-'}
                 </TableCell>
@@ -119,7 +127,7 @@ export function JobsTable({ jobs }: JobsTableProps) {
                     {job._count?.applications || 0}
                   </div>
                 </TableCell>
-                <TableCell className="hidden lg:table-cell text-muted-foreground">
+                <TableCell className="hidden xl:table-cell text-muted-foreground">
                   {format(new Date(job.created_at), 'MMM d, yyyy')}
                 </TableCell>
                 <TableCell>
