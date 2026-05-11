@@ -4,10 +4,10 @@ import { JobForm } from '@/components/jobs/job-form'
 export default async function NewJobPage() {
   const supabase = await createClient()
 
-  const [{ data: departments }, { data: recruiters }] = await Promise.all([
-    supabase.from('departments').select('*').order('name'),
-    supabase.from('profiles').select('*').eq('approval_status', 'approved').order('full_name'),
-  ])
+  const { data: departments } = await supabase
+    .from('departments')
+    .select('*')
+    .order('name')
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -18,7 +18,7 @@ export default async function NewJobPage() {
         </p>
       </div>
 
-      <JobForm departments={departments || []} recruiters={recruiters || []} />
+      <JobForm departments={departments || []} />
     </div>
   )
 }

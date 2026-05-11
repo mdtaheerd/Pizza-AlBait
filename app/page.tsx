@@ -18,18 +18,8 @@ import {
   ShieldCheck,
   Package,
   Wrench,
-  Cog,
-  UserCircle,
-  UserCog,
-  ChevronDown,
-  LogIn
+  Cog
 } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -40,14 +30,14 @@ export default function HomePage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            {/* CPECC Logo */}
+            {/* Official CPECC Logo */}
             <Link href="/" className="flex items-center">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2Pqwbqzr1lnrsrOSmNqst4Fcmq5AyS.png"
-                alt="CPECC"
-                width={70}
-                height={70}
-                className="h-16 w-auto"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
+                alt="CPECC - China Petroleum Engineering & Construction Corporation"
+                width={400}
+                height={50}
+                className="h-12 w-auto"
                 priority
               />
             </Link>
@@ -55,61 +45,17 @@ export default function HomePage() {
               <Link href="/careers" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
                 Open Positions
               </Link>
+              <Link href="#about" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
+                About Us
+              </Link>
               <Link href="#departments" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
                 Departments
               </Link>
-              <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
-                About Us
-              </Link>
             </div>
             <div className="flex items-center gap-3">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <LogIn className="h-4 w-4" />
-                    Sign In
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem asChild>
-                    <Link href="/candidate/login" className="flex items-center gap-3 cursor-pointer py-2">
-                      <UserCircle className="h-5 w-5 text-blue-600" />
-                      <div>
-                        <p className="font-medium">Candidate Login</p>
-                        <p className="text-xs text-muted-foreground">Apply for jobs</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/auth/login" className="flex items-center gap-3 cursor-pointer py-2">
-                      <UserCog className="h-5 w-5 text-green-600" />
-                      <div>
-                        <p className="font-medium">Recruiter Login</p>
-                        <p className="text-xs text-muted-foreground">Manage applications</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/auth/login" className="flex items-center gap-3 cursor-pointer py-2">
-                      <Briefcase className="h-5 w-5 text-purple-600" />
-                      <div>
-                        <p className="font-medium">Hiring Manager Login</p>
-                        <p className="text-xs text-muted-foreground">Review candidates</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/auth/login" className="flex items-center gap-3 cursor-pointer py-2">
-                      <ShieldCheck className="h-5 w-5 text-red-600" />
-                      <div>
-                        <p className="font-medium">Admin Login</p>
-                        <p className="text-xs text-muted-foreground">System administration</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button variant="ghost" asChild>
+                <Link href="/auth/login">Sign In</Link>
+              </Button>
               <Button asChild className="bg-red-600 hover:bg-red-700 rounded-xl">
                 <Link href="/careers">View Jobs</Link>
               </Button>
@@ -123,7 +69,7 @@ export default function HomePage() {
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/cpecc-hero.jpg"
-            alt="Modern Workplace"
+            alt="CPECC Oil and Gas Industry"
             fill
             className="object-cover"
             priority
@@ -135,17 +81,17 @@ export default function HomePage() {
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-600/10 border border-red-600/20 text-red-600 text-sm font-medium mb-6">
               <Globe className="h-4 w-4" />
-              Career Opportunities
+              Middle East Onshore Projects
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
               Join{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">
                 CPECC
               </span>{' '}
-              Today
+              - Build Energy Infrastructure
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
-              Build your career with China Petroleum Engineering & Construction Corporation. Join a global leader in EPC projects for the oil & gas industry.
+              China Petroleum Engineering and Construction Corporation - A leading EPC contractor delivering world-class onshore oil & gas projects across the Middle East. Shape the future of energy infrastructure.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" asChild className="bg-red-600 hover:bg-red-700 rounded-xl text-lg px-8 py-6">
@@ -164,16 +110,16 @@ export default function HomePage() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-border/50">
               <div>
-                <p className="text-3xl font-bold text-foreground">500+</p>
-                <p className="text-sm text-muted-foreground">Jobs Posted</p>
+                <p className="text-3xl font-bold text-foreground">100+</p>
+                <p className="text-sm text-muted-foreground">Onshore Projects</p>
               </div>
               <div>
                 <p className="text-3xl font-bold text-foreground">10,000+</p>
-                <p className="text-sm text-muted-foreground">Candidates</p>
+                <p className="text-sm text-muted-foreground">Employees</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-foreground">95%</p>
-                <p className="text-sm text-muted-foreground">Hiring Success</p>
+                <p className="text-3xl font-bold text-foreground">40+</p>
+                <p className="text-sm text-muted-foreground">Years Experience</p>
               </div>
             </div>
           </div>
@@ -187,8 +133,8 @@ export default function HomePage() {
             <div className="relative">
               <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-2xl">
                 <Image
-                  src="/images/team-hiring-3d.jpg"
-                  alt="Modern Recruitment Team"
+                  src="/images/team-epc.jpg"
+                  alt="Our Team"
                   fill
                   className="object-cover"
                 />
@@ -199,8 +145,8 @@ export default function HomePage() {
                     <Shield className="h-6 w-6 text-red-600" />
                   </div>
                   <div>
-                    <p className="font-bold text-foreground">Smart Hiring</p>
-                    <p className="text-sm text-muted-foreground">Efficient & Modern</p>
+                    <p className="font-bold text-foreground">ISO Certified</p>
+                    <p className="text-sm text-muted-foreground">Quality & Safety</p>
                   </div>
                 </div>
               </div>
@@ -208,17 +154,17 @@ export default function HomePage() {
             
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-                Why Choose CPECC?
+                Engineering Excellence in the Middle East
               </h2>
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                CPECC is a leading EPC contractor with over 40 years of experience in onshore oil & gas projects. We offer competitive compensation, career development opportunities, and the chance to work on world-class projects across the Middle East and beyond.
+                China Petroleum Engineering and Construction Corporation (CPECC) is a premier EPC contractor specializing in onshore oil and gas, petrochemical, and energy infrastructure projects across the Middle East. Our integrated approach combines cutting-edge engineering, strategic procurement, and world-class construction capabilities.
               </p>
               <div className="space-y-4">
                 {[
-                  'Competitive salary and benefits package',
-                  'Career development and training opportunities',
-                  'Work on major international projects',
-                  'Diverse and inclusive work environment'
+                  'Full lifecycle project delivery from concept to commissioning',
+                  'State-of-the-art engineering and design capabilities',
+                  'Global supply chain and procurement excellence',
+                  'Commitment to HSE and sustainable practices'
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <CheckCircle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
@@ -443,32 +389,32 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
-              {/* CPECC Footer Logo */}
+              {/* Official CPECC Footer Logo */}
               <div className="mb-4">
                 <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2Pqwbqzr1lnrsrOSmNqst4Fcmq5AyS.png"
-                  alt="CPECC"
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CPECC%20Logo-v2VEWr2wpVlNgvVySqwQDyOe1A3E71.jpg"
+                  alt="CPECC Logo"
                   width={80}
                   height={80}
-                  className="h-16 w-auto bg-white rounded-lg p-2"
+                  className="rounded-lg w-auto h-auto"
                 />
               </div>
               <p className="text-white/60 text-sm max-w-sm">
-                China Petroleum Engineering & Construction Corporation - A leading EPC contractor for onshore oil & gas projects.
+                China Petroleum Engineering and Construction Corporation - Leading EPC contractor for onshore oil & gas projects in the Middle East.
               </p>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Quick Links</h4>
               <div className="space-y-2">
                 <Link href="/careers" className="block text-white/60 hover:text-white text-sm">Open Positions</Link>
-                <Link href="/about" className="block text-white/60 hover:text-white text-sm">About Us</Link>
+                <Link href="#about" className="block text-white/60 hover:text-white text-sm">About Us</Link>
                 <Link href="#departments" className="block text-white/60 hover:text-white text-sm">Departments</Link>
               </div>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Departments</h4>
               <div className="space-y-2">
-                <span className="block text-white/60 text-sm">Engineering</span>
+                <span className="block text-white/60 text-sm">Marketing</span>
                 <span className="block text-white/60 text-sm">Project Planning & Control</span>
                 <span className="block text-white/60 text-sm">Commercial and Finance</span>
                 <span className="block text-white/60 text-sm">HR & Administration</span>
@@ -477,9 +423,9 @@ export default function HomePage() {
           </div>
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-center md:text-left">
-              <p className="text-white/60 text-sm font-medium mb-1">CPECC Careers</p>
+              <p className="text-white/60 text-sm font-medium mb-1">www.careers.cpecc.ae</p>
               <p className="text-white/40 text-sm">
-                &copy; {new Date().getFullYear()} CPECC. All rights reserved.
+                &copy; {new Date().getFullYear()} China Petroleum Engineering and Construction Corporation. All rights reserved.
               </p>
             </div>
             <div className="flex items-center gap-4">

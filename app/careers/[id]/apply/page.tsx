@@ -40,8 +40,8 @@ export default async function ApplyPage({ params }: ApplyPageProps) {
         <div className="space-y-6">
           <div>
             <h1 className="text-2xl font-bold text-balance">Apply for {job.title}</h1>
-            {Array.isArray(job.department) && job.department[0]?.name && (
-              <p className="mt-1 text-muted-foreground">{job.department[0].name}</p>
+            {job.department?.name && (
+              <p className="mt-1 text-muted-foreground">{job.department.name}</p>
             )}
           </div>
 

@@ -15,16 +15,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
-import type { Job, Department, JobStatus, EmploymentType, SalaryCurrency, Profile } from '@/lib/types'
+import type { Job, Department, JobStatus, EmploymentType, SalaryCurrency } from '@/lib/types'
 import { EMPLOYMENT_TYPE_LABELS, JOB_STATUS_LABELS, CURRENCY_OPTIONS } from '@/lib/types'
 
 interface JobFormProps {
   job?: Job
   departments: Department[]
-  recruiters?: Profile[]
 }
 
-export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
+export function JobForm({ job, departments }: JobFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -36,13 +35,10 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
     department_id: job?.department_id || '',
     location: job?.location || '',
     employment_type: job?.employment_type || '',
-    budgeted_salary: job?.budgeted_salary?.toString() || '',
-    salary_currency: job?.salary_currency || 'AED',
+    salary_min: job?.salary_min?.toString() || '',
+    salary_max: job?.salary_max?.toString() || '',
+    salary_currency: job?.salary_currency || 'USD',
     status: job?.status || 'draft',
-    closing_date: job?.closing_date ? job.closing_date.split('T')[0] : '',
-    recruiter_id: job?.recruiter_id || '',
-    project_name: job?.project_name || '',
-    qualification: job?.qualification || '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,13 +58,10 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
         department_id: formData.department_id || null,
         location: formData.location || null,
         employment_type: formData.employment_type || null,
-        budgeted_salary: formData.budgeted_salary ? parseInt(formData.budgeted_salary) : null,
+        salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
+        salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         salary_currency: formData.salary_currency as SalaryCurrency,
         status: formData.status as JobStatus,
-        closing_date: formData.closing_date || null,
-        recruiter_id: formData.recruiter_id || null,
-        project_name: formData.project_name || null,
-        qualification: formData.qualification || null,
         created_by: user?.id || null,
         published_at: formData.status === 'open' ? new Date().toISOString() : null,
       }
@@ -107,7 +100,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="e.g. Senior Planning Engineer"
+              placeholder="e.g. Senior Software Engineer"
               required
             />
           </div>
@@ -138,39 +131,8 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
                 id="location"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                placeholder="e.g. AUH"
+                placeholder="e.g. San Francisco, CA"
               />
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="project_name">Project Name</Label>
-              <Input
-                id="project_name"
-                value={formData.project_name}
-                onChange={(e) => setFormData({ ...formData, project_name: e.target.value })}
-                placeholder="e.g. Al Dhafra Gas Project"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="recruiter">Recruiter</Label>
-              <Select
-                value={formData.recruiter_id}
-                onValueChange={(value) => setFormData({ ...formData, recruiter_id: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select recruiter" />
-                </SelectTrigger>
-                <SelectContent>
-                  {recruiters.map((recruiter) => (
-                    <SelectItem key={recruiter.id} value={recruiter.id}>
-                      {recruiter.full_name || recruiter.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
           </div>
 
@@ -198,7 +160,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
               <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
-                onValueChange={(value) => setFormData({ ...formData, status: value as JobStatus })}
+                onValueChange={(value) => setFormData({ ...formData, status: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
@@ -214,56 +176,45 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="closing_date">Closing Date</Label>
-              <Input
-                id="closing_date"
-                type="date"
-                value={formData.closing_date}
-                onChange={(e) => setFormData({ ...formData, closing_date: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="qualification">Qualification</Label>
-              <Input
-                id="qualification"
-                value={formData.qualification}
-                onChange={(e) => setFormData({ ...formData, qualification: e.target.value })}
-                placeholder="e.g. Bachelor's in Engineering"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="salary_currency">Salary Currency</Label>
+            <Select
+              value={formData.salary_currency}
+              onValueChange={(value) => setFormData({ ...formData, salary_currency: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select currency" />
+              </SelectTrigger>
+              <SelectContent>
+                {CURRENCY_OPTIONS.map((currency) => (
+                  <SelectItem key={currency.value} value={currency.value}>
+                    {currency.symbol} {currency.label} ({currency.value})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="salary_currency">Salary Currency</Label>
-              <Select
-                value={formData.salary_currency}
-                onValueChange={(value) => setFormData({ ...formData, salary_currency: value as SalaryCurrency })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select currency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CURRENCY_OPTIONS.map((currency) => (
-                    <SelectItem key={currency.value} value={currency.value}>
-                      {currency.symbol} {currency.label} ({currency.value})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="salary_min">Minimum Salary (Annual)</Label>
+              <Input
+                id="salary_min"
+                type="number"
+                value={formData.salary_min}
+                onChange={(e) => setFormData({ ...formData, salary_min: e.target.value })}
+                placeholder="e.g. 80000"
+              />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="budgeted_salary">Budgeted Salary (Annual)</Label>
+              <Label htmlFor="salary_max">Maximum Salary (Annual)</Label>
               <Input
-                id="budgeted_salary"
+                id="salary_max"
                 type="number"
-                value={formData.budgeted_salary}
-                onChange={(e) => setFormData({ ...formData, budgeted_salary: e.target.value })}
-                placeholder="e.g. 100000"
+                value={formData.salary_max}
+                onChange={(e) => setFormData({ ...formData, salary_max: e.target.value })}
+                placeholder="e.g. 120000"
               />
             </div>
           </div>

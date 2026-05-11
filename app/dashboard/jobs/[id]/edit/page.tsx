@@ -10,10 +10,9 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
   const { id } = await params
   const supabase = await createClient()
 
-  const [{ data: job, error }, { data: departments }, { data: recruiters }] = await Promise.all([
+  const [{ data: job, error }, { data: departments }] = await Promise.all([
     supabase.from('jobs').select('*').eq('id', id).single(),
     supabase.from('departments').select('*').order('name'),
-    supabase.from('profiles').select('*').eq('approval_status', 'approved').order('full_name'),
   ])
 
   if (error || !job) {
@@ -29,7 +28,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
         </p>
       </div>
 
-      <JobForm job={job} departments={departments || []} recruiters={recruiters || []} />
+      <JobForm job={job} departments={departments || []} />
     </div>
   )
 }

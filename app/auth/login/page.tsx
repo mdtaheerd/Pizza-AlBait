@@ -15,12 +15,11 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Linkedin, Mail, Loader2, Home, Eye, EyeOff } from 'lucide-react'
+import { Linkedin, Mail, Loader2, Home } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -32,67 +31,15 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      console.log('[v0] Starting login for:', email)
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
-      
-      if (error) {
-        console.log('[v0] Login error:', error.message)
-        throw error
-      }
-      
-      console.log('[v0] Login successful, user:', data.user?.email)
-      console.log('[v0] Session exists:', !!data.session)
-      
-      // Check user's approval status
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role, approval_status')
-        .eq('id', data.user?.id)
-        .single()
-      
-      console.log('[v0] User profile:', profile)
-      
-      // Block rejected users
-      if (profile?.approval_status === 'rejected') {
-        await supabase.auth.signOut()
-        throw new Error('Your account has been rejected. Please contact the administrator.')
-      }
-      
-      // Redirect pending users to pending approval page
-      if (profile?.role !== 'candidate' && profile?.role !== 'admin' && profile?.approval_status === 'pending') {
-        window.location.href = '/auth/pending-approval'
-        return
-      }
-      
-      // Wait a moment for the session to be set in cookies
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
-      // Verify the session is set
-      const { data: sessionCheck } = await supabase.auth.getSession()
-      console.log('[v0] Session check after login:', !!sessionCheck.session)
-      
-      // Redirect based on role
-      if (profile?.role === 'candidate') {
-        window.location.href = '/candidate/dashboard'
-      } else {
-        window.location.href = '/dashboard'
-      }
+      if (error) throw error
+      router.push('/dashboard')
     } catch (error: unknown) {
-      // Log detailed error for debugging but show generic message to user
-      console.error('[SECURITY] Login failure:', error)
-      
-      // Don't reveal whether email exists or not - always show generic message
-      const errorMessage = error instanceof Error ? error.message : ''
-      
-      // Only show specific message for rejected users
-      if (errorMessage.includes('rejected')) {
-        setError(errorMessage)
-      } else {
-        setError('Invalid email or password. Please try again.')
-      }
+      setError(error instanceof Error ? error.message : 'An error occurred')
+    } finally {
       setIsLoading(false)
     }
   }
@@ -115,11 +62,11 @@ export default function LoginPage() {
         <div className="flex flex-col gap-6">
           <Link href="/" className="flex items-center justify-center">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2Pqwbqzr1lnrsrOSmNqst4Fcmq5AyS.png"
-              alt="CPECC"
-              width={80}
-              height={80}
-              className="h-20 w-auto"
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
+              alt="CPECC - China Petroleum Engineering & Construction Corporation"
+              width={280}
+              height={40}
+              className="h-10 w-auto"
             />
           </Link>
           
@@ -170,37 +117,14 @@ export default function LoginPage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="password">Password</Label>
-                      <Link
-                        href="/auth/forgot-password"
-                        className="text-xs text-primary hover:underline"
-                      >
-                        Forgot password?
-                      </Link>
-                    </div>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        type={showPassword ? 'text' : 'password'}
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="pr-10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        tabIndex={-1}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </button>
-                    </div>
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
                   </div>
                   {error && (
                     <p className="text-sm text-destructive">{error}</p>
