@@ -48,9 +48,9 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
       return
     }
 
-    // Validate file size (2MB max)
-    if (file.size > 2 * 1024 * 1024) {
-      setError('File too large. Maximum size is 2MB.')
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File too large. Maximum size is 5MB.')
       return
     }
 
@@ -298,7 +298,7 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
                     Click to upload or drag and drop
                   </span>
                   <span className="text-xs text-muted-foreground mt-1">
-                    PDF, DOC, DOCX (Max 2MB)
+                    PDF, DOC, DOCX (Max 5MB)
                   </span>
                 </label>
               ) : (

@@ -1,7 +1,7 @@
 import { put } from '@vercel/blob'
 import { NextRequest, NextResponse } from 'next/server'
 
-const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,10 +25,10 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Validate file size (2MB max)
+    // Validate file size (5MB max)
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json({ 
-        error: 'File too large. Maximum size is 2MB.' 
+        error: 'File too large. Maximum size is 5MB.' 
       }, { status: 400 })
     }
 
