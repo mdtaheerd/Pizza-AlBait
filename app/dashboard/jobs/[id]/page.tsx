@@ -27,14 +27,25 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     .from('jobs')
     .select(`
       *,
-      department:departments(name),
-      creator:profiles(full_name)
+      department:departments(name)
     `)
     .eq('id', id)
     .single()
 
   if (error || !job) {
+    console.error('[v0] Job fetch error:', error)
     notFound()
+  }
+
+  // Fetch creator separately to avoid foreign key issues
+  let creatorName = 'Unknown'
+  if (job.created_by) {
+    const { data: creator } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', job.created_by)
+      .single()
+    creatorName = creator?.full_name || 'Unknown'
   }
 
   const { data: applications } = await supabase
@@ -73,8 +84,8 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
             </Badge>
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            {Array.isArray(job.department) && job.department[0]?.name && (
-              <span>{job.department[0].name}</span>
+            {job.department?.name && (
+              <span>{job.department.name}</span>
             )}
             {job.location && (
               <span className="flex items-center gap-1">
@@ -220,7 +231,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
 
       {/* Meta Information */}
       <div className="text-sm text-muted-foreground">
-        Created by {job.creator?.full_name || 'Unknown'} on{' '}
+        Created by {creatorName} on{' '}
         {format(new Date(job.created_at), 'MMMM d, yyyy')}
         {job.published_at && (
           <> · Published on {format(new Date(job.published_at), 'MMMM d, yyyy')}</>
