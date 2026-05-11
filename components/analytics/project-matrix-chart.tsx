@@ -28,6 +28,7 @@ interface ProjectMatrixChartProps {
 }
 
 const COLORS = {
+  jobs: '#6366f1', // indigo
   applicants: '#3b82f6', // blue
   interviews: '#8b5cf6', // purple
   offers: '#10b981', // green
@@ -45,10 +46,11 @@ export function ProjectMatrixChart({ data }: ProjectMatrixChartProps) {
     )
   }
 
-  // Transform data for stacked bar chart - only include metrics with data
+  // Transform data for stacked bar chart - include jobs and all metrics
   const chartData = data.map(d => ({
     name: d.project.length > 15 ? d.project.substring(0, 15) + '...' : d.project,
     fullName: d.project,
+    Jobs: d.jobs,
     Applicants: d.applicants,
     Interviews: d.interviews,
     Offers: d.offers,
@@ -82,6 +84,7 @@ export function ProjectMatrixChart({ data }: ProjectMatrixChartProps) {
           }}
         />
         <Legend />
+        <Bar dataKey="Jobs" stackId="a" fill={COLORS.jobs} />
         <Bar dataKey="Applicants" stackId="a" fill={COLORS.applicants} />
         <Bar dataKey="Interviews" stackId="a" fill={COLORS.interviews} />
         <Bar dataKey="Offers" stackId="a" fill={COLORS.offers} />
