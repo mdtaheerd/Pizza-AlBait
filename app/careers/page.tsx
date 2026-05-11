@@ -63,14 +63,18 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-white">
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex items-center gap-3">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
-              alt="CPECC - China Petroleum Engineering & Construction Corporation"
-              width={300}
-              height={40}
-              className="h-10 w-auto"
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2Pqwbqzr1lnrsrOSmNqst4Fcmq5AyS.png"
+              alt="CPECC"
+              width={50}
+              height={50}
+              className="h-12 w-auto"
             />
+            <div className="hidden sm:block">
+              <p className="text-xs text-muted-foreground leading-tight">中国石油工程建设有限公司海湾地区公司</p>
+              <p className="text-[10px] text-muted-foreground leading-tight">CHINA PETROLEUM ENGINEERING & CONSTRUCTION CORPORATION</p>
+            </div>
           </Link>
           <div className="flex items-center gap-4">
             <Button variant="ghost" asChild>
@@ -270,14 +274,18 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
       <footer className="border-t bg-slate-900 text-white py-12">
         <div className="mx-auto max-w-5xl px-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
+            <div className="flex items-center gap-3">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CPECC%20Logo-v2VEWr2wpVlNgvVySqwQDyOe1A3E71.jpg"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2Pqwbqzr1lnrsrOSmNqst4Fcmq5AyS.png"
                 alt="CPECC Logo"
-                width={60}
-                height={60}
-                className="rounded-lg w-auto h-auto"
+                width={50}
+                height={50}
+                className="h-12 w-auto"
               />
+              <div>
+                <p className="text-xs text-white/80 leading-tight">中国石油工程建设有限公司海湾地区公司</p>
+                <p className="text-[10px] text-white/60 leading-tight">CHINA PETROLEUM ENGINEERING & CONSTRUCTION CORPORATION</p>
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <a href="#" className="h-10 w-10 rounded-lg bg-white/10 flex items-center justify-center hover:bg-[#0077B5] transition-colors">

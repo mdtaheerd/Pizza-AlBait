@@ -7,14 +7,18 @@ export function CareersHeader() {
   return (
     <header className="sticky top-0 z-50 border-b bg-white">
       <div className="mx-auto flex h-20 max-w-5xl items-center justify-between px-6">
-        <Link href="/" className="flex items-center">
+        <Link href="/" className="flex items-center gap-3">
           <Image
             src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2Pqwbqzr1lnrsrOSmNqst4Fcmq5AyS.png"
             alt="CPECC"
-            width={60}
-            height={60}
-            className="h-14 w-auto"
+            width={50}
+            height={50}
+            className="h-12 w-auto"
           />
+          <div className="hidden sm:block">
+            <p className="text-xs text-muted-foreground leading-tight">中国石油工程建设有限公司海湾地区公司</p>
+            <p className="text-[10px] text-muted-foreground leading-tight">CHINA PETROLEUM ENGINEERING & CONSTRUCTION CORPORATION</p>
+          </div>
         </Link>
         <nav className="flex items-center gap-4">
           <Button variant="ghost" size="sm" asChild>
