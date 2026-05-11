@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import {
   Select,
   SelectContent,
@@ -270,23 +270,19 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            <RichTextEditor
+              content={formData.description}
+              onChange={(content) => setFormData({ ...formData, description: content })}
               placeholder="Describe the role, responsibilities, and what the ideal candidate looks like..."
-              rows={6}
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="requirements">Requirements</Label>
-            <Textarea
-              id="requirements"
-              value={formData.requirements}
-              onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+            <RichTextEditor
+              content={formData.requirements}
+              onChange={(content) => setFormData({ ...formData, requirements: content })}
               placeholder="List the required qualifications, skills, and experience..."
-              rows={4}
             />
           </div>
 
