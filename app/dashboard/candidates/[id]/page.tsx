@@ -38,7 +38,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
 
   const { data: applications } = await supabase
     .from('applications')
-    .select('*, job:jobs(id, title, department:departments(name)), locker:profiles!applications_locked_by_fkey(full_name, email)')
+    .select('*, job:jobs(id, title, department:departments(name)), locker:profiles!applications_locked_by_fkey(full_name, email), interviews:interviews(id, scheduled_at, status)')
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
 
@@ -297,7 +297,18 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
                       {STAGE_LABELS[application.stage]}
                     </Badge>
                     <span className="text-sm text-muted-foreground">
-                      {format(new Date(application.applied_at), 'MMM d, yyyy')}
+                      {(() => {
+                        // Get the latest scheduled interview for this application
+                        const interviews = (application as any).interviews || []
+                        const latestInterview = interviews
+                          .filter((i: any) => i.status === 'scheduled')
+                          .sort((a: any, b: any) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime())[0]
+                        
+                        if (latestInterview && application.stage === 'interview_scheduled') {
+                          return format(new Date(latestInterview.scheduled_at), 'MMM d, yyyy')
+                        }
+                        return format(new Date(application.applied_at), 'MMM d, yyyy')
+                      })()}
                     </span>
                   </div>
                 </div>
