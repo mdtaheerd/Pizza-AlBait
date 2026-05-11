@@ -2,9 +2,13 @@ import { Resend } from 'resend'
 import { NextResponse } from 'next/server'
 import { format } from 'date-fns'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Lazy initialization to avoid build-time errors
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY)
+}
 
 export async function POST(request: Request) {
+  const resend = getResend()
   try {
     const body = await request.json()
     const {
