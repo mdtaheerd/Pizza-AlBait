@@ -7,14 +7,29 @@ import { JobsTable } from '@/components/jobs/jobs-table'
 export default async function JobsPage() {
   const supabase = await createClient()
 
-  const { data: jobs } = await supabase
+  const { data: jobs, error } = await supabase
     .from('jobs')
     .select(`
       *,
-      department:departments(name),
-      creator:profiles(full_name)
+      department:departments(name)
     `)
     .order('created_at', { ascending: false })
+
+  // Log any errors for debugging
+  if (error) {
+    console.error('[v0] Jobs fetch error:', error)
+  }
+
+  // Fetch creator names separately to avoid foreign key issues
+  const creatorIds = [...new Set((jobs || []).map(j => j.created_by).filter(Boolean))]
+  const { data: creators } = creatorIds.length > 0 
+    ? await supabase.from('profiles').select('id, full_name').in('id', creatorIds)
+    : { data: [] }
+  
+  const creatorMap = (creators || []).reduce((acc, c) => {
+    acc[c.id] = c.full_name
+    return acc
+  }, {} as Record<string, string>)
 
   // Get application counts for each job
   const { data: applicationCounts } = await supabase
@@ -28,6 +43,7 @@ export default async function JobsPage() {
 
   const jobsWithCounts = (jobs || []).map((job) => ({
     ...job,
+    creator: job.created_by ? { full_name: creatorMap[job.created_by] || null } : null,
     _count: {
       applications: countsByJob[job.id] || 0,
     },
