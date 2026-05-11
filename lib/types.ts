@@ -41,15 +41,20 @@ export interface Job {
   employment_type: EmploymentType | null
   salary_min: number | null
   salary_max: number | null
+  budgeted_salary: number | null
   salary_currency: SalaryCurrency
   status: JobStatus
   created_by: string | null
+  recruiter_id: string | null
+  project_name: string | null
+  qualification: string | null
   created_at: string
   updated_at: string
   published_at: string | null
   closing_date: string | null
   department?: Department | null
   creator?: Profile | null
+  recruiter?: Profile | null
   _count?: {
     applications: number
   }
