@@ -165,7 +165,6 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
           .eq('id', candidateId)
         
         if (updateError) {
-          console.error('[v0] Error updating candidate:', updateError)
           throw updateError
         }
       } else {
@@ -207,16 +206,19 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
 
       setIsSubmitted(true)
     } catch (err) {
-      console.error('[v0] Application submission error:', err)
+      console.error('Application submission error:', err)
       const errorMessage = err instanceof Error ? err.message : 'An error occurred'
-      // Provide more helpful error messages
+      // Provide user-friendly error messages
       if (errorMessage.includes('violates row-level security policy')) {
         setError('Unable to submit application. Please try again or contact support.')
       } else if (errorMessage.includes('duplicate key')) {
         setError('You have already applied for this position.')
+      } else if (errorMessage.includes('Failed to fetch') || errorMessage.includes('network')) {
+        setError('Network error. Please check your internet connection and try again.')
+      } else if (errorMessage.includes('upload') || errorMessage.includes('CV')) {
+        setError('Failed to upload your CV. Please try a different file or contact support.')
       } else {
-        // Show the actual error message for better debugging
-        setError(errorMessage)
+        setError('Unable to submit application. Please try again or contact support.')
       }
       setIsUploading(false)
     } finally {
