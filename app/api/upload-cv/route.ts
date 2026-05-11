@@ -36,14 +36,16 @@ export async function POST(request: NextRequest) {
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
     const filePath = `cvs/${timestamp}_${sanitizedName}`
 
-    // Upload to Vercel Blob (private storage)
+    // Upload to Vercel Blob (public storage for CV files)
     const blob = await put(filePath, file, {
-      access: 'private',
+      access: 'public',
     })
+
+    console.log('[v0] CV uploaded successfully:', blob.url)
 
     return NextResponse.json({
       success: true,
-      url: blob.pathname,
+      url: blob.url,
       filename: file.name,
       size: file.size,
       path: blob.pathname
