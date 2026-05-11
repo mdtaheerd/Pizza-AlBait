@@ -45,7 +45,7 @@ export function MobileSidebar({ profile }: MobileSidebarProps) {
       <SheetHeader className="border-b px-6 py-4">
         <SheetTitle className="flex items-center justify-center">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-SIoaEem9rRhvQManhsXzLTLTuvKC1c.png"
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2Pqwbqzr1lnrsrOSmNqst4Fcmq5AyS.png"
             alt="CPECC"
             width={60}
             height={60}

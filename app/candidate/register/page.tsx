@@ -190,7 +190,7 @@ export default function CandidateRegisterPage() {
           <CardHeader className="space-y-4 text-center">
             <Link href="/" className="flex items-center justify-center">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-SIoaEem9rRhvQManhsXzLTLTuvKC1c.png"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2Pqwbqzr1lnrsrOSmNqst4Fcmq5AyS.png"
                 alt="CPECC"
                 width={200}
                 height={60}

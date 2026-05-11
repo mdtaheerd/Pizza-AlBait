@@ -31,7 +31,7 @@ export async function POST(request: Request) {
             </p>
           </div>
           <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
-            <p style="margin: 0;">Sent via TalentTrack ATS</p>
+            <p style="margin: 0;">Sent via CPECC</p>
           </div>
         </div>
       `,

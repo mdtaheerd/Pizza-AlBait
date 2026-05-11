@@ -68,7 +68,7 @@ export function CandidateDashboardClient({ candidate, openJobs, userEmail }: Can
           <div className="flex items-center gap-4">
             <Link href="/">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-SIoaEem9rRhvQManhsXzLTLTuvKC1c.png"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2Pqwbqzr1lnrsrOSmNqst4Fcmq5AyS.png"
                 alt="CPECC"
                 width={160}
                 height={40}

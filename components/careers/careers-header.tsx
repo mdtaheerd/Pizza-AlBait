@@ -9,7 +9,7 @@ export function CareersHeader() {
       <div className="mx-auto flex h-20 max-w-5xl items-center justify-between px-6">
         <Link href="/" className="flex items-center">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-SIoaEem9rRhvQManhsXzLTLTuvKC1c.png"
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2Pqwbqzr1lnrsrOSmNqst4Fcmq5AyS.png"
             alt="CPECC"
             width={60}
             height={60}
