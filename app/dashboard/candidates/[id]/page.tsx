@@ -45,9 +45,25 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   // Fetch candidate history
   const { data: history } = await supabase
     .from('candidate_history')
-    .select('*, actor:profiles(full_name, email), job:jobs(title)')
+    .select('*, job:jobs(title)')
     .eq('candidate_id', id)
     .order('created_at', { ascending: false })
+
+  // Fetch actor profiles separately for history
+  const actorIds = [...new Set((history || []).map(h => h.actor_id).filter(Boolean))]
+  const { data: actors } = actorIds.length > 0
+    ? await supabase.from('profiles').select('id, full_name, email').in('id', actorIds)
+    : { data: [] }
+
+  const actorMap = (actors || []).reduce((acc, a) => {
+    acc[a.id] = { full_name: a.full_name, email: a.email }
+    return acc
+  }, {} as Record<string, { full_name: string; email: string }>)
+
+  const historyWithActor = (history || []).map(h => ({
+    ...h,
+    actor: h.actor_id ? actorMap[h.actor_id] : null
+  }))
 
   // Check if candidate has any rejected or declined applications (available for reconsideration)
   const hasRejectedApplications = applications?.some(
@@ -319,8 +335,8 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
       </Card>
 
       {/* Candidate History Timeline */}
-      {history && history.length > 0 && (
-        <CandidateHistoryTimeline history={history as CandidateHistory[]} />
+      {historyWithActor && historyWithActor.length > 0 && (
+        <CandidateHistoryTimeline history={historyWithActor as CandidateHistory[]} />
       )}
 
       {/* Meta Information */}

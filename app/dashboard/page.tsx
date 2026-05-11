@@ -41,7 +41,7 @@ export default async function DashboardPage() {
       .limit(5),
     supabase
       .from('interviews')
-      .select('*, application:applications(*, candidate:candidates(*), job:jobs(title)), interviewer:profiles(full_name)')
+      .select('*, application:applications(*, candidate:candidates(*), job:jobs(title))')
       .eq('status', 'scheduled')
       .gte('scheduled_at', new Date().toISOString())
       .order('scheduled_at', { ascending: true })

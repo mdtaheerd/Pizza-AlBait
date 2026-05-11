@@ -54,13 +54,13 @@ export default async function ReportsPage() {
         salary_currency,
         published_at,
         closing_date,
-        department:departments(id, name),
-        creator:profiles(id, full_name, email)
+        created_by,
+        department:departments(id, name)
       )
     `)
     .order('applied_at', { ascending: false })
   
-  // Fetch jobs with creator/recruiter info
+  // Fetch jobs with department info
   const { data: jobs } = await supabase
     .from('jobs')
     .select(`
@@ -69,10 +69,35 @@ export default async function ReportsPage() {
       status,
       created_at,
       closing_date,
-      department:departments(id, name),
-      creator:profiles(id, full_name, email)
+      created_by,
+      department:departments(id, name)
     `)
     .order('created_at', { ascending: false })
+
+  // Fetch creator profiles separately
+  const creatorIds = [...new Set([
+    ...(applications || []).map(a => a.job?.created_by).filter(Boolean),
+    ...(jobs || []).map(j => j.created_by).filter(Boolean)
+  ])]
+  const { data: creators } = creatorIds.length > 0
+    ? await supabase.from('profiles').select('id, full_name, email').in('id', creatorIds)
+    : { data: [] }
+
+  const creatorMap = (creators || []).reduce((acc, c) => {
+    acc[c.id] = { full_name: c.full_name, email: c.email }
+    return acc
+  }, {} as Record<string, { full_name: string; email: string }>)
+
+  // Add creator data
+  const applicationsWithCreator = (applications || []).map(app => ({
+    ...app,
+    job: app.job ? { ...app.job, creator: app.job.created_by ? creatorMap[app.job.created_by] : null } : null
+  }))
+
+  const jobsWithCreator = (jobs || []).map(job => ({
+    ...job,
+    creator: job.created_by ? creatorMap[job.created_by] : null
+  }))
   
   return (
     <div className="space-y-6">
@@ -84,8 +109,8 @@ export default async function ReportsPage() {
       </div>
       
       <ReportsClient 
-        applications={applications || []} 
-        jobs={jobs || []}
+        applications={applicationsWithCreator} 
+        jobs={jobsWithCreator}
         currentUser={profile}
       />
     </div>
