@@ -2,15 +2,14 @@ import { Resend } from 'resend'
 import { NextResponse } from 'next/server'
 import { format } from 'date-fns'
 
-// Initialize Resend only if API key is available (prevents build errors)
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
+// Lazy initialization to avoid build-time errors
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY)
+}
 
 export async function POST(request: Request) {
+  const resend = getResend()
   try {
-    if (!resend) {
-      return NextResponse.json({ error: 'Email service not configured' }, { status: 503 })
-    }
-
     const body = await request.json()
     const {
       candidateEmail,
