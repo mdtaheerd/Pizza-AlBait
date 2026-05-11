@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button'
 import { MapPin, Clock, Banknote, Search, HardHat, ArrowRight, Users, Briefcase, Shield, Linkedin, Globe } from 'lucide-react'
 import { EMPLOYMENT_TYPE_LABELS } from '@/lib/types'
 import Link from 'next/link'
-import Image from 'next/image'
 import { CareersSearch } from '@/components/careers/careers-search'
+import Image from 'next/image'
 
 interface CareersPageProps {
   searchParams: Promise<{ search?: string; department?: string }>
@@ -65,11 +65,11 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
           <Link href="/" className="flex items-center">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pxapD8smtnaNSYCYo9mTLtPDa75C80.png"
-              alt="TalentTrack ATS"
-              width={180}
-              height={50}
-              className="h-12 w-auto"
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
+              alt="CPECC - China Petroleum Engineering & Construction Corporation"
+              width={300}
+              height={40}
+              className="h-10 w-auto"
             />
           </Link>
           <div className="flex items-center gap-4">
@@ -83,37 +83,57 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden border-b bg-gradient-to-br from-blue-50 to-indigo-50">
+      {/* Hero Section with Background */}
+      <section className="relative overflow-hidden border-b">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/middle-east-construction.jpg"
+            alt="CPECC Middle East Construction"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/90 to-background" />
+        </div>
+        
         <div className="relative z-10 mx-auto max-w-5xl px-6 py-20 text-center">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card/80 backdrop-blur px-4 py-1.5 text-sm shadow-sm">
-            <Users className="h-4 w-4 text-blue-600" />
+            <Users className="h-4 w-4 text-red-600" />
             <span className="text-muted-foreground">{filteredJobs.length} Open Positions</span>
           </div>
           
           <h1 className="text-4xl font-bold tracking-tight text-balance sm:text-5xl">
-            Find Your Next
-            <span className="mx-2 bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
-              Opportunity
+            Join
+            <span className="mx-2 bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">
+              CPECC
             </span>
+            in the Middle East
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground text-pretty leading-relaxed">
-            Browse our open positions and take the next step in your career. We are always looking for talented individuals to join our team.
+            China Petroleum Engineering and Construction Corporation - Join our team of engineers, project managers, and industry experts working on world-class onshore oil & gas projects across the Middle East.
           </p>
           
           <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-2 bg-card/50 backdrop-blur px-3 py-1.5 rounded-full">
-              <Shield className="h-4 w-4 text-blue-600" />
-              Great work environment
+              <Shield className="h-4 w-4 text-red-600" />
+              World-class HSE standards
             </div>
             <div className="flex items-center gap-2 bg-card/50 backdrop-blur px-3 py-1.5 rounded-full">
-              <Globe className="h-4 w-4 text-blue-600" />
-              Multiple locations
+              <Globe className="h-4 w-4 text-red-600" />
+              Middle East onshore projects
             </div>
             <div className="flex items-center gap-2 bg-card/50 backdrop-blur px-3 py-1.5 rounded-full">
-              <Briefcase className="h-4 w-4 text-blue-600" />
+              <Briefcase className="h-4 w-4 text-red-600" />
               Competitive packages
             </div>
+          </div>
+
+          {/* LinkedIn CTA */}
+          <div className="mt-8">
+            <Button size="lg" className="bg-[#0077B5] hover:bg-[#005582] rounded-xl text-lg">
+              <Linkedin className="mr-2 h-5 w-5" />
+              Apply with LinkedIn
+            </Button>
           </div>
         </div>
       </section>

@@ -9,10 +9,10 @@ export function CareersHeader() {
       <div className="mx-auto flex h-20 max-w-5xl items-center justify-between px-6">
         <Link href="/" className="flex items-center">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pxapD8smtnaNSYCYo9mTLtPDa75C80.png"
-            alt="TalentTrack ATS"
-            width={160}
-            height={45}
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
+            alt="CPECC - China Petroleum Engineering & Construction Corporation"
+            width={280}
+            height={40}
             className="h-10 w-auto"
           />
         </Link>
