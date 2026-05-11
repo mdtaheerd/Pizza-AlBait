@@ -7,6 +7,13 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { CheckCircle2, Upload, FileText, X, Loader2 } from 'lucide-react'
 
 interface ApplicationFormProps {
@@ -30,6 +37,8 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
     linkedin_url: '',
     portfolio_url: '',
     cover_letter: '',
+    gender: '',
+    nationality: '',
   })
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,6 +157,8 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
             phone: formData.phone || null,
             linkedin_url: formData.linkedin_url || null,
             portfolio_url: formData.portfolio_url || null,
+            gender: formData.gender,
+            nationality: formData.nationality,
             source: 'career_page',
             resume_url: uploadedCvUrl || null,
             cv_uploaded_at: uploadedCvUrl ? new Date().toISOString() : null,
@@ -275,6 +286,36 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
             />
           </div>
 
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="gender">Gender *</Label>
+              <Select
+                value={formData.gender}
+                onValueChange={(value) => setFormData({ ...formData, gender: value })}
+                required
+              >
+                <SelectTrigger id="gender">
+                  <SelectValue placeholder="Select gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Male">Male</SelectItem>
+                  <SelectItem value="Female">Female</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="nationality">Nationality *</Label>
+              <Input
+                id="nationality"
+                value={formData.nationality}
+                onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
+                placeholder="e.g., Indian, Pakistani, Filipino"
+                required
+              />
+            </div>
+          </div>
+
           {/* CV Upload Section */}
           <div className="space-y-2">
             <Label>Resume / CV *</Label>
@@ -346,7 +387,7 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
             type="submit" 
             size="lg" 
             className="w-full" 
-            disabled={isLoading || isUploading || !cvFile}
+            disabled={isLoading || isUploading || !cvFile || !formData.gender || !formData.nationality}
           >
             {isUploading ? (
               <>
