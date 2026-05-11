@@ -40,7 +40,7 @@ export default function SignUpPage() {
     setError(null)
 
     try {
-      // First check if user was previously rejected and allow re-registration
+      // First check if user already exists with this email
       const reregisterResponse = await fetch('/api/auth/reregister', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -49,18 +49,20 @@ export default function SignUpPage() {
       const reregisterResult = await reregisterResponse.json()
 
       if (reregisterResult.wasRejected) {
-        // User was rejected and has been reset to pending
+        // User was rejected and has been reset to pending - show success message
         router.push('/auth/sign-up-success?reregistered=true')
         return
       }
 
       if (reregisterResult.isPending) {
         setError('Your registration is already pending approval. Please wait for admin review.')
+        setIsLoading(false)
         return
       }
 
       if (reregisterResult.isApproved) {
         setError('You already have an approved account. Please login instead.')
+        setIsLoading(false)
         return
       }
 
