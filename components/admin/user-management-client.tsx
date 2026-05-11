@@ -46,8 +46,10 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState<string | null>(null)
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
+  const [revokeDialogOpen, setRevokeDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
+  const [revokeReason, setRevokeReason] = useState('')
 
   const pendingUsers = users.filter(u => u.approval_status === 'pending' && u.role !== 'admin')
   const approvedUsers = users.filter(u => u.approval_status === 'approved')
@@ -137,7 +139,51 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
     setRejectDialogOpen(true)
   }
 
-  const UserTable = ({ userList, showActions = false }: { userList: Profile[], showActions?: boolean }) => (
+  const openRevokeDialog = (user: Profile) => {
+    setSelectedUser(user)
+    setRevokeDialogOpen(true)
+  }
+
+  const handleRevoke = async () => {
+    if (!selectedUser) return
+    setLoading(selectedUser.id)
+    try {
+      const { error } = await supabase.rpc('reject_user', {
+        p_user_id: selectedUser.id,
+        p_admin_id: currentUserId,
+        p_reason: revokeReason || 'Access revoked by administrator'
+      })
+      
+      if (error) throw error
+
+      // Send revocation email
+      try {
+        await fetch('/api/send-approval-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            userId: selectedUser.id, 
+            action: 'revoke',
+            reason: revokeReason || 'Your access has been revoked by an administrator.'
+          }),
+        })
+      } catch (emailError) {
+        console.error('Failed to send revocation email:', emailError)
+      }
+
+      setRevokeDialogOpen(false)
+      setSelectedUser(null)
+      setRevokeReason('')
+      router.refresh()
+    } catch (error) {
+      console.error('Error revoking user access:', error)
+      alert('Failed to revoke user access')
+    } finally {
+      setLoading(null)
+    }
+  }
+
+  const UserTable = ({ userList, showActions = false, showRevokeAction = false }: { userList: Profile[], showActions?: boolean, showRevokeAction?: boolean }) => (
     <Table>
       <TableHeader>
         <TableRow>
@@ -146,13 +192,13 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
           <TableHead>Role</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Registered</TableHead>
-          {showActions && <TableHead className="text-right">Actions</TableHead>}
+          {(showActions || showRevokeAction) && <TableHead className="text-right">Actions</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody>
         {userList.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={showActions ? 6 : 5} className="text-center text-muted-foreground py-8">
+            <TableCell colSpan={(showActions || showRevokeAction) ? 6 : 5} className="text-center text-muted-foreground py-8">
               No users found
             </TableCell>
           </TableRow>
@@ -198,6 +244,31 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
                       Reject
                     </Button>
                   </div>
+                </TableCell>
+              )}
+              {showRevokeAction && user.id !== currentUserId && (
+                <TableCell className="text-right">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-red-600 border-red-200 hover:bg-red-50"
+                    onClick={() => openRevokeDialog(user)}
+                    disabled={loading === user.id}
+                  >
+                    {loading === user.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <UserX className="h-4 w-4 mr-1" />
+                        Revoke Access
+                      </>
+                    )}
+                  </Button>
+                </TableCell>
+              )}
+              {showRevokeAction && user.id === currentUserId && (
+                <TableCell className="text-right">
+                  <span className="text-xs text-muted-foreground">Current user</span>
                 </TableCell>
               )}
             </TableRow>
@@ -285,7 +356,7 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
               <CardTitle>Approved Users</CardTitle>
             </CardHeader>
             <CardContent>
-              <UserTable userList={filterUsers(approvedUsers)} />
+              <UserTable userList={filterUsers(approvedUsers)} showRevokeAction={true} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -341,6 +412,39 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}
               Reject User
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Revoke Access Dialog */}
+      <Dialog open={revokeDialogOpen} onOpenChange={setRevokeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Revoke User Access</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to revoke access for {selectedUser?.full_name || selectedUser?.email}?
+              This will prevent them from logging in. You can optionally provide a reason.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            placeholder="Reason for revoking access (optional)"
+            value={revokeReason}
+            onChange={(e) => setRevokeReason(e.target.value)}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRevokeDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleRevoke}
+              disabled={loading === selectedUser?.id}
+            >
+              {loading === selectedUser?.id ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
+              Revoke Access
             </Button>
           </DialogFooter>
         </DialogContent>
