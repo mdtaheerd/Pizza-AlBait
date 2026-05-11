@@ -1,7 +1,7 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -26,41 +26,41 @@ interface CareersSearchProps {
 
 function CareersSearchInner({ departments, currentSearch, currentDepartment }: CareersSearchProps) {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [search, setSearch] = useState(currentSearch || '')
   const [selectedDepartment, setSelectedDepartment] = useState(currentDepartment || 'all')
+  const [isInitialized, setIsInitialized] = useState(false)
 
-  // Update local state when props change
+  // Mark as initialized after first render
   useEffect(() => {
-    setSearch(currentSearch || '')
-    setSelectedDepartment(currentDepartment || 'all')
-  }, [currentSearch, currentDepartment])
+    setIsInitialized(true)
+  }, [])
 
-  const updateUrl = useCallback((searchValue: string, deptValue: string) => {
-    const params = new URLSearchParams()
-    if (searchValue) {
-      params.set('search', searchValue)
-    }
-    if (deptValue && deptValue !== 'all') {
-      params.set('department', deptValue)
-    }
-    const queryString = params.toString()
-    router.push(queryString ? `/careers?${queryString}` : '/careers')
-  }, [router])
-
-  // Debounced search
+  // Debounced search - only run after user interaction, not on initial render
   useEffect(() => {
+    if (!isInitialized) return
+    
+    // Don't update if values match the current URL params
+    if (search === (currentSearch || '') && selectedDepartment === (currentDepartment || 'all')) {
+      return
+    }
+
     const debounce = setTimeout(() => {
-      updateUrl(search, selectedDepartment)
-    }, 400)
+      const params = new URLSearchParams()
+      if (search) {
+        params.set('search', search)
+      }
+      if (selectedDepartment && selectedDepartment !== 'all') {
+        params.set('department', selectedDepartment)
+      }
+      const queryString = params.toString()
+      router.push(queryString ? `/careers?${queryString}` : '/careers')
+    }, 500)
 
     return () => clearTimeout(debounce)
-  }, [search, selectedDepartment, updateUrl])
+  }, [search, selectedDepartment, isInitialized, router, currentSearch, currentDepartment])
 
   const handleDepartmentChange = (value: string) => {
     setSelectedDepartment(value)
-    // Immediate update for department change
-    updateUrl(search, value)
   }
 
   const clearFilters = () => {
