@@ -98,14 +98,28 @@ interface InterviewWithRelations {
 }
 
 interface InterviewsClientProps {
-  upcomingInterviews: InterviewWithRelations[]
-  pastInterviews: InterviewWithRelations[]
+  interviews: InterviewWithRelations[]
+  currentUserId: string
 }
 
-export function InterviewsClient({ upcomingInterviews: initialUpcoming, pastInterviews: initialPast }: InterviewsClientProps) {
+export function InterviewsClient({ interviews, currentUserId }: InterviewsClientProps) {
   const router = useRouter()
-  const [upcomingInterviews, setUpcomingInterviews] = useState(initialUpcoming)
-  const [pastInterviews, setPastInterviews] = useState(initialPast)
+  
+  // Split interviews into upcoming (scheduled status, any future date or today) and past/completed
+  const now = new Date()
+  now.setHours(0, 0, 0, 0) // Start of today
+  
+  const upcomingInterviews = interviews.filter(i => {
+    const date = new Date(i.scheduled_at)
+    // Show all scheduled interviews that are today or in the future
+    return i.status === 'scheduled' && date >= now
+  }).sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
+  
+  const pastInterviews = interviews.filter(i => {
+    const date = new Date(i.scheduled_at)
+    // Show completed/cancelled interviews OR scheduled interviews in the past
+    return i.status !== 'scheduled' || date < now
+  }).sort((a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime())
   const [rescheduleDialog, setRescheduleDialog] = useState(false)
   const [cancelDialog, setCancelDialog] = useState(false)
   const [completeDialog, setCompleteDialog] = useState(false)
@@ -321,15 +335,15 @@ export function InterviewsClient({ upcomingInterviews: initialUpcoming, pastInte
         <div className="bg-green-50 text-green-600 p-4 rounded-lg">{success}</div>
       )}
 
-      {/* Upcoming Interviews - Next 7 Days */}
+      {/* Upcoming Interviews */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CalendarDays className="h-5 w-5 text-blue-600" />
-            Upcoming Interviews (Next 7 Days)
+            Upcoming Interviews
           </CardTitle>
           <CardDescription>
-            Interviews scheduled for the next 7 days
+            All scheduled interviews - use actions to reschedule, complete, or cancel
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -353,7 +367,7 @@ export function InterviewsClient({ upcomingInterviews: initialUpcoming, pastInte
               </TableHeader>
               <TableBody>
                 {upcomingInterviews.map((interview) => (
-                  <InterviewRow key={interview.id} interview={interview} />
+                  <InterviewRow key={interview.id} interview={interview} showActions={true} />
                 ))}
               </TableBody>
             </Table>
@@ -361,15 +375,15 @@ export function InterviewsClient({ upcomingInterviews: initialUpcoming, pastInte
         </CardContent>
       </Card>
 
-      {/* Past Interviews - Last 7 Days */}
+      {/* Past/Completed Interviews */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <History className="h-5 w-5 text-gray-600" />
-            Past Interviews (Last 7 Days)
+            Recent Past Interviews
           </CardTitle>
           <CardDescription>
-            Interviews from the past 7 days - reschedule to move to upcoming
+            Completed, cancelled, or past interviews
           </CardDescription>
         </CardHeader>
         <CardContent>
