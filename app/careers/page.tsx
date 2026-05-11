@@ -63,13 +63,13 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-white">
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center">
+          <Link href="/careers" className="flex items-center">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hz6EBPSFSJJS08uKo2AKL3E1iPN5Ux.png"
               alt="CPECC - China Petroleum Engineering & Construction Corporation"
-              width={300}
-              height={40}
-              className="h-10 w-auto"
+              width={60}
+              height={70}
+              className="h-14 w-auto"
             />
           </Link>
           <div className="flex items-center gap-4">
@@ -171,60 +171,60 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
               Showing {filteredJobs.length} open position{filteredJobs.length !== 1 ? 's' : ''}
             </p>
             {filteredJobs.map((job) => (
-              <Link key={job.id} href={`/careers/${job.id}`}>
-                <Card className="group overflow-hidden transition-all hover:shadow-lg hover:border-red-600/30">
-                  <div className="absolute inset-0 bg-gradient-to-r from-red-600/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                  <CardHeader className="relative pb-3">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <h2 className="text-xl font-semibold group-hover:text-red-600 transition-colors">
-                          {job.title}
-                        </h2>
-                        {job.department?.name && (
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            {job.department.name}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {job.employment_type && (
-                          <Badge variant="secondary" className="shrink-0">
-                            {EMPLOYMENT_TYPE_LABELS[job.employment_type]}
-                          </Badge>
-                        )}
-                        <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-1 group-hover:text-red-600" />
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="relative pt-0">
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                      {job.location && (
-                        <span className="flex items-center gap-1.5">
-                          <MapPin className="h-4 w-4" />
-                          {job.location}
-                        </span>
+              <Card key={job.id} className="group relative overflow-hidden transition-all hover:shadow-lg hover:border-red-600/30">
+                <Link href={`/careers/${job.id}`} className="absolute inset-0 z-10">
+                  <span className="sr-only">View {job.title}</span>
+                </Link>
+                <CardHeader className="pb-3">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold group-hover:text-red-600 transition-colors">
+                        {job.title}
+                      </h2>
+                      {job.department?.name && (
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {job.department.name}
+                        </p>
                       )}
+                    </div>
+                    <div className="flex items-center gap-2">
                       {job.employment_type && (
-                        <span className="flex items-center gap-1.5">
-                          <Clock className="h-4 w-4" />
-                          {EMPLOYMENT_TYPE_LABELS[job.employment_type]}
-                        </span>
+                        <Badge variant="secondary" className="shrink-0">
+                          {EMPLOYMENT_TYPE_LABELS[job.employment_type as keyof typeof EMPLOYMENT_TYPE_LABELS]}
+                        </Badge>
                       )}
-                      {formatSalary(job.salary_min, job.salary_max) && (
-                        <span className="flex items-center gap-1.5">
-                          <Banknote className="h-4 w-4" />
-                          {formatSalary(job.salary_min, job.salary_max)}
-                        </span>
-                      )}
+                      <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-1 group-hover:text-red-600" />
                     </div>
-                    {job.description && (
-                      <p className="mt-4 line-clamp-2 text-sm text-muted-foreground leading-relaxed">
-                        {job.description}
-                      </p>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                    {job.location && (
+                      <span className="flex items-center gap-1.5">
+                        <MapPin className="h-4 w-4" />
+                        {job.location}
+                      </span>
                     )}
-                  </CardContent>
-                </Card>
-              </Link>
+                    {job.employment_type && (
+                      <span className="flex items-center gap-1.5">
+                        <Clock className="h-4 w-4" />
+                        {EMPLOYMENT_TYPE_LABELS[job.employment_type as keyof typeof EMPLOYMENT_TYPE_LABELS]}
+                      </span>
+                    )}
+                    {formatSalary(job.salary_min, job.salary_max) && (
+                      <span className="flex items-center gap-1.5">
+                        <Banknote className="h-4 w-4" />
+                        {formatSalary(job.salary_min, job.salary_max)}
+                      </span>
+                    )}
+                  </div>
+                  {job.description && (
+                    <p className="mt-4 line-clamp-2 text-sm text-muted-foreground leading-relaxed">
+                      {job.description}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}
@@ -270,13 +270,13 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
       <footer className="border-t bg-slate-900 text-white py-12">
         <div className="mx-auto max-w-5xl px-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
+            <div className="flex items-center">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CPECC%20Logo-v2VEWr2wpVlNgvVySqwQDyOe1A3E71.jpg"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hz6EBPSFSJJS08uKo2AKL3E1iPN5Ux.png"
                 alt="CPECC Logo"
                 width={60}
-                height={60}
-                className="rounded-lg w-auto h-auto"
+                height={70}
+                className="h-14 w-auto"
               />
             </div>
             <div className="flex items-center gap-4">

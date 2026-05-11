@@ -1,7 +1,8 @@
 export type UserRole = 'admin' | 'recruiter' | 'hiring_manager'
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
 export type JobStatus = 'draft' | 'open' | 'paused' | 'closed'
 export type EmploymentType = 'full_time' | 'part_time' | 'contract' | 'internship' | 'remote'
-export type ApplicationStage = 'applied' | 'screening' | 'interview' | 'assessment' | 'offer' | 'hired' | 'rejected'
+export type ApplicationStage = 'applied' | 'screening' | 'shortlisted' | 'interview_scheduled' | 'assessment' | 'offered' | 'hired' | 'rejected'
 export type InterviewType = 'phone' | 'video' | 'onsite' | 'technical' | 'panel'
 export type InterviewStatus = 'scheduled' | 'completed' | 'cancelled' | 'no_show'
 export type CandidateSource = 'career_page' | 'linkedin' | 'referral' | 'agency' | 'other'
@@ -24,6 +25,7 @@ export interface Profile {
   role: UserRole
   department_id: string | null
   avatar_url: string | null
+  approval_status: ApprovalStatus
   created_at: string
   updated_at: string
   department?: Department | null
@@ -39,14 +41,20 @@ export interface Job {
   employment_type: EmploymentType | null
   salary_min: number | null
   salary_max: number | null
+  budgeted_salary: number | null
   salary_currency: SalaryCurrency
   status: JobStatus
   created_by: string | null
+  recruiter_id: string | null
+  project_name: string | null
+  qualification: string | null
   created_at: string
   updated_at: string
   published_at: string | null
+  closing_date: string | null
   department?: Department | null
   creator?: Profile | null
+  recruiter?: Profile | null
   _count?: {
     applications: number
   }
@@ -69,6 +77,13 @@ export interface Candidate {
   global_locked_by: string | null
   global_locked_at: string | null
   global_lock_job_id: string | null
+  country_code: string | null
+  nationality: string | null
+  current_salary: number | null
+  current_salary_currency: SalaryCurrency | null
+  expected_salary: number | null
+  expected_salary_currency: SalaryCurrency | null
+  notice_period_days: number | null
   created_at: string
   updated_at: string
   applications?: Application[]
@@ -89,6 +104,21 @@ export interface Application {
   lock_status: LockStatus
   applied_at: string
   updated_at: string
+  interview_date?: string | null
+  interview_location?: string | null
+  interviewer_name?: string | null
+  interviewer_email?: string | null
+  interviewer_emails?: string[] | null
+  interview_status?: string | null
+  recruiter_comments?: string | null
+  hiring_manager_comments?: string | null
+  screening_summary?: string | null
+  salary_expectation?: string | null
+  benefits_expectation?: string | null
+  notice_period?: string | null
+  offer_sent_at?: string | null
+  hired_at?: string | null
+  rejection_comments?: string | null
   candidate?: Candidate
   job?: Job
   assignee?: Profile | null
@@ -163,9 +193,10 @@ export interface PipelineColumn {
 export const STAGE_LABELS: Record<ApplicationStage, string> = {
   applied: 'Applied',
   screening: 'Screening',
-  interview: 'Interview',
+  shortlisted: 'Shortlisted',
+  interview_scheduled: 'Interview',
   assessment: 'Assessment',
-  offer: 'Offer',
+  offered: 'Offered',
   hired: 'Hired',
   rejected: 'Rejected',
 }
@@ -173,9 +204,10 @@ export const STAGE_LABELS: Record<ApplicationStage, string> = {
 export const STAGE_COLORS: Record<ApplicationStage, string> = {
   applied: 'bg-slate-100 text-slate-700',
   screening: 'bg-blue-100 text-blue-700',
-  interview: 'bg-amber-100 text-amber-700',
+  shortlisted: 'bg-cyan-100 text-cyan-700',
+  interview_scheduled: 'bg-amber-100 text-amber-700',
   assessment: 'bg-purple-100 text-purple-700',
-  offer: 'bg-emerald-100 text-emerald-700',
+  offered: 'bg-emerald-100 text-emerald-700',
   hired: 'bg-green-100 text-green-700',
   rejected: 'bg-red-100 text-red-700',
 }
@@ -259,3 +291,40 @@ export const CURRENCY_SYMBOLS: Record<SalaryCurrency, string> = {
   GBP: '£',
   CNY: '¥',
 }
+
+export const APPROVAL_STATUS_LABELS: Record<ApprovalStatus, string> = {
+  pending: 'Pending',
+  approved: 'Approved',
+  rejected: 'Rejected',
+}
+
+export const APPROVAL_STATUS_COLORS: Record<ApprovalStatus, string> = {
+  pending: 'bg-amber-100 text-amber-700',
+  approved: 'bg-green-100 text-green-700',
+  rejected: 'bg-red-100 text-red-700',
+}
+
+export const COUNTRY_CODES = [
+  { code: 'AE', name: 'United Arab Emirates', flag: '🇦🇪' },
+  { code: 'SA', name: 'Saudi Arabia', flag: '🇸🇦' },
+  { code: 'QA', name: 'Qatar', flag: '🇶🇦' },
+  { code: 'KW', name: 'Kuwait', flag: '🇰🇼' },
+  { code: 'BH', name: 'Bahrain', flag: '🇧🇭' },
+  { code: 'OM', name: 'Oman', flag: '🇴🇲' },
+  { code: 'US', name: 'United States', flag: '🇺🇸' },
+  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧' },
+  { code: 'IN', name: 'India', flag: '🇮🇳' },
+  { code: 'PK', name: 'Pakistan', flag: '🇵🇰' },
+  { code: 'PH', name: 'Philippines', flag: '🇵🇭' },
+  { code: 'EG', name: 'Egypt', flag: '🇪🇬' },
+  { code: 'JO', name: 'Jordan', flag: '🇯🇴' },
+  { code: 'LB', name: 'Lebanon', flag: '🇱🇧' },
+  { code: 'SY', name: 'Syria', flag: '🇸🇾' },
+  { code: 'IQ', name: 'Iraq', flag: '🇮🇶' },
+  { code: 'YE', name: 'Yemen', flag: '🇾🇪' },
+  { code: 'BD', name: 'Bangladesh', flag: '🇧🇩' },
+  { code: 'NP', name: 'Nepal', flag: '🇳🇵' },
+  { code: 'LK', name: 'Sri Lanka', flag: '🇱🇰' },
+]
+
+export const COUNTRIES = COUNTRY_CODES

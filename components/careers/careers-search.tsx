@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useState, useEffect, Suspense } from 'react'
 import { Input } from '@/components/ui/input'
 import {
@@ -26,33 +26,41 @@ interface CareersSearchProps {
 
 function CareersSearchInner({ departments, currentSearch, currentDepartment }: CareersSearchProps) {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [search, setSearch] = useState(currentSearch || '')
   const [selectedDepartment, setSelectedDepartment] = useState(currentDepartment || 'all')
+  const [isInitialized, setIsInitialized] = useState(false)
 
+  // Mark as initialized after first render
   useEffect(() => {
+    setIsInitialized(true)
+  }, [])
+
+  // Debounced search - only run after user interaction, not on initial render
+  useEffect(() => {
+    if (!isInitialized) return
+    
+    // Don't update if values match the current URL params
+    if (search === (currentSearch || '') && selectedDepartment === (currentDepartment || 'all')) {
+      return
+    }
+
     const debounce = setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString())
+      const params = new URLSearchParams()
       if (search) {
         params.set('search', search)
-      } else {
-        params.delete('search')
       }
-      router.push(`/careers?${params.toString()}`)
-    }, 300)
+      if (selectedDepartment && selectedDepartment !== 'all') {
+        params.set('department', selectedDepartment)
+      }
+      const queryString = params.toString()
+      router.push(queryString ? `/careers?${queryString}` : '/careers')
+    }, 500)
 
     return () => clearTimeout(debounce)
-  }, [search, searchParams, router])
+  }, [search, selectedDepartment, isInitialized, router, currentSearch, currentDepartment])
 
   const handleDepartmentChange = (value: string) => {
     setSelectedDepartment(value)
-    const params = new URLSearchParams(searchParams.toString())
-    if (value === 'all') {
-      params.delete('department')
-    } else {
-      params.set('department', value)
-    }
-    router.push(`/careers?${params.toString()}`)
   }
 
   const clearFilters = () => {
@@ -64,23 +72,27 @@ function CareersSearchInner({ departments, currentSearch, currentDepartment }: C
   const hasFilters = search || (selectedDepartment && selectedDepartment !== 'all')
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+    <div 
+      className="flex flex-col gap-4 sm:flex-row sm:items-center"
+      onClick={(e) => e.stopPropagation()}
+    >
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="Search positions..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          onClick={(e) => e.stopPropagation()}
           className="pl-9"
         />
       </div>
       <Select value={selectedDepartment} onValueChange={handleDepartmentChange}>
-        <SelectTrigger className="w-full sm:w-[200px]">
+        <SelectTrigger className="w-full sm:w-[200px]" onClick={(e) => e.stopPropagation()}>
           <SelectValue placeholder="All Departments" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Departments</SelectItem>
-          {departments && departments.length > 0 && departments.map((dept) => (
+          {departments.map((dept) => (
             <SelectItem key={dept.id} value={dept.id}>
               {dept.name}
             </SelectItem>
@@ -88,7 +100,7 @@ function CareersSearchInner({ departments, currentSearch, currentDepartment }: C
         </SelectContent>
       </Select>
       {hasFilters && (
-        <Button variant="ghost" size="icon" onClick={clearFilters}>
+        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); clearFilters(); }}>
           <X className="h-4 w-4" />
           <span className="sr-only">Clear filters</span>
         </Button>

@@ -15,6 +15,8 @@ import {
   Settings,
   Building2,
   Linkedin,
+  UserCheck,
+  ClipboardList,
 } from 'lucide-react'
 
 interface DashboardSidebarProps {
@@ -28,9 +30,11 @@ const navigation = [
   { name: 'Pipeline', href: '/dashboard/pipeline', icon: Briefcase },
   { name: 'Interviews', href: '/dashboard/interviews', icon: Calendar },
   { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+  { name: 'Reports', href: '/dashboard/reports', icon: ClipboardList },
 ]
 
 const adminNavigation = [
+  { name: 'User Approvals', href: '/dashboard/users', icon: UserCheck },
   { name: 'Departments', href: '/dashboard/departments', icon: Building2 },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
@@ -44,16 +48,12 @@ export function DashboardSidebar({ profile }: DashboardSidebarProps) {
       {/* Logo */}
       <div className="flex h-20 items-center justify-center border-b border-sidebar-border px-4 bg-white">
         <Image
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CPECC%20Logo-v2VEWr2wpVlNgvVySqwQDyOe1A3E71.jpg"
-          alt="CPECC Logo"
-          width={50}
-          height={50}
-          className="rounded"
+          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2Pqwbqzr1lnrsrOSmNqst4Fcmq5AyS.png"
+          alt="CPECC"
+          width={80}
+          height={80}
+          className="h-16 w-auto"
         />
-        <div className="ml-3">
-          <span className="text-sm font-bold text-slate-800 block">CPECC</span>
-          <span className="text-[10px] text-slate-500 block leading-tight">Recruitment Portal</span>
-        </div>
       </div>
 
       {/* Navigation */}
