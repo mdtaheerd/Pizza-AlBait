@@ -90,6 +90,25 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
       let candidateId: string
       let uploadedCvUrl: string | null = null
 
+      // Upload CV first if provided (before any database operations)
+      if (cvFile) {
+        setIsUploading(true)
+        const formDataUpload = new FormData()
+        formDataUpload.append('cv', cvFile)
+        
+        const uploadResponse = await fetch('/api/upload-cv', {
+          method: 'POST',
+          body: formDataUpload,
+        })
+        
+        const uploadResult = await uploadResponse.json()
+        if (!uploadResponse.ok || uploadResult.error) {
+          throw new Error(uploadResult.error || 'Failed to upload CV')
+        }
+        uploadedCvUrl = uploadResult.url
+        setIsUploading(false)
+      }
+
       if (existingCandidate) {
         candidateId = existingCandidate.id
         
@@ -107,27 +126,20 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
           return
         }
 
-        // Upload CV if provided
-        if (cvFile) {
-          setIsUploading(true)
-          const formDataUpload = new FormData()
-          formDataUpload.append('cv', cvFile)
-          formDataUpload.append('candidateId', candidateId)
-          
-          const uploadResponse = await fetch('/api/upload-cv', {
-            method: 'POST',
-            body: formDataUpload,
-          })
-          
-          const uploadResult = await uploadResponse.json()
-          if (uploadResult.error) {
-            throw new Error(uploadResult.error)
-          }
-          uploadedCvUrl = uploadResult.url
-          setIsUploading(false)
+        // Update candidate with new CV if uploaded
+        if (uploadedCvUrl) {
+          await supabase
+            .from('candidates')
+            .update({
+              resume_url: uploadedCvUrl,
+              cv_uploaded_at: new Date().toISOString(),
+              cv_filename: cvFile?.name,
+              cv_size_bytes: cvFile?.size
+            })
+            .eq('id', candidateId)
         }
       } else {
-        // Create new candidate
+        // Create new candidate with CV info
         const { data: newCandidate, error: candidateError } = await supabase
           .from('candidates')
           .insert({
@@ -137,32 +149,16 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
             linkedin_url: formData.linkedin_url || null,
             portfolio_url: formData.portfolio_url || null,
             source: 'career_page',
+            resume_url: uploadedCvUrl || null,
+            cv_uploaded_at: uploadedCvUrl ? new Date().toISOString() : null,
+            cv_filename: cvFile?.name || null,
+            cv_size_bytes: cvFile?.size || null
           })
           .select('id')
           .single()
 
         if (candidateError) throw candidateError
         candidateId = newCandidate.id
-
-        // Upload CV if provided
-        if (cvFile) {
-          setIsUploading(true)
-          const formDataUpload = new FormData()
-          formDataUpload.append('cv', cvFile)
-          formDataUpload.append('candidateId', candidateId)
-          
-          const uploadResponse = await fetch('/api/upload-cv', {
-            method: 'POST',
-            body: formDataUpload,
-          })
-          
-          const uploadResult = await uploadResponse.json()
-          if (uploadResult.error) {
-            throw new Error(uploadResult.error)
-          }
-          uploadedCvUrl = uploadResult.url
-          setIsUploading(false)
-        }
       }
 
       // Create application
