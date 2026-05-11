@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   DndContext,
@@ -44,6 +44,48 @@ export function PipelineBoard({ applications: initialApplications, currentUser }
   const router = useRouter()
   const [applications, setApplications] = useState(initialApplications)
   const [activeApplication, setActiveApplication] = useState<Application | null>(null)
+
+  // Sync with server data when props change
+  useEffect(() => {
+    setApplications(initialApplications)
+  }, [initialApplications])
+
+  // Real-time subscription for application changes
+  useEffect(() => {
+    const supabase = createClient()
+    
+    const channel = supabase
+      .channel('pipeline-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'applications',
+        },
+        () => {
+          // Refresh the page to get updated data
+          router.refresh()
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'interviews',
+        },
+        () => {
+          // Refresh when interviews change (status updates, reschedules, etc.)
+          router.refresh()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [router])
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

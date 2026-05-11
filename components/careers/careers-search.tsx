@@ -72,18 +72,22 @@ function CareersSearchInner({ departments, currentSearch, currentDepartment }: C
   const hasFilters = search || (selectedDepartment && selectedDepartment !== 'all')
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+    <div 
+      className="flex flex-col gap-4 sm:flex-row sm:items-center"
+      onClick={(e) => e.stopPropagation()}
+    >
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="Search positions..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          onClick={(e) => e.stopPropagation()}
           className="pl-9"
         />
       </div>
       <Select value={selectedDepartment} onValueChange={handleDepartmentChange}>
-        <SelectTrigger className="w-full sm:w-[200px]">
+        <SelectTrigger className="w-full sm:w-[200px]" onClick={(e) => e.stopPropagation()}>
           <SelectValue placeholder="All Departments" />
         </SelectTrigger>
         <SelectContent>
@@ -96,7 +100,7 @@ function CareersSearchInner({ departments, currentSearch, currentDepartment }: C
         </SelectContent>
       </Select>
       {hasFilters && (
-        <Button variant="ghost" size="icon" onClick={clearFilters}>
+        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); clearFilters(); }}>
           <X className="h-4 w-4" />
           <span className="sr-only">Clear filters</span>
         </Button>
