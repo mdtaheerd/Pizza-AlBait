@@ -44,6 +44,7 @@ export interface Job {
   budgeted_salary: number | null
   salary_currency: SalaryCurrency
   status: JobStatus
+  job_number: number | null
   created_by: string | null
   recruiter_id: string | null
   project_name: string | null

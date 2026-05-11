@@ -20,14 +20,17 @@ export default async function JobsPage() {
     console.error('[v0] Jobs fetch error:', error)
   }
 
-  // Fetch creator names separately to avoid foreign key issues
+  // Fetch creator and recruiter names separately to avoid foreign key issues
   const creatorIds = [...new Set((jobs || []).map(j => j.created_by).filter(Boolean))]
-  const { data: creators } = creatorIds.length > 0 
-    ? await supabase.from('profiles').select('id, full_name').in('id', creatorIds)
+  const recruiterIds = [...new Set((jobs || []).map(j => j.recruiter_id).filter(Boolean))]
+  const allProfileIds = [...new Set([...creatorIds, ...recruiterIds])]
+  
+  const { data: profiles } = allProfileIds.length > 0 
+    ? await supabase.from('profiles').select('id, full_name').in('id', allProfileIds)
     : { data: [] }
   
-  const creatorMap = (creators || []).reduce((acc, c) => {
-    acc[c.id] = c.full_name
+  const profileMap = (profiles || []).reduce((acc, p) => {
+    acc[p.id] = p.full_name
     return acc
   }, {} as Record<string, string>)
 
@@ -43,7 +46,8 @@ export default async function JobsPage() {
 
   const jobsWithCounts = (jobs || []).map((job) => ({
     ...job,
-    creator: job.created_by ? { full_name: creatorMap[job.created_by] || null } : null,
+    creator: job.created_by ? { full_name: profileMap[job.created_by] || null } : null,
+    recruiter: job.recruiter_id ? { full_name: profileMap[job.recruiter_id] || null } : null,
     _count: {
       applications: countsByJob[job.id] || 0,
     },
