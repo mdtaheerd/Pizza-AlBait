@@ -339,7 +339,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
       app.candidate?.nationality || '',
       formatSalary(app.candidate?.current_salary),
       formatSalary(app.candidate?.expected_salary),
-      formatJobSalary(app.job?.salary_min ?? null, app.job?.salary_max ?? null, app.job?.salary_currency),
+      formatJobSalary(app.job?.salary_min ?? null, app.job?.salary_max ?? null, app.job?.salary_currency as SalaryCurrency | undefined),
       app.candidate?.notice_period_days?.toString() || '',
       format(new Date(app.applied_at), 'yyyy-MM-dd'),
       STAGE_LABELS[app.stage as keyof typeof STAGE_LABELS] || app.stage,
@@ -597,7 +597,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                             {formatSalary(app.candidate?.expected_salary)}
                           </TableCell>
                           <TableCell className="text-sm">
-                            {formatJobSalary(app.job?.salary_min ?? null, app.job?.salary_max ?? null, app.job?.salary_currency)}
+                            {formatJobSalary(app.job?.salary_min ?? null, app.job?.salary_max ?? null, app.job?.salary_currency as SalaryCurrency | undefined)}
                           </TableCell>
                           <TableCell>
                             {app.candidate?.notice_period_days !== null && app.candidate?.notice_period_days !== undefined
