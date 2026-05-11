@@ -3,9 +3,9 @@ import { notFound } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { MapPin, Clock, Banknote, ArrowLeft, Building2 } from 'lucide-react'
+import { MapPin, Clock, Banknote, ArrowLeft, Building2, User, FolderOpen } from 'lucide-react'
 import Link from 'next/link'
-import { EMPLOYMENT_TYPE_LABELS, CURRENCY_SYMBOLS, type SalaryCurrency } from '@/lib/types'
+import { EMPLOYMENT_TYPE_LABELS, CURRENCY_OPTIONS, type SalaryCurrency } from '@/lib/types'
 import { CareersHeader } from '@/components/careers/careers-header'
 
 interface JobDetailPageProps {
@@ -30,15 +30,28 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     notFound()
   }
 
+  // Fetch recruiter name separately
+  let recruiterName: string | null = null
+  if (job.recruiter_id) {
+    const { data: recruiter } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', job.recruiter_id)
+      .single()
+    recruiterName = recruiter?.full_name || null
+  }
+
   const formatSalary = (min: number | null, max: number | null, currency: SalaryCurrency = 'USD') => {
     if (!min && !max) return null
-    const symbol = CURRENCY_SYMBOLS[currency] || '$'
+    // Use currency code (e.g., "AED") for better browser compatibility
+    const currencyInfo = CURRENCY_OPTIONS.find(c => c.value === currency)
+    const currencyLabel = currencyInfo?.value || 'USD'
     const formatter = new Intl.NumberFormat('en-US', {
       maximumFractionDigits: 0,
     })
-    if (min && max) return `${symbol}${formatter.format(min)} - ${symbol}${formatter.format(max)}`
-    if (min) return `From ${symbol}${formatter.format(min)}`
-    if (max) return `Up to ${symbol}${formatter.format(max)}`
+    if (min && max) return `${currencyLabel} ${formatter.format(min)} - ${formatter.format(max)}`
+    if (min) return `From ${currencyLabel} ${formatter.format(min)}`
+    if (max) return `Up to ${currencyLabel} ${formatter.format(max)}`
     return null
   }
 
@@ -67,10 +80,10 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               )}
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-4 text-muted-foreground">
-              {Array.isArray(job.department) && job.department[0]?.name && (
+              {job.department?.name && (
                 <span className="flex items-center gap-1">
                   <Building2 className="h-4 w-4" />
-                  {job.department[0].name}
+                  {job.department.name}
                 </span>
               )}
               {job.location && (
@@ -89,6 +102,21 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                 <span className="flex items-center gap-1">
                   <Banknote className="h-4 w-4" />
                   {formatSalary(job.salary_min, job.salary_max, job.salary_currency)} / year
+                </span>
+              )}
+            </div>
+            {/* Project and Recruiter Info */}
+            <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground border-t pt-4">
+              {job.project_name && (
+                <span className="flex items-center gap-1">
+                  <FolderOpen className="h-4 w-4" />
+                  <span className="font-medium">Project:</span> {job.project_name}
+                </span>
+              )}
+              {recruiterName && (
+                <span className="flex items-center gap-1">
+                  <User className="h-4 w-4" />
+                  <span className="font-medium">Recruiter:</span> {recruiterName}
                 </span>
               )}
             </div>
