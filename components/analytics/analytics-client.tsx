@@ -29,6 +29,7 @@ import { PipelineChart } from '@/components/analytics/pipeline-chart'
 import { DepartmentChart } from '@/components/analytics/department-chart'
 import { DemographicsChart } from '@/components/analytics/demographics-chart'
 import { NationalityChart } from '@/components/analytics/nationality-chart'
+import { ProjectMatrixChart } from '@/components/analytics/project-matrix-chart'
 import { STAGE_LABELS, type ApplicationStage } from '@/lib/types'
 
 interface Application {
@@ -185,6 +186,28 @@ export function AnalyticsClient({
     return filtered
   }, [interviews, startDate, endDate])
 
+  // Filter jobs by date range (based on created_at)
+  const filteredJobs = useMemo(() => {
+    let filtered = jobs
+    if (startDate || endDate) {
+      filtered = filtered.filter(job => {
+        const jobDate = parseISO(job.created_at)
+        const start = startDate ? parseISO(startDate) : new Date(0)
+        const end = endDate ? new Date(parseISO(endDate).setHours(23, 59, 59, 999)) : new Date()
+        return jobDate >= start && jobDate <= end
+      })
+    }
+    // Apply department filter
+    if (selectedDepartment !== 'all') {
+      filtered = filtered.filter(j => j.department_id === selectedDepartment)
+    }
+    // Apply project filter
+    if (selectedProject !== 'all') {
+      filtered = filtered.filter(j => j.project_name === selectedProject)
+    }
+    return filtered
+  }, [jobs, startDate, endDate, selectedDepartment, selectedProject])
+
   // Get relevant candidates for filtered applications
   const filteredCandidateIds = useMemo(() => 
     new Set(filteredApplications.map(a => a.candidate_id))
@@ -243,7 +266,7 @@ export function AnalyticsClient({
       .map(([name, value]) => ({ name, value }))
   }, [filteredCandidates])
 
-  // Project-wise hiring matrix
+  // Project-wise hiring matrix (using filtered jobs and applications)
   const projectMatrix = useMemo(() => {
     const projects = new Map<string, {
       project: string
@@ -256,7 +279,8 @@ export function AnalyticsClient({
       hires: number
     }>()
 
-    jobs.forEach(job => {
+    // Use filtered jobs instead of all jobs
+    filteredJobs.forEach(job => {
       const projectName = job.project_name || 'Unassigned'
       if (!projects.has(projectName)) {
         projects.set(projectName, {
@@ -274,8 +298,9 @@ export function AnalyticsClient({
     })
 
     filteredApplications.forEach(app => {
-      const job = jobs.find(j => j.id === app.job_id)
-      const projectName = job?.project_name || 'Unassigned'
+      const job = filteredJobs.find(j => j.id === app.job_id)
+      if (!job) return // Skip if job is not in filtered jobs
+      const projectName = job.project_name || 'Unassigned'
       if (!projects.has(projectName)) {
         projects.set(projectName, {
           project: projectName,
@@ -299,11 +324,11 @@ export function AnalyticsClient({
     })
 
     return Array.from(projects.values()).sort((a, b) => b.applicants - a.applicants)
-  }, [jobs, filteredApplications])
+  }, [filteredJobs, filteredApplications])
 
-  // Job-wise applicant breakdown
+  // Job-wise applicant breakdown (using filtered jobs)
   const jobMatrix = useMemo(() => {
-    return jobs.map(job => {
+    return filteredJobs.map(job => {
       const jobApps = filteredApplications.filter(a => a.job_id === job.id)
       const dept = departments.find(d => d.id === job.department_id)
       return {
@@ -320,7 +345,7 @@ export function AnalyticsClient({
         rejected: jobApps.filter(a => a.stage === 'rejected').length,
       }
     }).filter(j => j.applicants > 0).sort((a, b) => b.applicants - a.applicants)
-  }, [jobs, filteredApplications, departments])
+  }, [filteredJobs, filteredApplications, departments])
 
   // Pipeline data
   const pipelineData = Object.entries(STAGE_LABELS).map(([stage, label]) => ({
@@ -331,33 +356,36 @@ export function AnalyticsClient({
   // Department map
   const departmentMap = new Map(departments.map(d => [d.id, d.name]))
 
-  // Department stats
-  const departmentStats: Record<string, { jobs: number; applications: number }> = {}
-  jobs.forEach((job) => {
-    const deptName = departmentMap.get(job.department_id || '') || 'Unassigned'
-    if (!departmentStats[deptName]) {
-      departmentStats[deptName] = { jobs: 0, applications: 0 }
-    }
-    departmentStats[deptName].jobs++
-  })
-
-  filteredApplications.forEach((app) => {
-    const job = jobs.find(j => j.id === app.job_id)
-    if (job) {
+  // Department stats (using filtered data)
+  const departmentChartData = useMemo(() => {
+    const departmentStats: Record<string, { jobs: number; applications: number }> = {}
+    
+    filteredJobs.forEach((job) => {
       const deptName = departmentMap.get(job.department_id || '') || 'Unassigned'
-      if (departmentStats[deptName]) {
-        departmentStats[deptName].applications++
+      if (!departmentStats[deptName]) {
+        departmentStats[deptName] = { jobs: 0, applications: 0 }
       }
-    }
-  })
+      departmentStats[deptName].jobs++
+    })
 
-  const departmentChartData = Object.entries(departmentStats)
-    .map(([department, stats]) => ({
-      department,
-      jobs: stats.jobs,
-      applications: stats.applications,
-    }))
-    .sort((a, b) => b.applications - a.applications)
+    filteredApplications.forEach((app) => {
+      const job = filteredJobs.find(j => j.id === app.job_id)
+      if (job) {
+        const deptName = departmentMap.get(job.department_id || '') || 'Unassigned'
+        if (departmentStats[deptName]) {
+          departmentStats[deptName].applications++
+        }
+      }
+    })
+
+    return Object.entries(departmentStats)
+      .map(([department, stats]) => ({
+        department,
+        jobs: stats.jobs,
+        applications: stats.applications,
+      }))
+      .sort((a, b) => b.applications - a.applications)
+  }, [filteredJobs, filteredApplications, departmentMap])
 
   // Export to Excel with filters
   const exportToExcel = () => {
@@ -618,7 +646,7 @@ export function AnalyticsClient({
         </CardContent>
       </Card>
 
-      {/* Stats Grid */}
+      {/* Stats Grid - All filtered by date range */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -626,8 +654,10 @@ export function AnalyticsClient({
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{initialStats.totalJobs}</div>
-            <p className="text-xs text-muted-foreground">{initialStats.openJobs} currently open</p>
+            <div className="text-2xl font-bold">{filteredJobs.length}</div>
+            <p className="text-xs text-muted-foreground">
+              {filteredJobs.filter(j => j.status === 'open').length} currently open
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -636,8 +666,10 @@ export function AnalyticsClient({
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{initialStats.totalCandidates}</div>
-            <p className="text-xs text-muted-foreground">In your talent pool</p>
+            <div className="text-2xl font-bold">{filteredCandidates.length}</div>
+            <p className="text-xs text-muted-foreground">
+              {hasActiveFilters ? 'In selected period' : 'In your talent pool'}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -703,7 +735,7 @@ export function AnalyticsClient({
         </Card>
       </div>
 
-      {/* Project-wise Hiring Matrix */}
+      {/* Project-wise Hiring Matrix - Horizontal Stacked Bar Chart */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -711,11 +743,14 @@ export function AnalyticsClient({
             Project-wise Hiring Matrix
           </CardTitle>
           <CardDescription>
-            Recruitment metrics breakdown by project
+            Recruitment metrics breakdown by project (filtered by selected date range)
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          <ProjectMatrixChart data={projectMatrix} />
+          
+          {/* Summary Table */}
+          <div className="mt-6 overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -733,7 +768,7 @@ export function AnalyticsClient({
                 {projectMatrix.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                      No data available
+                      No data available for selected period
                     </TableCell>
                   </TableRow>
                 ) : (
