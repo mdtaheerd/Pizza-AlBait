@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -135,7 +135,39 @@ export function InterviewsClient({ interviews, currentUserId }: InterviewsClient
   const [newLocation, setNewLocation] = useState('')
   const [rescheduleReason, setRescheduleReason] = useState('')
 
-  const supabase = createClient()
+  // Real-time subscription for interview and application changes
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel('interviews-sync')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'interviews',
+        },
+        () => {
+          router.refresh()
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'applications',
+        },
+        () => {
+          router.refresh()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [router])
 
   const openRescheduleDialog = (interview: InterviewWithRelations) => {
     setSelectedInterview(interview)
@@ -157,6 +189,7 @@ export function InterviewsClient({ interviews, currentUserId }: InterviewsClient
     setError(null)
 
     try {
+      const supabase = createClient()
       const scheduledAt = new Date(`${newDate}T${newTime}`)
 
       // Update interview in database
@@ -205,6 +238,7 @@ export function InterviewsClient({ interviews, currentUserId }: InterviewsClient
 
     setIsLoading(true)
     try {
+      const supabase = createClient()
       await supabase
         .from('interviews')
         .update({ status: 'completed' })
@@ -224,6 +258,7 @@ export function InterviewsClient({ interviews, currentUserId }: InterviewsClient
 
     setIsLoading(true)
     try {
+      const supabase = createClient()
       await supabase
         .from('interviews')
         .update({ status: 'cancelled' })
