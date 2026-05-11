@@ -7,14 +7,20 @@ import { JobsTable } from '@/components/jobs/jobs-table'
 export default async function JobsPage() {
   const supabase = await createClient()
 
-  const { data: jobs } = await supabase
+  const { data: jobs, error } = await supabase
     .from('jobs')
     .select(`
       *,
       department:departments(name),
-      creator:profiles(full_name)
+      creator:profiles!jobs_created_by_fkey(full_name),
+      recruiter:profiles!jobs_recruiter_id_fkey(full_name)
     `)
     .order('created_at', { ascending: false })
+
+  // Log any errors for debugging
+  if (error) {
+    console.error('[v0] Jobs fetch error:', error)
+  }
 
   // Get application counts for each job
   const { data: applicationCounts } = await supabase
