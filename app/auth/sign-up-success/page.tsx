@@ -27,11 +27,11 @@ export default function SignUpSuccessPage() {
         <div className="flex flex-col gap-6">
           <Link href="/" className="flex items-center justify-center">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
-              alt="CPECC - China Petroleum Engineering & Construction Corporation"
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pxapD8smtnaNSYCYo9mTLtPDa75C80.png"
+              alt="TalentTrack ATS"
               width={280}
-              height={40}
-              className="h-10 w-auto"
+              height={50}
+              className="h-12 w-auto"
             />
           </Link>
           <Card>

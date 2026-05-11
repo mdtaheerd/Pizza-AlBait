@@ -8,22 +8,20 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'CPECC Careers | www.careers.cpecc.ae',
-  description: 'Join CPECC - China Petroleum Engineering & Construction Corporation. Leading EPC contractor for onshore oil & gas projects in the Middle East. Explore career opportunities.',
+  title: 'TalentTrack ATS - Modern Applicant Tracking System',
+  description: 'TalentTrack ATS - A powerful, modern applicant tracking system for streamlined recruitment and hiring.',
   generator: 'v0.app',
-  metadataBase: new URL('https://www.careers.cpecc.ae'),
   openGraph: {
-    title: 'CPECC Careers | www.careers.cpecc.ae',
-    description: 'Join CPECC - Leading EPC contractor for onshore oil & gas projects in the Middle East.',
-    url: 'https://www.careers.cpecc.ae',
-    siteName: 'CPECC Careers',
-    locale: 'en_AE',
+    title: 'TalentTrack ATS - Modern Applicant Tracking System',
+    description: 'A powerful, modern applicant tracking system for streamlined recruitment and hiring.',
+    siteName: 'TalentTrack ATS',
+    locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CPECC Careers | www.careers.cpecc.ae',
-    description: 'Join CPECC - Leading EPC contractor for onshore oil & gas projects in the Middle East.',
+    title: 'TalentTrack ATS - Modern Applicant Tracking System',
+    description: 'A powerful, modern applicant tracking system for streamlined recruitment and hiring.',
   },
   icons: {
     icon: [
