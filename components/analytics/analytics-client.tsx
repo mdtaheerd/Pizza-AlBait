@@ -22,9 +22,9 @@ import {
 } from '@/components/ui/table'
 import { 
   Briefcase, Users, FileText, TrendingUp, Calendar, Download, 
-  FolderOpen, Filter, Building2, User, Globe, UserCircle
+  FolderOpen, Filter, Building2, Globe, UserCircle
 } from 'lucide-react'
-import { format, parseISO, differenceInYears } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 import { PipelineChart } from '@/components/analytics/pipeline-chart'
 import { DepartmentChart } from '@/components/analytics/department-chart'
 import { DemographicsChart } from '@/components/analytics/demographics-chart'
@@ -55,7 +55,6 @@ interface Candidate {
   source: string | null
   nationality: string | null
   gender: string | null
-  date_of_birth: string | null
 }
 
 interface Interview {
@@ -239,32 +238,7 @@ export function AnalyticsClient({
       .slice(0, 10) // Top 10 nationalities
   }, [filteredCandidates])
 
-  const ageData = useMemo(() => {
-    const ageBrackets: Record<string, number> = {
-      '18-25': 0,
-      '26-35': 0,
-      '36-45': 0,
-      '46-55': 0,
-      '55+': 0,
-      'Not Specified': 0,
-    }
-    filteredCandidates.forEach(c => {
-      if (!c.date_of_birth) {
-        ageBrackets['Not Specified']++
-        return
-      }
-      const age = differenceInYears(new Date(), parseISO(c.date_of_birth))
-      if (age >= 18 && age <= 25) ageBrackets['18-25']++
-      else if (age >= 26 && age <= 35) ageBrackets['26-35']++
-      else if (age >= 36 && age <= 45) ageBrackets['36-45']++
-      else if (age >= 46 && age <= 55) ageBrackets['46-55']++
-      else if (age > 55) ageBrackets['55+']++
-      else ageBrackets['Not Specified']++
-    })
-    return Object.entries(ageBrackets)
-      .filter(([_, value]) => value > 0)
-      .map(([name, value]) => ({ name, value }))
-  }, [filteredCandidates])
+
 
   // Project-wise hiring matrix (using filtered jobs and applications)
   const projectMatrix = useMemo(() => {
@@ -452,10 +426,6 @@ export function AnalyticsClient({
       ['=== NATIONALITY DISTRIBUTION (Top 10) ==='],
       ['Nationality', 'Count'],
       ...nationalityData.map(n => [n.name, n.value]),
-      [],
-      ['=== AGE DISTRIBUTION ==='],
-      ['Age Group', 'Count'],
-      ...ageData.map(a => [a.name, a.value]),
     ]
       .map(row => row.map(cell => `"${cell}"`).join(','))
       .join('\n')
@@ -699,7 +669,7 @@ export function AnalyticsClient({
       </div>
 
       {/* Demographics Section */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
@@ -720,17 +690,6 @@ export function AnalyticsClient({
           </CardHeader>
           <CardContent>
             <NationalityChart data={nationalityData} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <User className="h-5 w-5" />
-              Age Distribution
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DemographicsChart data={ageData} title="Age" />
           </CardContent>
         </Card>
       </div>
