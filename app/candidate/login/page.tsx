@@ -89,8 +89,8 @@ export default function CandidateLoginPage() {
           <CardHeader className="space-y-4 text-center">
             <Link href="/" className="flex items-center justify-center">
               <Image
-                src="/images/talenttrack-logo.png"
-                alt="TalentTrack ATS"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2Pqwbqzr1lnrsrOSmNqst4Fcmq5AyS.png"
+                alt="CPECC"
                 width={220}
                 height={70}
                 className="h-16 w-auto"

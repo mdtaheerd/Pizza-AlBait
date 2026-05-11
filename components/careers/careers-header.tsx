@@ -9,11 +9,11 @@ export function CareersHeader() {
       <div className="mx-auto flex h-20 max-w-5xl items-center justify-between px-6">
         <Link href="/" className="flex items-center">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hdNTqit9D9oEqOX2PeHJoQmOeK7S4W.png"
-            alt="CPECC - China Petroleum Engineering & Construction Corporation"
-            width={280}
-            height={40}
-            className="h-10 w-auto"
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2Pqwbqzr1lnrsrOSmNqst4Fcmq5AyS.png"
+            alt="CPECC"
+            width={60}
+            height={60}
+            className="h-14 w-auto"
           />
         </Link>
         <nav className="flex items-center gap-4">
@@ -26,6 +26,11 @@ export function CareersHeader() {
           <Button variant="ghost" size="sm" asChild>
             <Link href="/careers">
               All Jobs
+            </Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/about">
+              About Us
             </Link>
           </Button>
           <a

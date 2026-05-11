@@ -64,7 +64,7 @@ export async function POST(request: Request) {
             <strong>HR Team</strong></p>
           </div>
           <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
-            <p>Sent via TalentTrack ATS</p>
+            <p>Sent via CPECC</p>
           </div>
         </div>
       `,
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
               <strong>HR Team</strong></p>
             </div>
             <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
-              <p>Sent via TalentTrack ATS</p>
+              <p>Sent via CPECC</p>
             </div>
           </div>
         `,
@@ -135,7 +135,7 @@ export async function POST(request: Request) {
                   <strong>HR Team</strong></p>
                 </div>
                 <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
-                  <p>Sent via TalentTrack ATS</p>
+                  <p>Sent via CPECC</p>
                 </div>
               </div>
             `,
@@ -169,10 +169,10 @@ export async function POST(request: Request) {
               <p>Please add this to your calendar.</p>
               
               <p>Best regards,<br>
-              <strong>TalentTrack ATS</strong></p>
+              <strong>CPECC</strong></p>
             </div>
             <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
-              <p>Sent via TalentTrack ATS</p>
+              <p>Sent via CPECC</p>
             </div>
           </div>
         `,

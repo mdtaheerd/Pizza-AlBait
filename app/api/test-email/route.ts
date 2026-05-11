@@ -43,10 +43,10 @@ export async function GET() {
     const adminEmail = process.env.ADMIN_EMAIL || 'cpecchr.auh@gmail.com'
     const result = await sendEmail({
       to: adminEmail,
-      subject: 'TalentTrack ATS - Email Test',
+      subject: 'CPECC - Email Test',
       html: `
         <h2>Email Configuration Test</h2>
-        <p>This is a test email from TalentTrack ATS.</p>
+        <p>This is a test email from CPECC.</p>
         <p>If you received this, your email configuration is working correctly!</p>
         <p>Sent at: ${new Date().toISOString()}</p>
       `,

@@ -266,14 +266,15 @@ export function InterviewsClient({ upcomingInterviews: initialUpcoming, pastInte
         </TableCell>
         {showActions && (
           <TableCell>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <Button
-                variant="outline"
+                variant="default"
                 size="sm"
                 onClick={() => openRescheduleDialog(interview)}
-                title="Reschedule"
+                className="bg-blue-600 hover:bg-blue-700"
               >
-                <CalendarClock className="h-4 w-4" />
+                <CalendarClock className="h-4 w-4 mr-1" />
+                Reschedule
               </Button>
               <Button
                 variant="outline"
