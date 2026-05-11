@@ -59,6 +59,12 @@ export async function POST(request: NextRequest) {
         full_name: targetUser.full_name || 'User',
         reason,
       })
+    } else if (action === 'revoke') {
+      result = await sendRejectionEmail({
+        email: targetUser.email,
+        full_name: targetUser.full_name || 'User',
+        reason: reason || 'Your access has been revoked by an administrator.',
+      })
     } else {
       return NextResponse.json(
         { error: 'Invalid action' },
