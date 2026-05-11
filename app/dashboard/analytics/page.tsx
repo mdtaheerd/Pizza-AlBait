@@ -1,18 +1,22 @@
 import { createClient } from '@/lib/supabase/server'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Briefcase, Users, FileText, TrendingUp, TrendingDown, Clock } from 'lucide-react'
-import { subDays, format, startOfDay } from 'date-fns'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Briefcase, Users, FileText, TrendingUp, TrendingDown, Clock, Building2, MapPin, Calendar, User } from 'lucide-react'
+import { subDays, format, differenceInYears } from 'date-fns'
 import { PipelineChart } from '@/components/analytics/pipeline-chart'
 import { ApplicationsChart } from '@/components/analytics/applications-chart'
 import { SourceChart } from '@/components/analytics/source-chart'
+import { DepartmentChart } from '@/components/analytics/department-chart'
+import { ApplicantsPerJobChart } from '@/components/analytics/applicants-per-job-chart'
+import { DemographicsChart } from '@/components/analytics/demographics-chart'
 import { STAGE_LABELS } from '@/lib/types'
+import { AnalyticsExport } from '@/components/analytics/analytics-export'
 
 export default async function AnalyticsPage() {
   const supabase = await createClient()
   const thirtyDaysAgo = subDays(new Date(), 30).toISOString()
   const sixtyDaysAgo = subDays(new Date(), 60).toISOString()
 
-  // Fetch all data
+  // Fetch all data with extended queries
   const [
     { count: totalJobs },
     { count: openJobs },
@@ -22,15 +26,19 @@ export default async function AnalyticsPage() {
     { data: recentApplications },
     { data: previousPeriodApplications },
     { data: candidates },
+    { data: jobs },
+    { data: departments },
   ] = await Promise.all([
     supabase.from('jobs').select('*', { count: 'exact', head: true }),
     supabase.from('jobs').select('*', { count: 'exact', head: true }).eq('status', 'open'),
     supabase.from('candidates').select('*', { count: 'exact', head: true }),
     supabase.from('applications').select('*', { count: 'exact', head: true }),
-    supabase.from('applications').select('stage, applied_at'),
+    supabase.from('applications').select('stage, applied_at, job_id'),
     supabase.from('applications').select('applied_at').gte('applied_at', thirtyDaysAgo),
     supabase.from('applications').select('applied_at').gte('applied_at', sixtyDaysAgo).lt('applied_at', thirtyDaysAgo),
-    supabase.from('candidates').select('source'),
+    supabase.from('candidates').select('id, source, nationality, gender, date_of_birth'),
+    supabase.from('jobs').select('id, title, department_id, status'),
+    supabase.from('departments').select('id, name'),
   ])
 
   // Calculate pipeline data
@@ -90,6 +98,106 @@ export default async function AnalyticsPage() {
   const hiredApplications = (applications || []).filter((app) => app.stage === 'hired')
   const avgTimeToHire = hiredApplications.length > 0 ? 14 : 0 // Placeholder - would need more data
 
+  // Department Analytics - positions per department
+  const departmentMap = new Map((departments || []).map(d => [d.id, d.name]))
+  const departmentStats: Record<string, { jobs: number; applications: number }> = {}
+  
+  ;(jobs || []).forEach((job) => {
+    const deptName = departmentMap.get(job.department_id) || 'Unassigned'
+    if (!departmentStats[deptName]) {
+      departmentStats[deptName] = { jobs: 0, applications: 0 }
+    }
+    departmentStats[deptName].jobs++
+  })
+
+  ;(applications || []).forEach((app) => {
+    const job = (jobs || []).find(j => j.id === app.job_id)
+    if (job) {
+      const deptName = departmentMap.get(job.department_id) || 'Unassigned'
+      if (departmentStats[deptName]) {
+        departmentStats[deptName].applications++
+      }
+    }
+  })
+
+  const departmentChartData = Object.entries(departmentStats)
+    .map(([department, stats]) => ({
+      department,
+      jobs: stats.jobs,
+      applications: stats.applications,
+    }))
+    .sort((a, b) => b.applications - a.applications)
+
+  // Candidates per position
+  const jobApplicationCount: Record<string, { title: string; count: number }> = {}
+  ;(jobs || []).forEach((job) => {
+    jobApplicationCount[job.id] = { title: job.title, count: 0 }
+  })
+  ;(applications || []).forEach((app) => {
+    if (jobApplicationCount[app.job_id]) {
+      jobApplicationCount[app.job_id].count++
+    }
+  })
+
+  const applicantsPerJobData = Object.values(jobApplicationCount)
+    .map(item => ({
+      job: item.title,
+      applicants: item.count,
+    }))
+    .sort((a, b) => b.applicants - a.applicants)
+    .slice(0, 10)
+
+  // Nationality Distribution
+  const nationalityCount: Record<string, number> = {}
+  ;(candidates || []).forEach((candidate) => {
+    const nationality = candidate.nationality || 'Not Specified'
+    nationalityCount[nationality] = (nationalityCount[nationality] || 0) + 1
+  })
+
+  const nationalityData = Object.entries(nationalityCount)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10)
+
+  // Gender Distribution
+  const genderCount: Record<string, number> = {}
+  ;(candidates || []).forEach((candidate) => {
+    const gender = candidate.gender || 'Not Specified'
+    const genderLabel = gender === 'male' ? 'Male' : gender === 'female' ? 'Female' : gender === 'other' ? 'Other' : 'Not Specified'
+    genderCount[genderLabel] = (genderCount[genderLabel] || 0) + 1
+  })
+
+  const genderData = Object.entries(genderCount)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value)
+
+  // Age Distribution
+  const ageGroups: Record<string, number> = {
+    '18-25': 0,
+    '26-35': 0,
+    '36-45': 0,
+    '46-55': 0,
+    '55+': 0,
+    'Not Specified': 0,
+  }
+
+  ;(candidates || []).forEach((candidate) => {
+    if (candidate.date_of_birth) {
+      const age = differenceInYears(new Date(), new Date(candidate.date_of_birth))
+      if (age >= 18 && age <= 25) ageGroups['18-25']++
+      else if (age >= 26 && age <= 35) ageGroups['26-35']++
+      else if (age >= 36 && age <= 45) ageGroups['36-45']++
+      else if (age >= 46 && age <= 55) ageGroups['46-55']++
+      else if (age > 55) ageGroups['55+']++
+    } else {
+      ageGroups['Not Specified']++
+    }
+  })
+
+  const ageData = Object.entries(ageGroups)
+    .filter(([_, value]) => value > 0)
+    .map(([name, value]) => ({ name, value }))
+
   const stats = [
     {
       title: 'Total Jobs',
@@ -120,13 +228,36 @@ export default async function AnalyticsPage() {
     },
   ]
 
+  // Prepare export data
+  const exportData = {
+    summary: {
+      totalJobs: totalJobs || 0,
+      openJobs: openJobs || 0,
+      totalCandidates: totalCandidates || 0,
+      totalApplications: totalApplications || 0,
+      applicationsLast30Days: currentPeriodCount,
+      applicationChangePercent: applicationChange,
+    },
+    departmentStats: departmentChartData,
+    applicantsPerJob: applicantsPerJobData,
+    pipelineData,
+    sourceData: sourceChartData,
+    nationalityData,
+    genderData,
+    ageData,
+    applicationsOverTime: applicationsChartData,
+  }
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-balance">Analytics</h1>
-        <p className="text-muted-foreground">
-          Track your recruitment performance and metrics
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-balance">Analytics</h1>
+          <p className="text-muted-foreground">
+            Track your recruitment performance and metrics
+          </p>
+        </div>
+        <AnalyticsExport data={exportData} />
       </div>
 
       {/* Stats Grid */}
@@ -157,12 +288,96 @@ export default async function AnalyticsPage() {
         ))}
       </div>
 
+      {/* Department Analytics */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            Department Analytics
+          </CardTitle>
+          <CardDescription>
+            Jobs posted and applications received by department
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DepartmentChart data={departmentChartData} />
+        </CardContent>
+      </Card>
+
+      {/* Candidates per Position */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Briefcase className="h-5 w-5" />
+            Candidates per Position (Top 10)
+          </CardTitle>
+          <CardDescription>
+            Number of applicants for each job position
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ApplicantsPerJobChart data={applicantsPerJobData} />
+        </CardContent>
+      </Card>
+
+      {/* Demographics Row */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Nationality Distribution */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <MapPin className="h-4 w-4" />
+              By Nationality
+            </CardTitle>
+            <CardDescription>
+              Top 10 nationalities
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DemographicsChart data={nationalityData} title="Nationality" />
+          </CardContent>
+        </Card>
+
+        {/* Age Distribution */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Calendar className="h-4 w-4" />
+              By Age Group
+            </CardTitle>
+            <CardDescription>
+              Candidate age distribution
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DemographicsChart data={ageData} title="Age" />
+          </CardContent>
+        </Card>
+
+        {/* Gender Distribution */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <User className="h-4 w-4" />
+              By Gender
+            </CardTitle>
+            <CardDescription>
+              Gender breakdown
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DemographicsChart data={genderData} title="Gender" />
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Charts Row */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Applications Over Time */}
         <Card>
           <CardHeader>
             <CardTitle>Applications Over Time</CardTitle>
+            <CardDescription>Last 30 days application trend</CardDescription>
           </CardHeader>
           <CardContent>
             <ApplicationsChart data={applicationsChartData} />
@@ -173,6 +388,7 @@ export default async function AnalyticsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Pipeline Distribution</CardTitle>
+            <CardDescription>Applications by stage</CardDescription>
           </CardHeader>
           <CardContent>
             <PipelineChart data={pipelineData} />
@@ -184,6 +400,7 @@ export default async function AnalyticsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Candidate Sources</CardTitle>
+          <CardDescription>Where candidates are coming from</CardDescription>
         </CardHeader>
         <CardContent>
           <SourceChart data={sourceChartData} />
