@@ -48,11 +48,11 @@ export function DashboardSidebar({ profile }: DashboardSidebarProps) {
       {/* Logo */}
       <div className="flex h-20 items-center justify-center border-b border-sidebar-border px-4 bg-white">
         <Image
-          src="/images/talenttrack-logo.png"
-          alt="TalentTrack ATS"
-          width={180}
-          height={56}
-          className="h-14 w-auto"
+          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-SIoaEem9rRhvQManhsXzLTLTuvKC1c.png"
+          alt="CPECC"
+          width={80}
+          height={80}
+          className="h-16 w-auto"
         />
       </div>
 

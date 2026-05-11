@@ -61,8 +61,8 @@ export default function ForgotPasswordPage() {
             <CardHeader className="text-center space-y-4">
               <Link href="/" className="flex items-center justify-center">
                 <Image
-                  src="/images/talenttrack-logo.png"
-                  alt="TalentTrack ATS"
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-SIoaEem9rRhvQManhsXzLTLTuvKC1c.png"
+                  alt="CPECC"
                   width={200}
                   height={60}
                   className="h-14 w-auto"
@@ -114,8 +114,8 @@ export default function ForgotPasswordPage() {
         <div className="flex flex-col gap-6">
           <Link href="/" className="flex items-center justify-center">
             <Image
-              src="/images/talenttrack-logo.png"
-              alt="TalentTrack ATS"
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-SIoaEem9rRhvQManhsXzLTLTuvKC1c.png"
+              alt="CPECC"
               width={200}
               height={60}
               className="h-14 w-auto"

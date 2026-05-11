@@ -45,11 +45,11 @@ export function MobileSidebar({ profile }: MobileSidebarProps) {
       <SheetHeader className="border-b px-6 py-4">
         <SheetTitle className="flex items-center justify-center">
           <Image
-            src="/images/talenttrack-logo.png"
-            alt="TalentTrack ATS"
-            width={160}
-            height={50}
-            className="h-12 w-auto"
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-SIoaEem9rRhvQManhsXzLTLTuvKC1c.png"
+            alt="CPECC"
+            width={60}
+            height={60}
+            className="h-14 w-auto"
           />
         </SheetTitle>
       </SheetHeader>

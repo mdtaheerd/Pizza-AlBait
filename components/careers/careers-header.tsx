@@ -9,11 +9,11 @@ export function CareersHeader() {
       <div className="mx-auto flex h-20 max-w-5xl items-center justify-between px-6">
         <Link href="/" className="flex items-center">
           <Image
-            src="/images/talenttrack-logo.png"
-            alt="TalentTrack ATS"
-            width={180}
-            height={50}
-            className="h-12 w-auto"
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-SIoaEem9rRhvQManhsXzLTLTuvKC1c.png"
+            alt="CPECC"
+            width={60}
+            height={60}
+            className="h-14 w-auto"
           />
         </Link>
         <nav className="flex items-center gap-4">
@@ -26,6 +26,11 @@ export function CareersHeader() {
           <Button variant="ghost" size="sm" asChild>
             <Link href="/careers">
               All Jobs
+            </Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/about">
+              About Us
             </Link>
           </Button>
           <a

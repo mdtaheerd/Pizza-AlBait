@@ -40,12 +40,12 @@ export default function HomePage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            {/* TalentTrack ATS Logo */}
+            {/* CPECC Logo */}
             <Link href="/" className="flex items-center">
               <Image
-                src="/images/talenttrack-logo.png"
-                alt="TalentTrack ATS"
-                width={220}
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-SIoaEem9rRhvQManhsXzLTLTuvKC1c.png"
+                alt="CPECC"
+                width={70}
                 height={70}
                 className="h-16 w-auto"
                 priority
@@ -57,6 +57,9 @@ export default function HomePage() {
               </Link>
               <Link href="#departments" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
                 Departments
+              </Link>
+              <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
+                About Us
               </Link>
             </div>
             <div className="flex items-center gap-3">
@@ -132,17 +135,17 @@ export default function HomePage() {
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-600/10 border border-red-600/20 text-red-600 text-sm font-medium mb-6">
               <Globe className="h-4 w-4" />
-              Applicant Tracking System
+              Career Opportunities
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-              Welcome to{' '}
+              Join{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">
-                TalentTrack
+                CPECC
               </span>{' '}
-              ATS
+              Today
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
-              A modern applicant tracking system to streamline your recruitment process. Manage candidates, track applications, and make data-driven hiring decisions.
+              Build your career with China Petroleum Engineering & Construction Corporation. Join a global leader in EPC projects for the oil & gas industry.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" asChild className="bg-red-600 hover:bg-red-700 rounded-xl text-lg px-8 py-6">
@@ -205,17 +208,17 @@ export default function HomePage() {
             
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-                Streamline Your Hiring Process
+                Why Choose CPECC?
               </h2>
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                TalentTrack ATS is a modern applicant tracking system designed to help organizations manage their recruitment process efficiently. From job posting to candidate management, interview scheduling, and offer letters - we have got you covered.
+                CPECC is a leading EPC contractor with over 40 years of experience in onshore oil & gas projects. We offer competitive compensation, career development opportunities, and the chance to work on world-class projects across the Middle East and beyond.
               </p>
               <div className="space-y-4">
                 {[
-                  'Full recruitment lifecycle management',
-                  'Automated candidate screening and tracking',
-                  'Interview scheduling and feedback management',
-                  'Analytics and reporting dashboard'
+                  'Competitive salary and benefits package',
+                  'Career development and training opportunities',
+                  'Work on major international projects',
+                  'Diverse and inclusive work environment'
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <CheckCircle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
@@ -440,31 +443,32 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
-              {/* TalentTrack ATS Footer Logo */}
+              {/* CPECC Footer Logo */}
               <div className="mb-4">
                 <Image
-                  src="/images/talenttrack-logo.png"
-                  alt="TalentTrack ATS"
-                  width={160}
-                  height={50}
-                  className="h-12 w-auto bg-white rounded-lg p-2"
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-SIoaEem9rRhvQManhsXzLTLTuvKC1c.png"
+                  alt="CPECC"
+                  width={80}
+                  height={80}
+                  className="h-16 w-auto bg-white rounded-lg p-2"
                 />
               </div>
               <p className="text-white/60 text-sm max-w-sm">
-                TalentTrack ATS - A modern applicant tracking system to streamline your recruitment process.
+                China Petroleum Engineering & Construction Corporation - A leading EPC contractor for onshore oil & gas projects.
               </p>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Quick Links</h4>
               <div className="space-y-2">
                 <Link href="/careers" className="block text-white/60 hover:text-white text-sm">Open Positions</Link>
+                <Link href="/about" className="block text-white/60 hover:text-white text-sm">About Us</Link>
                 <Link href="#departments" className="block text-white/60 hover:text-white text-sm">Departments</Link>
               </div>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Departments</h4>
               <div className="space-y-2">
-                <span className="block text-white/60 text-sm">Marketing</span>
+                <span className="block text-white/60 text-sm">Engineering</span>
                 <span className="block text-white/60 text-sm">Project Planning & Control</span>
                 <span className="block text-white/60 text-sm">Commercial and Finance</span>
                 <span className="block text-white/60 text-sm">HR & Administration</span>
@@ -473,9 +477,9 @@ export default function HomePage() {
           </div>
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-center md:text-left">
-              <p className="text-white/60 text-sm font-medium mb-1">TalentTrack ATS</p>
+              <p className="text-white/60 text-sm font-medium mb-1">CPECC Careers</p>
               <p className="text-white/40 text-sm">
-                &copy; {new Date().getFullYear()} TalentTrack ATS. All rights reserved.
+                &copy; {new Date().getFullYear()} CPECC. All rights reserved.
               </p>
             </div>
             <div className="flex items-center gap-4">

@@ -115,11 +115,11 @@ export default function LoginPage() {
         <div className="flex flex-col gap-6">
           <Link href="/" className="flex items-center justify-center">
             <Image
-              src="/images/talenttrack-logo.png"
-              alt="TalentTrack ATS"
-              width={220}
-              height={70}
-              className="h-16 w-auto"
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-SIoaEem9rRhvQManhsXzLTLTuvKC1c.png"
+              alt="CPECC"
+              width={80}
+              height={80}
+              className="h-20 w-auto"
             />
           </Link>
           
