@@ -46,22 +46,10 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
     notFound()
   }
 
+  // Fetch applications with simple join first
   const { data: applications, error: applicationsError } = await supabase
     .from('applications')
-    .select(`
-      *,
-      job:jobs(
-        id, 
-        title, 
-        department:departments(id, name), 
-        salary_min, 
-        salary_max, 
-        salary_currency, 
-        created_by,
-        hiring_manager_id
-      ),
-      interviews:interviews(id, scheduled_at, status)
-    `)
+    .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager_id), interviews:interviews(id, scheduled_at, status)')
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
 
