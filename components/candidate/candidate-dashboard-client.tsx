@@ -12,7 +12,8 @@ import {
   LogOut, 
   MapPin, 
   Calendar,
-  ExternalLink
+  ExternalLink,
+  Pencil
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -192,11 +193,17 @@ export function CandidateDashboardClient({ candidate, openJobs, userEmail }: Can
         {/* Profile Card */}
         {candidate && (
           <Card className="mt-8">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
                 Your Profile
               </CardTitle>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/candidate/profile/edit" className="flex items-center gap-2">
+                  <Pencil className="h-4 w-4" />
+                  Edit Profile
+                </Link>
+              </Button>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
