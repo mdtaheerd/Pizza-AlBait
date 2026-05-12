@@ -87,8 +87,11 @@ export function CandidateApplicationActions({
   const [interviewDate, setInterviewDate] = useState<Date>()
   const [interviewTime, setInterviewTime] = useState('10:00')
   const [interviewLocation, setInterviewLocation] = useState('')
+  const [meetingLink, setMeetingLink] = useState('')
   const [interviewerName, setInterviewerName] = useState('')
   const [interviewerEmail, setInterviewerEmail] = useState('')
+  const [interviewerEmail2, setInterviewerEmail2] = useState('')
+  const [interviewerEmail3, setInterviewerEmail3] = useState('')
   const [rejectionComments, setRejectionComments] = useState('')
   const [recruiterComments, setRecruiterComments] = useState('')
   const [hiringManagerComments, setHiringManagerComments] = useState('')
@@ -272,8 +275,13 @@ export function CandidateApplicationActions({
 
       if (error) throw error
 
+      // Collect all interviewer emails (up to 3)
+      const allInterviewerEmails = [interviewerEmail, interviewerEmail2, interviewerEmail3]
+        .filter(e => e && e.trim())
+        .map(e => e.trim())
+
       // Create interview record in interviews table
-      const { error: interviewError } = await supabase
+      const { data: newInterview, error: interviewError } = await supabase
         .from('interviews')
         .insert({
           application_id: application.id,
@@ -281,32 +289,32 @@ export function CandidateApplicationActions({
           duration_minutes: 60,
           interview_type: 'video',
           location: interviewLocation || null,
-          meeting_link: null,
+          meeting_link: meetingLink || null,
           interviewer_id: currentUser.id,
+          interviewer_emails: allInterviewerEmails.length > 0 ? allInterviewerEmails : null,
           status: 'scheduled',
-          notes: `Interviewer: ${interviewerName} (${emailsArray.join(', ')})`,
+          notes: `Interviewer: ${interviewerName} (${allInterviewerEmails.join(', ')})`,
         })
+        .select('id')
+        .single()
 
       if (interviewError) {
         console.error('[v0] Failed to create interview record:', interviewError)
       }
 
       // Send email to candidate, interviewer(s), and hiring manager
-      await fetch('/api/send-interview-invite', {
+      await fetch('/api/send-interview-invitation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          applicationId: application.id,
+          interviewId: newInterview?.id,
           candidateEmail: application.candidate?.email,
           candidateName: application.candidate?.full_name,
-          interviewerEmail: emailsArray[0],
-          interviewerEmails: emailsArray,
-          interviewerName,
           jobTitle: application.job?.title,
-          interviewDate: scheduledDate.toISOString(),
-          interviewLocation,
-          hiringManagerEmail: application.job?.hiring_manager?.email,
-          hiringManagerName: application.job?.hiring_manager?.full_name,
+          scheduledAt: scheduledDate.toISOString(),
+          meetingLink: meetingLink || null,
+          interviewerEmails: allInterviewerEmails,
+          notes: `Location: ${interviewLocation || 'TBD'}`,
         }),
       })
 
@@ -893,12 +901,22 @@ export function CandidateApplicationActions({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="location">Location / Meeting Link</Label>
+              <Label htmlFor="location">Location</Label>
               <Input
                 id="location"
                 value={interviewLocation}
                 onChange={(e) => setInterviewLocation(e.target.value)}
-                placeholder="Office or video call link"
+                placeholder="e.g., Office Room 101, Abu Dhabi"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="meeting_link">Meeting Link</Label>
+              <Input
+                id="meeting_link"
+                type="url"
+                value={meetingLink}
+                onChange={(e) => setMeetingLink(e.target.value)}
+                placeholder="https://meet.google.com/... or https://teams.microsoft.com/..."
               />
             </div>
             <div className="space-y-2">
@@ -907,21 +925,38 @@ export function CandidateApplicationActions({
                 id="interviewer_name"
                 value={interviewerName}
                 onChange={(e) => setInterviewerName(e.target.value)}
-                placeholder="Name of the interviewer"
+                placeholder="Name of the primary interviewer"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="interviewer_email">Interviewer Email(s) *</Label>
+              <Label htmlFor="interviewer_email">Interviewer 1 Email *</Label>
               <Input
                 id="interviewer_email"
-                type="text"
+                type="email"
                 value={interviewerEmail}
                 onChange={(e) => setInterviewerEmail(e.target.value)}
-                placeholder="email1@company.com, email2@company.com"
+                placeholder="interviewer1@cpecc.ae"
               />
-              <p className="text-xs text-muted-foreground">
-                Separate multiple emails with commas
-              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="interviewer_email2">Interviewer 2 Email (Optional)</Label>
+              <Input
+                id="interviewer_email2"
+                type="email"
+                value={interviewerEmail2}
+                onChange={(e) => setInterviewerEmail2(e.target.value)}
+                placeholder="interviewer2@cpecc.ae"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="interviewer_email3">Interviewer 3 Email (Optional)</Label>
+              <Input
+                id="interviewer_email3"
+                type="email"
+                value={interviewerEmail3}
+                onChange={(e) => setInterviewerEmail3(e.target.value)}
+                placeholder="interviewer3@cpecc.ae"
+              />
             </div>
           </div>
           <DialogFooter className="flex-col sm:flex-row gap-2">
