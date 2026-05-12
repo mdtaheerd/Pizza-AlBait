@@ -35,7 +35,9 @@ export function PipelineCard({
 }: PipelineCardProps) {
   const isLocked = application.lock_status === 'locked' || application.lock_status === 'in_process'
   const isLockedByMe = application.locked_by === currentUser?.id
-  const isLockedByOther = isLocked && !isLockedByMe
+  const isAdmin = currentUser?.role === 'admin'
+  const canUnlock = isLockedByMe || isAdmin
+  const isLockedByOther = isLocked && !isLockedByMe && !isAdmin
   const wasRejectedOrDeclined = application.stage === 'rejected'
   const canReconsider = wasRejectedOrDeclined && application.lock_status === 'released'
 
@@ -66,7 +68,8 @@ export function PipelineCard({
 
   const handleLockToggle = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (isLockedByMe) {
+    if (isLocked && canUnlock) {
+      // Admin can unlock any lock, users can unlock their own
       onUnlock?.(application.id)
     } else if (!isLocked) {
       onLock?.(application.id)
@@ -198,10 +201,11 @@ export function PipelineCard({
                       className={cn(
                         "h-7 w-7 p-0",
                         isLockedByMe && "text-primary hover:text-primary",
-                        isLockedByOther && "text-red-500 cursor-not-allowed"
+                        (isLocked && !canUnlock) && "text-red-500 cursor-not-allowed",
+                        (isLocked && isAdmin && !isLockedByMe) && "text-orange-500 hover:text-orange-600"
                       )}
                       onClick={handleLockToggle}
-                      disabled={isLockedByOther}
+                      disabled={isLocked && !canUnlock}
                     >
                       {isLocked ? (
                         <Lock className="h-3.5 w-3.5" />
@@ -212,7 +216,8 @@ export function PipelineCard({
                   </TooltipTrigger>
                   <TooltipContent>
                     {isLockedByMe && "Click to release candidate"}
-                    {isLockedByOther && `Locked by ${application.locker?.full_name || 'another recruiter'}`}
+                    {isLocked && isAdmin && !isLockedByMe && `Click to unlock (locked by ${application.locker?.full_name || 'another recruiter'})`}
+                    {isLocked && !canUnlock && `Locked by ${application.locker?.full_name || 'another recruiter'}`}
                     {!isLocked && "Click to lock candidate for processing"}
                   </TooltipContent>
                 </Tooltip>

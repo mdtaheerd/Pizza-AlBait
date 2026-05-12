@@ -146,35 +146,68 @@ export function PipelineBoard({ applications: initialApplications, currentUser }
 
     const supabase = createClient()
     
-    // Call the release function
-    const { data, error } = await supabase.rpc('release_application', {
-      p_application_id: applicationId,
-      p_user_id: currentUser.id,
-      p_reason: 'Released by recruiter'
-    })
-
-    if (error) {
-      toast.error('Failed to release candidate', {
-        description: error.message
+    // Find the application to check who locked it
+    const application = applications.find(app => app.id === applicationId)
+    const isAdmin = currentUser.role === 'admin'
+    const isLockedByMe = application?.locked_by === currentUser.id
+    
+    // Use unlock_application for admins unlocking others' locks, release_application for own locks
+    if (isAdmin && !isLockedByMe) {
+      // Admin unlocking someone else's lock - use unlock function
+      const { error } = await supabase.rpc('unlock_application', {
+        p_application_id: applicationId
       })
-      return
+
+      if (error) {
+        toast.error('Failed to unlock candidate', {
+          description: error.message
+        })
+        return
+      }
+
+      // Update local state - set to available, not released
+      setApplications((prev) =>
+        prev.map((app) =>
+          app.id === applicationId 
+            ? { ...app, lock_status: 'available', locked_by: null, locker: null } 
+            : app
+        )
+      )
+
+      toast.success('Candidate unlocked', {
+        description: 'The candidate is now available for processing.'
+      })
+    } else {
+      // User releasing their own lock
+      const { error } = await supabase.rpc('release_application', {
+        p_application_id: applicationId,
+        p_user_id: currentUser.id,
+        p_reason: 'Released by recruiter'
+      })
+
+      if (error) {
+        toast.error('Failed to release candidate', {
+          description: error.message
+        })
+        return
+      }
+
+      // Update local state
+      setApplications((prev) =>
+        prev.map((app) =>
+          app.id === applicationId 
+            ? { ...app, lock_status: 'released', locked_by: null, locker: null } 
+            : app
+        )
+      )
+
+      toast.success('Candidate released', {
+        description: 'Other recruiters can now process this candidate.'
+      })
     }
 
-    // Update local state
-    setApplications((prev) =>
-      prev.map((app) =>
-        app.id === applicationId 
-          ? { ...app, lock_status: 'released', locked_by: null, locker: null } 
-          : app
-      )
-    )
-
-    toast.success('Candidate released', {
-      description: 'Other recruiters can now process this candidate.'
-    })
-
     router.refresh()
-  }, [currentUser, router])
+  }, [currentUser, router, applications])
 
   const handleDragStart = (event: DragStartEvent) => {
     const application = applications.find((app) => app.id === event.active.id)
