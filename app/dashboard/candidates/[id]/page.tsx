@@ -53,6 +53,15 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
 
+  // DEBUG: Log to server console
+  console.log('[v0] DEBUG - User ID:', user?.id)
+  console.log('[v0] DEBUG - Candidate ID:', id)
+  console.log('[v0] DEBUG - Applications count:', applications?.length || 0)
+  console.log('[v0] DEBUG - Applications error:', applicationsError?.message || 'none')
+  if (applications && applications.length > 0) {
+    console.log('[v0] DEBUG - First app:', applications[0].id, applications[0].stage)
+  }
+
   // Fetch locker and hiring manager profiles separately to avoid join issues
   const lockerIds = [...new Set((applications || []).map(a => a.locked_by).filter(Boolean))]
   const hmIds = [...new Set((applications || []).map(a => a.job?.hiring_manager_id).filter(Boolean))]
