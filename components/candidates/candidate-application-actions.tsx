@@ -80,6 +80,8 @@ export function CandidateApplicationActions({
   // Dialog states
   const [shortlistDialogOpen, setShortlistDialogOpen] = useState(false)
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
+  const [rejectionReason, setRejectionReason] = useState('')
+  const [rejectionComments, setRejectionComments] = useState('')
   const [interviewResultDialogOpen, setInterviewResultDialogOpen] = useState(false)
   const [offerDialogOpen, setOfferDialogOpen] = useState(false)
   
@@ -92,7 +94,6 @@ export function CandidateApplicationActions({
   const [interviewerEmail, setInterviewerEmail] = useState('')
   const [interviewerEmail2, setInterviewerEmail2] = useState('')
   const [interviewerEmail3, setInterviewerEmail3] = useState('')
-  const [rejectionComments, setRejectionComments] = useState('')
   const [recruiterComments, setRecruiterComments] = useState('')
   const [hiringManagerComments, setHiringManagerComments] = useState('')
   const [interviewResult, setInterviewResult] = useState<'hire' | 'reject'>('hire')
@@ -360,8 +361,15 @@ export function CandidateApplicationActions({
   }
 
   const handleReject = async () => {
-    if (rejectionComments.length > 30) {
-      alert('Comments must not exceed 30 characters')
+    // Validate rejection reason is selected (mandatory)
+    if (!rejectionReason) {
+      alert('Please select a rejection reason')
+      return
+    }
+    
+    // Validate comments length (max 150 characters)
+    if (rejectionComments.length > 150) {
+      alert('Comments must not exceed 150 characters')
       return
     }
 
@@ -372,6 +380,7 @@ export function CandidateApplicationActions({
         .from('applications')
         .update({
           stage: 'rejected',
+          rejection_reason: rejectionReason,
           rejection_comments: rejectionComments || null,
           rejected_at: new Date().toISOString(),
           recruiter_comments: currentUser.role === 'recruiter' ? recruiterComments : undefined,
@@ -400,6 +409,8 @@ export function CandidateApplicationActions({
       }
 
       setRejectDialogOpen(false)
+      setRejectionReason('') // Reset for next time
+      setRejectionComments('') // Reset for next time
       setSendRejectionEmail(true) // Reset for next time
       router.refresh()
     } catch (error) {
@@ -978,35 +989,68 @@ export function CandidateApplicationActions({
 
       {/* Reject Dialog */}
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Reject Application</DialogTitle>
             <DialogDescription>
-              This will reject the application and notify the candidate.
+              Please select a rejection reason. This information will be recorded for reporting.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="rejection_comments">
-                Rejection Reason (max 30 characters)
+              <Label htmlFor="rejection_reason">
+                Rejection Reason <span className="text-destructive">*</span>
               </Label>
-              <Input
+              <Select
+                value={rejectionReason}
+                onValueChange={setRejectionReason}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a reason..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Does Not Qualify">Does Not Qualify</SelectItem>
+                  <SelectItem value="Insufficient Experience">Insufficient Experience</SelectItem>
+                  <SelectItem value="Technical Skill Gap">Technical Skill Gap</SelectItem>
+                  <SelectItem value="Certification Not Available">Certification Not Available</SelectItem>
+                  <SelectItem value="Failed Interview / Assessment">Failed Interview / Assessment</SelectItem>
+                  <SelectItem value="No Response from Candidate">No Response from Candidate</SelectItem>
+                  <SelectItem value="Candidate Withdrew / Not Interested">Candidate Withdrew / Not Interested</SelectItem>
+                  <SelectItem value="Salary Expectation Too High">Salary Expectation Too High</SelectItem>
+                  <SelectItem value="Notice Period Too Long">Notice Period Too Long</SelectItem>
+                  <SelectItem value="Not Available for Mobilization">Not Available for Mobilization</SelectItem>
+                  <SelectItem value="Documentation / Visa Issue">Documentation / Visa Issue</SelectItem>
+                  <SelectItem value="Failed Medical / Background Check">Failed Medical / Background Check</SelectItem>
+                  <SelectItem value="Client Rejected">Client Rejected</SelectItem>
+                  <SelectItem value="Position Closed / On Hold">Position Closed / On Hold</SelectItem>
+                  <SelectItem value="Poor Communication / Interview Performance">Poor Communication / Interview Performance</SelectItem>
+                  <SelectItem value="Keep for Future Opportunities">Keep for Future Opportunities</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="rejection_comments">
+                Additional Comments (Optional - max 150 characters)
+              </Label>
+              <Textarea
                 id="rejection_comments"
                 value={rejectionComments}
-                onChange={(e) => setRejectionComments(e.target.value.slice(0, 30))}
-                placeholder="Brief reason..."
-                maxLength={30}
+                onChange={(e) => setRejectionComments(e.target.value.slice(0, 150))}
+                placeholder="Add any additional details..."
+                maxLength={150}
+                rows={3}
+                className="resize-none"
               />
               <p className="text-xs text-muted-foreground">
-                {rejectionComments.length}/30 characters
+                {rejectionComments.length}/150 characters
               </p>
             </div>
-            </div>
+          </div>
           <DialogFooter className="flex-col sm:flex-row gap-2">
-            <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
+            <Button variant="outline" onClick={() => { setRejectDialogOpen(false); setRejectionReason(''); setRejectionComments(''); }}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={() => { setSendRejectionEmail(false); handleReject(); }} disabled={isLoading}>
+            <Button variant="destructive" onClick={() => { setSendRejectionEmail(false); handleReject(); }} disabled={isLoading || !rejectionReason}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Reject
             </Button>
@@ -1014,7 +1058,7 @@ export function CandidateApplicationActions({
               <Button 
                 variant="destructive" 
                 onClick={() => { setSendRejectionEmail(true); handleReject(); }} 
-                disabled={isLoading}
+                disabled={isLoading || !rejectionReason}
                 className="bg-red-700 hover:bg-red-800"
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

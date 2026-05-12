@@ -163,16 +163,11 @@ export default function CandidateLoginPage() {
                 Login
               </Button>
 
-              <div className="space-y-2 text-center text-sm">
+              <div className="text-center text-sm">
                 <p className="text-muted-foreground">
                   Don&apos;t have an account?{' '}
                   <Link href="/candidate/register" className="text-primary hover:underline">
                     Register here
-                  </Link>
-                </p>
-                <p className="text-muted-foreground">
-                  <Link href="/careers" className="text-primary hover:underline">
-                    Browse jobs without logging in
                   </Link>
                 </p>
               </div>

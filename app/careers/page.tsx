@@ -17,11 +17,8 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
   const { search, department } = await searchParams
   const supabase = await createClient()
   
-  // Check if user is authenticated - redirect to registration if not
+  // Get user if authenticated (for showing apply button state)
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    redirect('/candidate/register?redirect=/careers')
-  }
 
   const { data: departments } = await supabase
     .from('departments')
@@ -241,11 +238,6 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
                       </span>
                     )}
                   </div>
-                  {job.description && (
-                    <p className="mt-4 line-clamp-2 text-sm text-muted-foreground leading-relaxed">
-                      {job.description}
-                    </p>
-                  )}
                 </CardContent>
               </Card>
             ))}
