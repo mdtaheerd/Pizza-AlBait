@@ -27,7 +27,7 @@ export default function AboutPage() {
             <Link href="/" className="flex items-center">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2Pqwbqzr1lnrsrOSmNqst4Fcmq5AyS.png"
-                alt="CPECC"
+                alt="CPECC Abu Dhabi Branch"
                 width={70}
                 height={70}
                 className="h-16 w-auto"
@@ -68,8 +68,9 @@ export default function AboutPage() {
               />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-              China Petroleum Engineering & Construction Corporation
+              CPECC Abu Dhabi Branch
             </h1>
+            <p className="text-lg text-muted-foreground mb-2">China Petroleum Engineering & Construction Corporation</p>
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
               A leading EPC contractor specializing in onshore oil & gas projects, 
               delivering excellence in engineering, procurement, and construction across the Middle East and beyond.
@@ -366,7 +367,7 @@ export default function AboutPage() {
                 className="h-12 w-auto brightness-0 invert"
               />
               <div>
-                <p className="font-semibold">CPECC</p>
+                <p className="font-semibold">CPECC Abu Dhabi Branch</p>
                 <p className="text-sm text-slate-400">China Petroleum Engineering & Construction Corporation</p>
               </div>
             </div>
@@ -384,7 +385,7 @@ export default function AboutPage() {
           </div>
           <div className="mt-8 pt-8 border-t border-slate-800 text-center">
             <p className="text-sm text-slate-400">
-              &copy; {new Date().getFullYear()} CPECC. All rights reserved.
+              &copy; {new Date().getFullYear()} CPECC Abu Dhabi Branch. All rights reserved.
             </p>
           </div>
         </div>

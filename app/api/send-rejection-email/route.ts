@@ -27,11 +27,12 @@ export async function POST(request: Request) {
             
             <p style="margin-top: 30px;">Best regards,</p>
             <p style="margin-top: 20px;">
-              <strong>HR Team</strong>
+              <strong>HR Team</strong><br/>
+              CPECC Abu Dhabi Branch
             </p>
           </div>
           <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
-            <p style="margin: 0;">Sent via CPECC</p>
+            <p style="margin: 0;">This is an automated message from CPECC Abu Dhabi Branch Careers Portal</p>
           </div>
         </div>
       `,

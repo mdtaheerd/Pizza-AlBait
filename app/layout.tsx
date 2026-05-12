@@ -8,20 +8,20 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'CPECC Careers | China Petroleum Engineering & Construction Corporation',
-  description: 'Join CPECC - A leading EPC contractor for onshore oil & gas projects in the Middle East. Explore career opportunities and apply today.',
+  title: 'CPECC Abu Dhabi Branch Careers | China Petroleum Engineering & Construction Corporation',
+  description: 'Join CPECC Abu Dhabi Branch - A leading EPC contractor for onshore oil & gas projects in the Middle East. Explore career opportunities and apply today.',
   generator: 'v0.app',
   openGraph: {
-    title: 'CPECC Careers | China Petroleum Engineering & Construction Corporation',
-    description: 'Join CPECC - A leading EPC contractor for onshore oil & gas projects in the Middle East.',
-    siteName: 'CPECC Careers',
+    title: 'CPECC Abu Dhabi Branch Careers | China Petroleum Engineering & Construction Corporation',
+    description: 'Join CPECC Abu Dhabi Branch - A leading EPC contractor for onshore oil & gas projects in the Middle East.',
+    siteName: 'CPECC Abu Dhabi Branch Careers',
     locale: 'en_AE',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CPECC Careers | China Petroleum Engineering & Construction Corporation',
-    description: 'Join CPECC - A leading EPC contractor for onshore oil & gas projects in the Middle East.',
+    title: 'CPECC Abu Dhabi Branch Careers | China Petroleum Engineering & Construction Corporation',
+    description: 'Join CPECC Abu Dhabi Branch - A leading EPC contractor for onshore oil & gas projects in the Middle East.',
   },
   icons: {
     icon: [

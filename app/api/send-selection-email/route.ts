@@ -34,13 +34,14 @@ export async function POST(request: Request) {
             
             <p>If you have any questions in the meantime, please don't hesitate to reach out.</p>
             
-            <p>We look forward to welcoming you to the team!</p>
+            <p>We look forward to welcoming you to the CPECC Abu Dhabi Branch team!</p>
             
             <p>Best regards,<br>
-            <strong>HR Team</strong></p>
+            <strong>HR Team</strong><br>
+            CPECC Abu Dhabi Branch</p>
           </div>
           <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
-            <p>Sent via CPECC</p>
+            <p>This is an automated message from CPECC Abu Dhabi Branch Careers Portal</p>
           </div>
         </div>
       `,

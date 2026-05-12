@@ -32,13 +32,14 @@ export async function POST(request: Request) {
               <li>Return the signed documents within 7 business days</li>
             </ol>
             
-            <p>We are excited about the possibility of you joining our team!</p>
+            <p>We are excited about the possibility of you joining the CPECC Abu Dhabi Branch team!</p>
             
             <p>Best regards,<br>
-            <strong>HR Team</strong></p>
+            <strong>HR Team</strong><br>
+            CPECC Abu Dhabi Branch</p>
           </div>
           <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
-            <p>Sent via CPECC</p>
+            <p>This is an automated message from CPECC Abu Dhabi Branch Careers Portal</p>
           </div>
         </div>
       `,

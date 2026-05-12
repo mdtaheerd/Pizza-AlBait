@@ -1,5 +1,4 @@
-'use client'
-
+import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { 
@@ -17,106 +16,31 @@ import {
   HardHat,
   ShieldCheck,
   Package,
-  Wrench,
   Cog,
-  UserCircle,
-  UserCog,
-  ChevronDown,
-  LogIn
+  Heart,
+  Target,
+  Lightbulb,
+  Handshake,
+  Award,
+  Layers
 } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
 import Image from 'next/image'
+import { LandingNavigation } from '@/components/landing/landing-navigation'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient()
+  
+  // Get active job count
+  const { count: jobCount } = await supabase
+    .from('jobs')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'open')
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            {/* CPECC Logo */}
-            <Link href="/" className="flex items-center">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2Pqwbqzr1lnrsrOSmNqst4Fcmq5AyS.png"
-                alt="CPECC"
-                width={70}
-                height={70}
-                className="h-16 w-auto"
-                priority
-              />
-            </Link>
-            <div className="hidden md:flex items-center gap-8">
-              <Link href="/careers" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
-                Open Positions
-              </Link>
-              <Link href="#departments" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
-                Departments
-              </Link>
-              <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
-                About Us
-              </Link>
-            </div>
-            <div className="flex items-center gap-3">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <LogIn className="h-4 w-4" />
-                    Sign In
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem asChild>
-                    <Link href="/candidate/login" className="flex items-center gap-3 cursor-pointer py-2">
-                      <UserCircle className="h-5 w-5 text-blue-600" />
-                      <div>
-                        <p className="font-medium">Candidate Login</p>
-                        <p className="text-xs text-muted-foreground">Apply for jobs</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/auth/login" className="flex items-center gap-3 cursor-pointer py-2">
-                      <UserCog className="h-5 w-5 text-green-600" />
-                      <div>
-                        <p className="font-medium">Recruiter Login</p>
-                        <p className="text-xs text-muted-foreground">Manage applications</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/auth/login" className="flex items-center gap-3 cursor-pointer py-2">
-                      <Briefcase className="h-5 w-5 text-purple-600" />
-                      <div>
-                        <p className="font-medium">Hiring Manager Login</p>
-                        <p className="text-xs text-muted-foreground">Review candidates</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/auth/login" className="flex items-center gap-3 cursor-pointer py-2">
-                      <ShieldCheck className="h-5 w-5 text-red-600" />
-                      <div>
-                        <p className="font-medium">Admin Login</p>
-                        <p className="text-xs text-muted-foreground">System administration</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Button asChild className="bg-red-600 hover:bg-red-700 rounded-xl">
-                <Link href="/careers">View Jobs</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <LandingNavigation />
 
       {/* Hero Section */}
       <section className="relative pt-20 min-h-[90vh] flex items-center">
@@ -140,12 +64,12 @@ export default function HomePage() {
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
               Join{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">
-                CPECC
+                CPECC Abu Dhabi Branch
               </span>{' '}
               Today
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
-              Build your career with China Petroleum Engineering & Construction Corporation. Join a global leader in EPC projects for the oil & gas industry.
+              Build your career with China Petroleum Engineering & Construction Corporation Abu Dhabi Branch. Join a global leader in EPC projects for the oil & gas industry.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" asChild className="bg-red-600 hover:bg-red-700 rounded-xl text-lg px-8 py-6">
@@ -164,18 +88,108 @@ export default function HomePage() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-border/50">
               <div>
-                <p className="text-3xl font-bold text-foreground">500+</p>
-                <p className="text-sm text-muted-foreground">Jobs Posted</p>
+                <p className="text-3xl font-bold text-foreground">3000+</p>
+                <p className="text-sm text-muted-foreground">Employees</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-foreground">10,000+</p>
-                <p className="text-sm text-muted-foreground">Candidates</p>
+                <p className="text-3xl font-bold text-foreground">{jobCount || 0}</p>
+                <p className="text-sm text-muted-foreground">Open Positions</p>
               </div>
               <div>
                 <p className="text-3xl font-bold text-foreground">95%</p>
                 <p className="text-sm text-muted-foreground">Hiring Success</p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Core Values Section */}
+      <section className="py-20 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Our Core Values
+            </h2>
+            <p className="text-white/70 max-w-2xl mx-auto">
+              The principles that guide our actions and define who we are as CPECC Abu Dhabi Branch
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300">
+              <CardContent className="p-6 text-center">
+                <div className="h-14 w-14 rounded-xl bg-red-600/20 flex items-center justify-center mx-auto mb-4">
+                  <Shield className="h-7 w-7 text-red-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Safety First</h3>
+                <p className="text-white/60 text-sm">
+                  Zero compromise on health, safety, and environmental standards in all our operations
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300">
+              <CardContent className="p-6 text-center">
+                <div className="h-14 w-14 rounded-xl bg-orange-500/20 flex items-center justify-center mx-auto mb-4">
+                  <Award className="h-7 w-7 text-orange-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Excellence</h3>
+                <p className="text-white/60 text-sm">
+                  Commitment to delivering world-class quality in every project we undertake
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300">
+              <CardContent className="p-6 text-center">
+                <div className="h-14 w-14 rounded-xl bg-blue-500/20 flex items-center justify-center mx-auto mb-4">
+                  <Handshake className="h-7 w-7 text-blue-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Integrity</h3>
+                <p className="text-white/60 text-sm">
+                  Building trust through honesty, transparency, and ethical business practices
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300">
+              <CardContent className="p-6 text-center">
+                <div className="h-14 w-14 rounded-xl bg-green-500/20 flex items-center justify-center mx-auto mb-4">
+                  <Lightbulb className="h-7 w-7 text-green-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Innovation</h3>
+                <p className="text-white/60 text-sm">
+                  Embracing new technologies and methods to drive continuous improvement
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 mt-6 max-w-2xl mx-auto">
+            <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300">
+              <CardContent className="p-6 text-center">
+                <div className="h-14 w-14 rounded-xl bg-purple-500/20 flex items-center justify-center mx-auto mb-4">
+                  <Users className="h-7 w-7 text-purple-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Teamwork</h3>
+                <p className="text-white/60 text-sm">
+                  Collaborating across cultures and disciplines to achieve shared goals
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300">
+              <CardContent className="p-6 text-center">
+                <div className="h-14 w-14 rounded-xl bg-yellow-500/20 flex items-center justify-center mx-auto mb-4">
+                  <Target className="h-7 w-7 text-yellow-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Customer Focus</h3>
+                <p className="text-white/60 text-sm">
+                  Dedicated to exceeding client expectations and delivering value
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
@@ -208,10 +222,10 @@ export default function HomePage() {
             
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-                Why Choose CPECC?
+                Why Choose CPECC Abu Dhabi Branch?
               </h2>
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                CPECC is a leading EPC contractor with over 40 years of experience in onshore oil & gas projects. We offer competitive compensation, career development opportunities, and the chance to work on world-class projects across the Middle East and beyond.
+                CPECC Abu Dhabi Branch is a leading EPC contractor with over 40 years of experience in onshore oil & gas projects. We offer competitive compensation, career development opportunities, and the chance to work on world-class projects across the Middle East and beyond.
               </p>
               <div className="space-y-4">
                 {[
@@ -243,18 +257,20 @@ export default function HomePage() {
             </p>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {[
-              { name: 'Engineering', icon: Building2, openings: 15, description: 'Technical & design' },
-              { name: 'Project Planning & Control', icon: FileText, openings: 12, description: 'Planning & scheduling' },
-              { name: 'Quality Control', icon: ShieldCheck, openings: 8, description: 'QA/QC assurance' },
-              { name: 'HSE', icon: Shield, openings: 10, description: 'Health, Safety & Environment' },
-              { name: 'Procurement', icon: Package, openings: 9, description: 'Materials & equipment' },
-              { name: 'Construction', icon: HardHat, openings: 20, description: 'Site construction' },
-              { name: 'Commissioning', icon: Cog, openings: 7, description: 'Plant startup' },
-              { name: 'Commercial and Finance', icon: Calculator, openings: 10, description: 'Finance & contracts' },
-              { name: 'Marketing', icon: BarChart3, openings: 5, description: 'Brand & communications' },
-              { name: 'HR & Administration', icon: Users, openings: 6, description: 'People operations' }
+              { name: 'Engineering', icon: Building2, description: 'Technical & design' },
+              { name: 'Planning & Control', icon: FileText, description: 'Planning & scheduling' },
+              { name: 'QAQC', icon: ShieldCheck, description: 'Quality Assurance & Control' },
+              { name: 'HSE', icon: Shield, description: 'Health, Safety & Environment' },
+              { name: 'Procurement', icon: Package, description: 'Materials & equipment' },
+              { name: 'Construction', icon: HardHat, description: 'Site construction' },
+              { name: 'Commissioning', icon: Cog, description: 'Plant startup' },
+              { name: 'Interface', icon: Layers, description: 'Interface management' },
+              { name: 'Finance', icon: Calculator, description: 'Financial operations' },
+              { name: 'Commercials & Contracts', icon: Briefcase, description: 'Contracts management' },
+              { name: 'Human Resources', icon: Users, description: 'People operations' },
+              { name: 'Administration', icon: BarChart3, description: 'Admin services' }
             ].map((dept) => (
               <Card key={dept.name} className="border border-border/50 hover:border-red-600/30 hover:shadow-lg transition-all duration-300 cursor-pointer group overflow-hidden">
                 <CardContent className="p-4">
@@ -262,9 +278,6 @@ export default function HomePage() {
                     <div className="h-10 w-10 rounded-lg bg-red-600/10 flex items-center justify-center group-hover:bg-red-600 group-hover:scale-110 transition-all duration-300">
                       <dept.icon className="h-5 w-5 text-red-600 group-hover:text-white transition-colors" />
                     </div>
-                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">
-                      {dept.openings} jobs
-                    </span>
                   </div>
                   <h3 className="font-semibold text-foreground text-sm mb-0.5 leading-tight">{dept.name}</h3>
                   <p className="text-[11px] text-muted-foreground">{dept.description}</p>
@@ -447,14 +460,14 @@ export default function HomePage() {
               <div className="mb-4">
                 <Image
                   src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2Pqwbqzr1lnrsrOSmNqst4Fcmq5AyS.png"
-                  alt="CPECC"
+                  alt="CPECC Abu Dhabi Branch"
                   width={80}
                   height={80}
                   className="h-16 w-auto bg-white rounded-lg p-2"
                 />
               </div>
               <p className="text-white/60 text-sm max-w-sm">
-                China Petroleum Engineering & Construction Corporation - A leading EPC contractor for onshore oil & gas projects.
+                China Petroleum Engineering & Construction Corporation Abu Dhabi Branch - A leading EPC contractor for onshore oil & gas projects.
               </p>
             </div>
             <div>
@@ -469,17 +482,17 @@ export default function HomePage() {
               <h4 className="font-semibold mb-4">Departments</h4>
               <div className="space-y-2">
                 <span className="block text-white/60 text-sm">Engineering</span>
-                <span className="block text-white/60 text-sm">Project Planning & Control</span>
-                <span className="block text-white/60 text-sm">Commercial and Finance</span>
-                <span className="block text-white/60 text-sm">HR & Administration</span>
+                <span className="block text-white/60 text-sm">Planning & Control</span>
+                <span className="block text-white/60 text-sm">Commercials & Contracts</span>
+                <span className="block text-white/60 text-sm">Human Resources</span>
               </div>
             </div>
           </div>
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-center md:text-left">
-              <p className="text-white/60 text-sm font-medium mb-1">CPECC Careers</p>
+              <p className="text-white/60 text-sm font-medium mb-1">CPECC Abu Dhabi Branch Careers</p>
               <p className="text-white/40 text-sm">
-                &copy; {new Date().getFullYear()} CPECC. All rights reserved.
+                &copy; {new Date().getFullYear()} CPECC Abu Dhabi Branch. All rights reserved.
               </p>
             </div>
             <div className="flex items-center gap-4">
