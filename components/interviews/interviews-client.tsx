@@ -76,6 +76,10 @@ interface InterviewWithRelations {
   status: string
   created_at: string
   updated_at: string
+  feedback_submitted?: boolean
+  feedback_decision?: string | null
+  overall_score?: number | null
+  feedback_comments?: string | null
   application?: {
     id: string
     candidate?: {
@@ -85,6 +89,9 @@ interface InterviewWithRelations {
     }
     job?: {
       title: string
+      department?: {
+        name: string
+      }
       hiring_manager?: {
         email: string
         full_name: string
@@ -95,6 +102,26 @@ interface InterviewWithRelations {
     full_name: string
     email: string
   } | null
+}
+
+const RECOMMENDATION_LABELS: Record<string, string> = {
+  strongly_recommended: 'Strongly Recommended',
+  recommended_with_reservations: 'Recommended w/ Reservations',
+  not_recommended: 'Not Recommended',
+  rejected: 'Rejected',
+  hire: 'Hire',
+  reject: 'Reject',
+  hold: 'Hold',
+}
+
+const RECOMMENDATION_COLORS: Record<string, string> = {
+  strongly_recommended: 'bg-green-100 text-green-700',
+  recommended_with_reservations: 'bg-amber-100 text-amber-700',
+  not_recommended: 'bg-orange-100 text-orange-700',
+  rejected: 'bg-red-100 text-red-700',
+  hire: 'bg-green-100 text-green-700',
+  reject: 'bg-red-100 text-red-700',
+  hold: 'bg-amber-100 text-amber-700',
 }
 
 interface InterviewsClientProps {
@@ -273,7 +300,7 @@ export function InterviewsClient({ interviews, currentUserId }: InterviewsClient
     }
   }
 
-  const InterviewRow = ({ interview, showActions = true }: { interview: InterviewWithRelations; showActions?: boolean }) => {
+  const InterviewRow = ({ interview, showActions = true, showFeedback = false }: { interview: InterviewWithRelations; showActions?: boolean; showFeedback?: boolean }) => {
     const TypeIcon = INTERVIEW_TYPE_ICONS[interview.interview_type || 'video'] || Video
 
     return (
@@ -284,6 +311,9 @@ export function InterviewsClient({ interviews, currentUserId }: InterviewsClient
         </TableCell>
         <TableCell>
           <div className="text-sm">{interview.application?.job?.title || '-'}</div>
+          {interview.application?.job?.department?.name && (
+            <div className="text-xs text-muted-foreground">{interview.application.job.department.name}</div>
+          )}
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
@@ -313,6 +343,24 @@ export function InterviewsClient({ interviews, currentUserId }: InterviewsClient
             {interview.status.charAt(0).toUpperCase() + interview.status.slice(1).replace('_', ' ')}
           </Badge>
         </TableCell>
+        {showFeedback && (
+          <TableCell>
+            {interview.feedback_submitted && interview.feedback_decision ? (
+              <div className="space-y-1">
+                <Badge className={RECOMMENDATION_COLORS[interview.feedback_decision] || 'bg-gray-100 text-gray-700'}>
+                  {RECOMMENDATION_LABELS[interview.feedback_decision] || interview.feedback_decision}
+                </Badge>
+                {interview.overall_score && (
+                  <div className="text-xs text-muted-foreground">
+                    Score: {interview.overall_score}/5
+                  </div>
+                )}
+              </div>
+            ) : (
+              <span className="text-xs text-muted-foreground">Pending</span>
+            )}
+          </TableCell>
+        )}
         {showActions && (
           <TableCell>
             <div className="flex items-center gap-2">
@@ -397,12 +445,13 @@ export function InterviewsClient({ interviews, currentUserId }: InterviewsClient
                   <TableHead>Type</TableHead>
                   <TableHead>Interviewer</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Feedback</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {upcomingInterviews.map((interview) => (
-                  <InterviewRow key={interview.id} interview={interview} showActions={true} />
+                  <InterviewRow key={interview.id} interview={interview} showActions={true} showFeedback={true} />
                 ))}
               </TableBody>
             </Table>
@@ -437,12 +486,13 @@ export function InterviewsClient({ interviews, currentUserId }: InterviewsClient
                   <TableHead>Type</TableHead>
                   <TableHead>Interviewer</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Feedback</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {pastInterviews.map((interview) => (
-                  <InterviewRow key={interview.id} interview={interview} showActions={interview.status === 'scheduled'} />
+                  <InterviewRow key={interview.id} interview={interview} showActions={interview.status === 'scheduled'} showFeedback={true} />
                 ))}
               </TableBody>
             </Table>
