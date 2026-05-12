@@ -169,6 +169,54 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
             </Card>
           )}
 
+          {/* Job Criteria */}
+          {(job.years_of_experience || job.age_criteria || job.required_languages?.length || job.other_certifications || job.other_requirements) && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Job Criteria</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {job.years_of_experience && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Years of Experience</p>
+                    <p className="text-foreground">{job.years_of_experience}</p>
+                  </div>
+                )}
+                {job.age_criteria && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Age Criteria</p>
+                    <p className="text-foreground">{job.age_criteria}</p>
+                  </div>
+                )}
+                {job.required_languages?.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Required Languages</p>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {job.required_languages.map((lang: string) => (
+                        <Badge key={lang} variant="outline">{lang}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {job.other_certifications && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Certifications</p>
+                    <p className="text-foreground">{job.other_certifications}</p>
+                  </div>
+                )}
+                {job.other_requirements && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Other Requirements</p>
+                    <div 
+                      className="prose prose-sm max-w-none dark:prose-invert"
+                      dangerouslySetInnerHTML={{ __html: job.other_requirements }}
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Apply CTA */}
           <Card className="bg-primary text-primary-foreground">
             <CardContent className="flex flex-col items-center py-8 text-center">

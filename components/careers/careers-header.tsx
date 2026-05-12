@@ -10,7 +10,7 @@ export function CareersHeader() {
         <Link href="/" className="flex items-center gap-3">
           <Image
             src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2Pqwbqzr1lnrsrOSmNqst4Fcmq5AyS.png"
-            alt="CPECC"
+            alt="CPECC Abu Dhabi Branch"
             width={50}
             height={50}
             className="h-12 w-auto"

@@ -11,7 +11,7 @@ const createTransporter = () => {
   })
 }
 
-const FROM_NAME = 'CPECC'
+const FROM_NAME = 'CPECC Abu Dhabi Branch'
 const getFromEmail = () => process.env.GMAIL_USER || 'noreply@example.com'
 const getAdminEmail = () => process.env.ADMIN_EMAIL || 'cpecchr.auh@gmail.com'
 const getAppUrl = () => process.env.NEXT_PUBLIC_APP_URL || 'https://pizza-al-bait.vercel.app'

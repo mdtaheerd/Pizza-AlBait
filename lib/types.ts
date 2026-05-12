@@ -49,6 +49,11 @@ export interface Job {
   recruiter_id: string | null
   project_name: string | null
   qualification: string | null
+  years_of_experience: string | null
+  age_criteria: string | null
+  required_languages: string[] | null
+  other_certifications: string | null
+  other_requirements: string | null
   created_at: string
   updated_at: string
   published_at: string | null

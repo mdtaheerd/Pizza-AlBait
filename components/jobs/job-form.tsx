@@ -15,6 +15,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Textarea } from '@/components/ui/textarea'
 import type { Job, Department, JobStatus, EmploymentType, SalaryCurrency, Profile } from '@/lib/types'
 import { EMPLOYMENT_TYPE_LABELS, JOB_STATUS_LABELS, CURRENCY_OPTIONS } from '@/lib/types'
 
@@ -43,6 +45,11 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
     recruiter_id: job?.recruiter_id || '',
     project_name: job?.project_name || '',
     qualification: job?.qualification || '',
+    years_of_experience: (job as any)?.years_of_experience || '',
+    age_criteria: (job as any)?.age_criteria || '',
+    required_languages: (job as any)?.required_languages || [] as string[],
+    other_certifications: (job as any)?.other_certifications || '',
+    other_requirements: (job as any)?.other_requirements || '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,6 +76,11 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
         recruiter_id: formData.recruiter_id || null,
         project_name: formData.project_name || null,
         qualification: formData.qualification || null,
+        years_of_experience: formData.years_of_experience || null,
+        age_criteria: formData.age_criteria || null,
+        required_languages: formData.required_languages.length > 0 ? formData.required_languages : null,
+        other_certifications: formData.other_certifications || null,
+        other_requirements: formData.other_requirements || null,
         created_by: user?.id || null,
         published_at: formData.status === 'open' ? new Date().toISOString() : null,
       }
@@ -265,6 +277,85 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
                 onChange={(e) => setFormData({ ...formData, budgeted_salary: e.target.value })}
                 placeholder="e.g. 100000"
               />
+            </div>
+          </div>
+
+          {/* Job Requirements Section */}
+          <div className="border-t pt-6 mt-6">
+            <h3 className="text-lg font-semibold mb-4">Job Requirements</h3>
+            
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="years_of_experience">Years of Experience</Label>
+                <Input
+                  id="years_of_experience"
+                  value={formData.years_of_experience}
+                  onChange={(e) => setFormData({ ...formData, years_of_experience: e.target.value })}
+                  placeholder="e.g. 5-10 years"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="age_criteria">Age Criteria</Label>
+                <Input
+                  id="age_criteria"
+                  value={formData.age_criteria}
+                  onChange={(e) => setFormData({ ...formData, age_criteria: e.target.value })}
+                  placeholder="e.g. 25-45 years"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3 mt-4">
+              <Label>Required Languages</Label>
+              <div className="flex flex-wrap gap-4">
+                {['English', 'Chinese', 'Hindi/Urdu'].map((lang) => (
+                  <div key={lang} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`lang-${lang}`}
+                      checked={formData.required_languages.includes(lang)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFormData({ 
+                            ...formData, 
+                            required_languages: [...formData.required_languages, lang] 
+                          })
+                        } else {
+                          setFormData({ 
+                            ...formData, 
+                            required_languages: formData.required_languages.filter((l: string) => l !== lang) 
+                          })
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`lang-${lang}`} className="text-sm font-normal cursor-pointer">
+                      {lang}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="other_certifications">Other Certifications (Optional)</Label>
+              <Input
+                id="other_certifications"
+                value={formData.other_certifications}
+                onChange={(e) => setFormData({ ...formData, other_certifications: e.target.value })}
+                placeholder="e.g. PMP, NEBOSH, etc."
+              />
+            </div>
+
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="other_requirements">Other Requirements (Optional)</Label>
+              <RichTextEditor
+                content={formData.other_requirements}
+                onChange={(content) => setFormData({ ...formData, other_requirements: content })}
+                placeholder="Additional requirements with formatting options..."
+              />
+              <p className="text-xs text-muted-foreground">
+                Use the toolbar above for bullet points, bold text, and font size options
+              </p>
             </div>
           </div>
 
