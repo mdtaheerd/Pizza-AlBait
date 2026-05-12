@@ -61,6 +61,7 @@ interface ExtendedApplication {
   offer_sent_at?: string | null
   hired_at?: string | null
   rejection_comments?: string | null
+  rejection_reason?: string | null
   candidate?: {
     id: string
     full_name: string
@@ -323,6 +324,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
       'Stage',
       'Interview Date',
       'Rejection Reason',
+      'Rejection Comments',
       'Recruiter Name'
     ]
 
@@ -344,6 +346,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
       format(new Date(app.applied_at), 'yyyy-MM-dd'),
       STAGE_LABELS[app.stage as keyof typeof STAGE_LABELS] || app.stage,
       app.interview_date ? format(new Date(app.interview_date), 'yyyy-MM-dd HH:mm') : '',
+      app.rejection_reason || '',
       app.rejection_comments || '',
       getCreator(app.job?.creator)?.full_name || ''
     ])
@@ -558,6 +561,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                         <TableHead>Stage</TableHead>
                         <TableHead>Interview Date</TableHead>
                         {reportType === 'rejected' && <TableHead>Rejection Reason</TableHead>}
+                        {reportType === 'rejected' && <TableHead>Rejection Comments</TableHead>}
                         <TableHead>Recruiter Name</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -618,7 +622,12 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                               : '-'}
                           </TableCell>
                           {reportType === 'rejected' && (
-                            <TableCell className="text-sm text-red-600">
+                            <TableCell className="text-sm text-red-600 font-medium">
+                              {app.rejection_reason || '-'}
+                            </TableCell>
+                          )}
+                          {reportType === 'rejected' && (
+                            <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate" title={app.rejection_comments || ''}>
                               {app.rejection_comments || '-'}
                             </TableCell>
                           )}
@@ -627,7 +636,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                       ))}
                       {filteredApplications.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={19} className="text-center text-muted-foreground py-8">
+                          <TableCell colSpan={reportType === 'rejected' ? 21 : 19} className="text-center text-muted-foreground py-8">
                             No applications found
                           </TableCell>
                         </TableRow>
