@@ -3,13 +3,14 @@ import { notFound } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Pencil, Mail, Phone, Linkedin, Globe, FileText, Plus, AlertTriangle, Lock, Download, Calendar, Briefcase } from 'lucide-react'
+import { Pencil, Mail, Phone, Linkedin, Globe, FileText, Plus, AlertTriangle, Lock, Download, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { STAGE_LABELS, STAGE_COLORS, LOCK_STATUS_LABELS, LOCK_STATUS_COLORS } from '@/lib/types'
 import type { Application, CandidateHistory } from '@/lib/types'
 import { CandidateHistoryTimeline } from '@/components/candidates/candidate-history'
 import { CandidateRemarks } from '@/components/candidates/candidate-remarks'
+import { CandidateApplicationActionsWrapper } from '@/components/candidates/candidate-application-actions-wrapper'
 
 interface CandidateDetailPageProps {
   params: Promise<{ id: string }>
@@ -47,7 +48,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
 
   const { data: applications } = await supabase
     .from('applications')
-    .select('*, job:jobs(id, title, department:departments(name)), locker:profiles!applications_locked_by_fkey(full_name, email), interviews:interviews(id, scheduled_at, status), recruiter_remarks, recruiter_remarks_updated_at, hm_remarks, hm_remarks_updated_at')
+    .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager:profiles!jobs_hiring_manager_id_fkey(email, full_name)), locker:profiles!applications_locked_by_fkey(full_name, email), interviews:interviews(id, scheduled_at, status), recruiter_remarks, recruiter_remarks_updated_at, hm_remarks, hm_remarks_updated_at')
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
 
@@ -335,6 +336,30 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
                       </span>
                     </div>
                   </div>
+                  
+                  {/* Application Actions (Schedule Interview, Move Stage, etc.) */}
+                  {currentUserProfile && ['admin', 'recruiter', 'hiring_manager'].includes(currentUserProfile.role) && (
+                    <CandidateApplicationActionsWrapper
+                      application={{
+                        ...application,
+                        candidate: {
+                          email: candidate.email,
+                          full_name: candidate.full_name,
+                          current_salary: candidate.current_salary,
+                          current_salary_currency: candidate.current_salary_currency,
+                          expected_salary: candidate.expected_salary,
+                          expected_salary_currency: candidate.expected_salary_currency,
+                          notice_period_days: candidate.notice_period_days,
+                          nationality: candidate.nationality,
+                        },
+                        job: application.job ? {
+                          ...application.job,
+                          hiring_manager: (application.job as any).hiring_manager,
+                        } : undefined,
+                      }}
+                      currentUser={currentUserProfile}
+                    />
+                  )}
                   
                   {/* Remarks for this application */}
                   {currentUserProfile && (

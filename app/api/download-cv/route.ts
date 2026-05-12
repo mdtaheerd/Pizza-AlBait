@@ -81,11 +81,18 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'CV not found' }, { status: 404 })
       }
 
-      // Check if it's a Vercel Blob URL (starts with cvs/)
-      if (candidate.resume_url.startsWith('cvs/')) {
-        // It's a Vercel Blob pathname, use Blob to download
+      const resumeUrl = candidate.resume_url
+      fileName = candidate.cv_filename || 'resume.pdf'
+
+      // Check if it's a Vercel Blob URL (contains blob.vercel-storage.com)
+      if (resumeUrl.includes('.blob.vercel-storage.com')) {
+        // It's a Vercel Blob URL - extract pathname and use Blob to download
         try {
-          const result = await get(candidate.resume_url, {
+          // Extract the pathname from the full URL (e.g., cvs/1234_file.pdf)
+          const url = new URL(resumeUrl)
+          const blobPathname = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname
+
+          const result = await get(blobPathname, {
             access: 'private',
           })
 
@@ -95,8 +102,47 @@ export async function GET(request: NextRequest) {
 
           return new NextResponse(result.stream, {
             headers: {
-              'Content-Type': result.blob.contentType,
-              'Content-Disposition': `attachment; filename="${candidate.cv_filename || 'cv.pdf'}"`,
+              'Content-Type': result.blob.contentType || 'application/pdf',
+              'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`,
+              'Cache-Control': 'private, no-cache',
+            },
+          })
+        } catch (blobError) {
+          console.error('[v0] Blob download error:', blobError)
+          // Fallback: try to fetch directly from the URL
+          try {
+            const directResponse = await fetch(resumeUrl)
+            if (directResponse.ok) {
+              const buffer = await directResponse.arrayBuffer()
+              return new NextResponse(buffer, {
+                headers: {
+                  'Content-Type': directResponse.headers.get('content-type') || 'application/pdf',
+                  'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`,
+                },
+              })
+            }
+          } catch (fetchError) {
+            console.error('[v0] Direct fetch error:', fetchError)
+          }
+          return NextResponse.json({ error: 'Failed to download file' }, { status: 500 })
+        }
+      }
+
+      // Check if it's a Vercel Blob pathname (starts with cvs/)
+      if (resumeUrl.startsWith('cvs/')) {
+        try {
+          const result = await get(resumeUrl, {
+            access: 'private',
+          })
+
+          if (!result) {
+            return new NextResponse('File not found', { status: 404 })
+          }
+
+          return new NextResponse(result.stream, {
+            headers: {
+              'Content-Type': result.blob.contentType || 'application/pdf',
+              'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`,
               'Cache-Control': 'private, no-cache',
             },
           })
@@ -107,11 +153,10 @@ export async function GET(request: NextRequest) {
       }
 
       // Legacy Supabase Storage URL
-      const urlParts = candidate.resume_url.split('/storage/v1/object/public/cvs/')
+      const urlParts = resumeUrl.split('/storage/v1/object/public/cvs/')
       if (urlParts.length > 1) {
         cvPath = urlParts[1]
       }
-      fileName = candidate.cv_filename || 'resume.pdf'
     }
 
     if (!cvPath) {
