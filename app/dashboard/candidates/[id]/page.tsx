@@ -48,15 +48,46 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
 
   const { data: applications, error: applicationsError } = await supabase
     .from('applications')
-    .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager:profiles!jobs_hiring_manager_id_fkey(email, full_name)), locker:profiles!applications_locked_by_fkey(full_name, email), interviews:interviews(id, scheduled_at, status), recruiter_remarks, recruiter_remarks_updated_at, hm_remarks, hm_remarks_updated_at')
+    .select(`
+      *,
+      job:jobs(
+        id, 
+        title, 
+        department:departments(id, name), 
+        salary_min, 
+        salary_max, 
+        salary_currency, 
+        created_by,
+        hiring_manager_id
+      ),
+      interviews:interviews(id, scheduled_at, status)
+    `)
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
 
-  // Debug: Log applications query result
-  if (applicationsError) {
-    console.error('[v0] Applications query error:', applicationsError)
-  }
-  console.log('[v0] Applications for candidate', id, ':', applications?.length ?? 0, 'found')
+  // Fetch locker and hiring manager profiles separately to avoid join issues
+  const lockerIds = [...new Set((applications || []).map(a => a.locked_by).filter(Boolean))]
+  const hmIds = [...new Set((applications || []).map(a => a.job?.hiring_manager_id).filter(Boolean))]
+  const allProfileIds = [...new Set([...lockerIds, ...hmIds])]
+  
+  const { data: relatedProfiles } = allProfileIds.length > 0
+    ? await supabase.from('profiles').select('id, full_name, email').in('id', allProfileIds)
+    : { data: [] }
+  
+  const profileMap = (relatedProfiles || []).reduce((acc, p) => {
+    acc[p.id] = p
+    return acc
+  }, {} as Record<string, { id: string; full_name: string; email: string }>)
+  
+  // Enrich applications with profile data
+  const enrichedApplications = (applications || []).map(app => ({
+    ...app,
+    locker: app.locked_by ? profileMap[app.locked_by] : null,
+    job: app.job ? {
+      ...app.job,
+      hiring_manager: app.job.hiring_manager_id ? profileMap[app.job.hiring_manager_id] : null
+    } : null
+  }))
 
   // Fetch candidate history
   const { data: history } = await supabase
@@ -82,7 +113,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   }))
 
   // Check if candidate has any rejected or declined applications (available for reconsideration)
-  const hasRejectedApplications = applications?.some(
+  const hasRejectedApplications = enrichedApplications?.some(
     (app) => app.stage === 'rejected' || app.lock_status === 'released'
   )
 
@@ -149,7 +180,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
       )}
 
       {/* Multiple Applications Info */}
-      {applications && applications.length > 1 && (
+      {enrichedApplications && enrichedApplications.length > 1 && (
         <Card className="border-blue-200 bg-blue-50">
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
@@ -161,7 +192,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
                   Multi-Position Candidate
                 </p>
                 <p className="text-sm text-blue-700">
-                  This candidate has applied to <strong>{applications.length} positions</strong>.
+                  This candidate has applied to <strong>{enrichedApplications.length} positions</strong>.
                   {candidate.is_globally_locked && ' Currently locked for one position.'}
                 </p>
               </div>
@@ -277,7 +308,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
       {/* Applications */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Applications ({applications?.length || 0})</CardTitle>
+          <CardTitle>Applications ({enrichedApplications?.length || 0})</CardTitle>
           <Button variant="outline" size="sm" asChild>
             <Link href={`/dashboard/candidates/${candidate.id}/apply`}>
               <Plus className="mr-2 h-4 w-4" />
@@ -286,13 +317,13 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
           </Button>
         </CardHeader>
         <CardContent>
-          {(applications || []).length === 0 ? (
+          {(enrichedApplications || []).length === 0 ? (
             <p className="text-sm text-muted-foreground">
               This candidate has not applied to any jobs yet.
             </p>
           ) : (
             <div className="space-y-3">
-              {(applications as Application[]).map((application) => (
+              {(enrichedApplications as Application[]).map((application) => (
                 <div key={application.id} className="space-y-3">
                   <div className="flex items-center justify-between rounded-lg border p-4">
                     <div>
