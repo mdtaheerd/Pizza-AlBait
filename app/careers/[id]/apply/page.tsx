@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { CareersHeader } from '@/components/careers/careers-header'
@@ -12,6 +12,12 @@ interface ApplyPageProps {
 export default async function ApplyPage({ params }: ApplyPageProps) {
   const { id } = await params
   const supabase = await createClient()
+
+  // Check if user is authenticated - redirect to registration if not
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    redirect(`/candidate/register?redirect=/careers/${id}/apply`)
+  }
 
   const { data: job, error } = await supabase
     .from('jobs')

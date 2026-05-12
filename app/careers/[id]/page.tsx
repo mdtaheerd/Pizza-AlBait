@@ -16,11 +16,8 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const { id } = await params
   const supabase = await createClient()
 
-  // Check if user is authenticated - redirect to registration if not
+  // Get user if authenticated (for showing apply button state)
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    redirect(`/candidate/register?redirect=/careers/${id}`)
-  }
 
   const { data: job, error } = await supabase
     .from('jobs')
@@ -136,7 +133,9 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
 
           {/* Apply Button */}
           <Button size="lg" asChild>
-            <Link href={`/careers/${id}/apply`}>Apply for this position</Link>
+            <Link href={user ? `/careers/${id}/apply` : `/candidate/register?redirect=/careers/${id}/apply`}>
+              Apply for this position
+            </Link>
           </Button>
 
           {/* Job Description */}
@@ -224,14 +223,16 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               <p className="mt-2 text-primary-foreground/80">
                 {"We'd love to hear from you. Submit your application today."}
               </p>
-              <Button
-                size="lg"
-                variant="secondary"
-                className="mt-6"
-                asChild
-              >
-                <Link href={`/careers/${id}/apply`}>Apply Now</Link>
-              </Button>
+<Button
+              size="lg"
+              variant="secondary"
+              className="mt-6"
+              asChild
+            >
+              <Link href={user ? `/careers/${id}/apply` : `/candidate/register?redirect=/careers/${id}/apply`}>
+                Apply Now
+              </Link>
+            </Button>
             </CardContent>
           </Card>
         </div>
