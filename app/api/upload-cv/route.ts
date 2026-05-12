@@ -1,4 +1,4 @@
-import { put } from '@vercel/blob'
+import { put, del } from '@vercel/blob'
 import { NextRequest, NextResponse } from 'next/server'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
@@ -7,9 +7,21 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const file = formData.get('cv') as File
+    const oldUrl = formData.get('oldUrl') as string | null
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+    }
+
+    // Delete old CV if provided (only keep most recent)
+    if (oldUrl && oldUrl.includes('.blob.vercel-storage.com')) {
+      try {
+        await del(oldUrl)
+        console.log('[v0] Deleted old CV:', oldUrl)
+      } catch (delError) {
+        // Log but don't fail if deletion fails
+        console.error('[v0] Failed to delete old CV:', delError)
+      }
     }
 
     // Validate file type
