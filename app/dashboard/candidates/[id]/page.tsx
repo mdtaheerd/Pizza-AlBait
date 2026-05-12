@@ -36,10 +36,6 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
     .eq('id', user.id)
     .single() : { data: null }
 
-  // Debug: Log current user info
-  console.log('[v0] Current user:', user?.id)
-  console.log('[v0] User profile role:', currentUserProfile?.role, 'approval_status:', currentUserProfile?.approval_status)
-
   const { data: candidate, error } = await supabase
     .from('candidates')
     .select('*, global_locker:profiles!candidates_global_locked_by_fkey(full_name, email), locked_job:jobs!candidates_global_lock_job_id_fkey(title)')
@@ -68,13 +64,6 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
     `)
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
-
-  // Debug logging
-  console.log('[v0] Candidate ID:', id)
-  console.log('[v0] Applications query result:', applications?.length ?? 0, 'applications')
-  if (applicationsError) {
-    console.error('[v0] Applications query error:', applicationsError)
-  }
 
   // Fetch locker and hiring manager profiles separately to avoid join issues
   const lockerIds = [...new Set((applications || []).map(a => a.locked_by).filter(Boolean))]
