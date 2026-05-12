@@ -4,14 +4,6 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { 
   Home, 
   Briefcase, 
@@ -20,16 +12,15 @@ import {
   LogOut, 
   MapPin, 
   Calendar,
-  ExternalLink,
-  Clock
+  ExternalLink
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { format } from 'date-fns'
-import { STAGE_LABELS, STAGE_COLORS, EMPLOYMENT_TYPE_LABELS } from '@/lib/types'
-import type { Candidate, Job, Application, ApplicationStage, EmploymentType } from '@/lib/types'
+import { EMPLOYMENT_TYPE_LABELS } from '@/lib/types'
+import type { Candidate, Job, Application, EmploymentType } from '@/lib/types'
 
 interface CandidateDashboardClientProps {
   candidate: (Candidate & {
@@ -114,30 +105,8 @@ export function CandidateDashboardClient({ candidate, openJobs, userEmail }: Can
           </p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-3 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{candidate?.applications?.length || 0}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {candidate?.applications?.filter(a => 
-                  !['hired', 'rejected'].includes(a.stage)
-                ).length || 0}
-              </div>
-            </CardContent>
-          </Card>
+        {/* Stats Card */}
+        <div className="grid gap-4 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Available Jobs</CardTitle>
@@ -145,72 +114,10 @@ export function CandidateDashboardClient({ candidate, openJobs, userEmail }: Can
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{availableJobs.length}</div>
+              <p className="text-xs text-muted-foreground mt-1">Open positions you can apply to</p>
             </CardContent>
           </Card>
         </div>
-
-        {/* My Applications */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              My Applications
-            </CardTitle>
-            <CardDescription>
-              Track the status of your job applications
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {candidate?.applications && candidate.applications.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Job Title</TableHead>
-                    <TableHead className="hidden md:table-cell">Department</TableHead>
-                    <TableHead className="hidden sm:table-cell">Applied On</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {candidate.applications.map((application) => (
-                    <TableRow key={application.id}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{application.job?.title}</p>
-                          <p className="text-sm text-muted-foreground flex items-center gap-1 md:hidden">
-                            {application.job?.department?.name}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {application.job?.department?.name || '-'}
-                      </TableCell>
-                      <TableCell className="hidden sm:table-cell">
-                        {format(new Date(application.applied_at), 'MMM d, yyyy')}
-                      </TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant="secondary" 
-                          className={STAGE_COLORS[application.stage as ApplicationStage]}
-                        >
-                          {STAGE_LABELS[application.stage as ApplicationStage]}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>You haven&apos;t applied to any jobs yet.</p>
-                <Button asChild className="mt-4">
-                  <Link href="/careers">Browse Open Positions</Link>
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
 
         {/* Available Jobs */}
         <Card>

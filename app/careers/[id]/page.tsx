@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,12 @@ interface JobDetailPageProps {
 export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const { id } = await params
   const supabase = await createClient()
+
+  // Check if user is authenticated - redirect to registration if not
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    redirect(`/candidate/register?redirect=/careers/${id}`)
+  }
 
   const { data: job, error } = await supabase
     .from('jobs')

@@ -157,10 +157,9 @@ export function CandidatesTable({ candidates }: CandidatesTableProps) {
                   <div className="flex gap-2">
                     {candidate.resume_url && (
                       <a
-                        href={candidate.resume_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href={`/api/download-cv?candidateId=${candidate.id}`}
                         className="text-muted-foreground hover:text-foreground"
+                        title="Download CV"
                       >
                         <FileText className="h-4 w-4" />
                       </a>

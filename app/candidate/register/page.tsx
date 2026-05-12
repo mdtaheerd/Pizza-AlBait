@@ -50,11 +50,18 @@ export default function CandidateRegisterPage() {
     password: '',
     confirmPassword: '',
     full_name: '',
+    gender: '',
     country_code: '+971',
     phone: '',
+    whatsapp_number: '',
     home_country_code: '+91',
     home_country_phone: '',
     nationality: '',
+    current_location: '',
+    current_company: '',
+    current_job_title: '',
+    referral_type: '' as 'cpecc_employee' | 'adnoc' | 'none' | '',
+    referral_name: '',
     current_salary: '',
     current_salary_currency: 'AED' as SalaryCurrency,
     expected_salary: '',
@@ -68,8 +75,22 @@ export default function CandidateRegisterPage() {
     setError(null)
 
     // Validate required fields
-    if (!formData.email || !formData.password || !formData.full_name || !formData.phone) {
+    if (!formData.email || !formData.password || !formData.full_name || !formData.phone || !formData.gender || !formData.nationality) {
       setError('Please fill in all required fields')
+      setIsLoading(false)
+      return
+    }
+
+    // Validate new mandatory fields
+    if (!formData.whatsapp_number || !formData.current_location || !formData.current_company || !formData.current_job_title || !formData.referral_type) {
+      setError('Please fill in all required fields including WhatsApp, current location, company, job title and referral')
+      setIsLoading(false)
+      return
+    }
+
+    // Validate referral name if referral type is not 'none'
+    if (formData.referral_type !== 'none' && !formData.referral_name) {
+      setError('Please provide the referral name')
       setIsLoading(false)
       return
     }
@@ -142,11 +163,18 @@ export default function CandidateRegisterPage() {
         .insert({
           email: formData.email,
           full_name: formData.full_name,
+          gender: formData.gender,
           country_code: formData.country_code,
           phone: formData.phone,
+          whatsapp_number: formData.whatsapp_number,
           home_country_code: formData.home_country_code,
           home_country_phone: formData.home_country_phone,
-          nationality: formData.nationality || null,
+          nationality: formData.nationality,
+          current_location: formData.current_location,
+          current_company: formData.current_company,
+          current_job_title: formData.current_job_title,
+          referral_type: formData.referral_type,
+          referral_name: formData.referral_type !== 'none' ? formData.referral_name : null,
           current_salary: parseFloat(formData.current_salary),
           current_salary_currency: formData.current_salary_currency,
           expected_salary: parseFloat(formData.expected_salary),
@@ -208,14 +236,33 @@ export default function CandidateRegisterPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Basic Info */}
               <div className="space-y-2">
-                <Label htmlFor="full_name">Full Name *</Label>
+                <Label htmlFor="full_name">Full Name (as per Passport) *</Label>
                 <Input
                   id="full_name"
                   value={formData.full_name}
-                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                  placeholder="Enter your full name"
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value.toUpperCase() })}
+                  placeholder="JOHN DOE"
+                  className="uppercase"
                   required
                 />
+                <p className="text-xs text-muted-foreground">Enter your name exactly as it appears on your passport</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="gender">Gender *</Label>
+                <Select
+                  value={formData.gender}
+                  onValueChange={(value) => setFormData({ ...formData, gender: value })}
+                  required
+                >
+                  <SelectTrigger id="gender">
+                    <SelectValue placeholder="Select gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Male">Male</SelectItem>
+                    <SelectItem value="Female">Female</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -286,6 +333,19 @@ export default function CandidateRegisterPage() {
                 </div>
               </div>
 
+              {/* WhatsApp Number */}
+              <div className="space-y-2">
+                <Label htmlFor="whatsapp_number">WhatsApp Number *</Label>
+                <Input
+                  id="whatsapp_number"
+                  type="tel"
+                  value={formData.whatsapp_number}
+                  onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
+                  placeholder="+971 50 123 4567"
+                  required
+                />
+              </div>
+
               {/* Home Country Phone - Mandatory */}
               <div className="space-y-2">
                 <Label htmlFor="home_country_phone">Home Country Contact Number *</Label>
@@ -322,7 +382,7 @@ export default function CandidateRegisterPage() {
 
               {/* Nationality - Searchable Combobox */}
               <div className="space-y-2">
-                <Label>Nationality (Optional)</Label>
+                <Label>Nationality *</Label>
                 <Popover open={nationalityOpen} onOpenChange={setNationalityOpen}>
                   <PopoverTrigger asChild>
                     <Button
@@ -364,6 +424,76 @@ export default function CandidateRegisterPage() {
                     </Command>
                   </PopoverContent>
                 </Popover>
+              </div>
+
+              {/* Current Location */}
+              <div className="space-y-2">
+                <Label htmlFor="current_location">Current Location *</Label>
+                <Input
+                  id="current_location"
+                  value={formData.current_location}
+                  onChange={(e) => setFormData({ ...formData, current_location: e.target.value })}
+                  placeholder="Dubai, UAE"
+                  required
+                />
+              </div>
+
+              {/* Current Company & Job Title */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="current_company">Current Company *</Label>
+                  <Input
+                    id="current_company"
+                    value={formData.current_company}
+                    onChange={(e) => setFormData({ ...formData, current_company: e.target.value })}
+                    placeholder="Company Name"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="current_job_title">Current Job Title *</Label>
+                  <Input
+                    id="current_job_title"
+                    value={formData.current_job_title}
+                    onChange={(e) => setFormData({ ...formData, current_job_title: e.target.value })}
+                    placeholder="Your current position"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Referral Section */}
+              <div className="space-y-4 pt-2 border-t">
+                <div className="space-y-2 pt-2">
+                  <Label htmlFor="referral_type">Referral *</Label>
+                  <Select
+                    value={formData.referral_type}
+                    onValueChange={(value) => setFormData({ ...formData, referral_type: value as 'cpecc_employee' | 'adnoc' | 'none', referral_name: value === 'none' ? '' : formData.referral_name })}
+                    required
+                  >
+                    <SelectTrigger id="referral_type">
+                      <SelectValue placeholder="Select referral type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cpecc_employee">CPECC Employee</SelectItem>
+                      <SelectItem value="adnoc">ADNOC</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {(formData.referral_type === 'cpecc_employee' || formData.referral_type === 'adnoc') && (
+                  <div className="space-y-2">
+                    <Label htmlFor="referral_name">Referral Name *</Label>
+                    <Input
+                      id="referral_name"
+                      value={formData.referral_name}
+                      onChange={(e) => setFormData({ ...formData, referral_name: e.target.value })}
+                      placeholder={formData.referral_type === 'cpecc_employee' ? "CPECC employee's name" : "ADNOC contact's name"}
+                      required
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Salary & Notice Period - Mandatory */}

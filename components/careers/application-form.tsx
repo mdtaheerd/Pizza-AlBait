@@ -92,11 +92,17 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
     full_name: '',
     email: '',
     phone: '',
+    whatsapp_number: '',
     linkedin_url: '',
     portfolio_url: '',
     cover_letter: '',
     gender: '',
     nationality: '',
+    current_location: '',
+    current_company: '',
+    current_job_title: '',
+    referral_type: '' as 'cpecc_employee' | 'adnoc' | 'none' | '',
+    referral_name: '',
   })
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -196,17 +202,18 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
         // Update candidate with new info (including CV, gender, nationality if provided)
         const updateData: Record<string, unknown> = {
           // Always update these fields if provided in the form
+          full_name: formData.full_name,
           phone: formData.phone || null,
+          whatsapp_number: formData.whatsapp_number || null,
           linkedin_url: formData.linkedin_url || null,
           portfolio_url: formData.portfolio_url || null,
-        }
-        
-        // Update gender and nationality if provided (they might not exist for old candidates)
-        if (formData.gender) {
-          updateData.gender = formData.gender
-        }
-        if (formData.nationality) {
-          updateData.nationality = formData.nationality
+          current_location: formData.current_location || null,
+          current_company: formData.current_company || null,
+          current_job_title: formData.current_job_title || null,
+          referral_type: formData.referral_type || null,
+          referral_name: formData.referral_name || null,
+          gender: formData.gender || null,
+          nationality: formData.nationality || null,
         }
         
         // Update CV info if uploaded
@@ -233,10 +240,16 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
             full_name: formData.full_name,
             email: formData.email,
             phone: formData.phone || null,
+            whatsapp_number: formData.whatsapp_number || null,
             linkedin_url: formData.linkedin_url || null,
             portfolio_url: formData.portfolio_url || null,
             gender: formData.gender,
             nationality: formData.nationality,
+            current_location: formData.current_location || null,
+            current_company: formData.current_company || null,
+            current_job_title: formData.current_job_title || null,
+            referral_type: formData.referral_type || null,
+            referral_name: formData.referral_name || null,
             source: 'career_page',
             resume_url: uploadedCvUrl || null,
             cv_uploaded_at: uploadedCvUrl ? new Date().toISOString() : null,
@@ -309,14 +322,16 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="full_name">Full Name *</Label>
+              <Label htmlFor="full_name">Full Name (as per Passport) *</Label>
               <Input
                 id="full_name"
                 value={formData.full_name}
-                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                placeholder="John Doe"
+                onChange={(e) => setFormData({ ...formData, full_name: e.target.value.toUpperCase() })}
+                placeholder="JOHN DOE"
+                className="uppercase"
                 required
               />
+              <p className="text-xs text-muted-foreground">Enter your name exactly as it appears on your passport</p>
             </div>
 
             <div className="space-y-2">
@@ -334,13 +349,39 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone">Phone Number *</Label>
               <Input
                 id="phone"
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 placeholder="+971 50 123 4567"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="whatsapp_number">WhatsApp Number *</Label>
+              <Input
+                id="whatsapp_number"
+                type="tel"
+                value={formData.whatsapp_number}
+                onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
+                placeholder="+971 50 123 4567"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="current_location">Current Location *</Label>
+              <Input
+                id="current_location"
+                value={formData.current_location}
+                onChange={(e) => setFormData({ ...formData, current_location: e.target.value })}
+                placeholder="Dubai, UAE"
+                required
               />
             </div>
 
@@ -354,6 +395,64 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
                 placeholder="https://linkedin.com/in/johndoe"
               />
             </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="current_company">Current Company *</Label>
+              <Input
+                id="current_company"
+                value={formData.current_company}
+                onChange={(e) => setFormData({ ...formData, current_company: e.target.value })}
+                placeholder="Company Name"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="current_job_title">Current Job Title *</Label>
+              <Input
+                id="current_job_title"
+                value={formData.current_job_title}
+                onChange={(e) => setFormData({ ...formData, current_job_title: e.target.value })}
+                placeholder="Your current position"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Referral Section */}
+          <div className="space-y-4 border-t pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="referral_type">Referral *</Label>
+              <Select
+                value={formData.referral_type}
+                onValueChange={(value) => setFormData({ ...formData, referral_type: value as 'cpecc_employee' | 'adnoc' | 'none', referral_name: value === 'none' ? '' : formData.referral_name })}
+                required
+              >
+                <SelectTrigger id="referral_type">
+                  <SelectValue placeholder="Select referral type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cpecc_employee">CPECC Employee</SelectItem>
+                  <SelectItem value="adnoc">ADNOC</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {(formData.referral_type === 'cpecc_employee' || formData.referral_type === 'adnoc') && (
+              <div className="space-y-2">
+                <Label htmlFor="referral_name">Referral Name *</Label>
+                <Input
+                  id="referral_name"
+                  value={formData.referral_name}
+                  onChange={(e) => setFormData({ ...formData, referral_name: e.target.value })}
+                  placeholder={formData.referral_type === 'cpecc_employee' ? "CPECC employee's name" : "ADNOC contact's name"}
+                  required
+                />
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -510,7 +609,7 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
             type="submit" 
             size="lg" 
             className="w-full" 
-            disabled={isLoading || isUploading || !cvFile || !formData.gender || !formData.nationality}
+            disabled={isLoading || isUploading || !cvFile || !formData.gender || !formData.nationality || !formData.current_location || !formData.current_company || !formData.current_job_title || !formData.referral_type || !formData.whatsapp_number || (formData.referral_type !== 'none' && !formData.referral_name)}
           >
             {isUploading ? (
               <>

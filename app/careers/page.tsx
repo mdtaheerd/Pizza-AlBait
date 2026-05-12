@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -15,6 +16,12 @@ interface CareersPageProps {
 export default async function CareersPage({ searchParams }: CareersPageProps) {
   const { search, department } = await searchParams
   const supabase = await createClient()
+  
+  // Check if user is authenticated - redirect to registration if not
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    redirect('/candidate/register?redirect=/careers')
+  }
 
   const { data: departments } = await supabase
     .from('departments')
