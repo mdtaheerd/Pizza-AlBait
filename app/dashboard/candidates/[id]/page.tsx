@@ -46,11 +46,17 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
     notFound()
   }
 
-  const { data: applications } = await supabase
+  const { data: applications, error: applicationsError } = await supabase
     .from('applications')
     .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager:profiles!jobs_hiring_manager_id_fkey(email, full_name)), locker:profiles!applications_locked_by_fkey(full_name, email), interviews:interviews(id, scheduled_at, status), recruiter_remarks, recruiter_remarks_updated_at, hm_remarks, hm_remarks_updated_at')
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
+
+  // Debug: Log applications query result
+  if (applicationsError) {
+    console.error('[v0] Applications query error:', applicationsError)
+  }
+  console.log('[v0] Applications for candidate', id, ':', applications?.length ?? 0, 'found')
 
   // Fetch candidate history
   const { data: history } = await supabase
