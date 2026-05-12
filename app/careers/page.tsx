@@ -241,11 +241,6 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
                       </span>
                     )}
                   </div>
-                  {job.description && (
-                    <p className="mt-4 line-clamp-2 text-sm text-muted-foreground leading-relaxed">
-                      {job.description}
-                    </p>
-                  )}
                 </CardContent>
               </Card>
             ))}
