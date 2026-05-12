@@ -232,7 +232,7 @@ export default function SignUpPage() {
                         <SelectValue placeholder="Select your role" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="recruiter">Recruiter</SelectItem>
+                        <SelectItem value="recruiter">Recruiter/HRBP</SelectItem>
                         <SelectItem value="hiring_manager">Hiring Manager</SelectItem>
                         <SelectItem value="admin">Admin</SelectItem>
                       </SelectContent>

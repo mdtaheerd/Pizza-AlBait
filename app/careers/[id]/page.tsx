@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { MapPin, Clock, Banknote, ArrowLeft, Building2, User, FolderOpen } from 'lucide-react'
+import { MapPin, Clock, Banknote, ArrowLeft, Building2, User, FolderOpen, CalendarClock } from 'lucide-react'
 import Link from 'next/link'
 import { EMPLOYMENT_TYPE_LABELS, CURRENCY_OPTIONS, type SalaryCurrency } from '@/lib/types'
 import { CareersHeader } from '@/components/careers/careers-header'
@@ -105,7 +105,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                 </span>
               )}
             </div>
-            {/* Project and Recruiter Info */}
+            {/* Project, Recruiter and Closing Date Info */}
             <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground border-t pt-4">
               {job.project_name && (
                 <span className="flex items-center gap-1">
@@ -116,7 +116,13 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               {recruiterName && (
                 <span className="flex items-center gap-1">
                   <User className="h-4 w-4" />
-                  <span className="font-medium">Recruiter:</span> {recruiterName}
+                  <span className="font-medium">Recruiter/HRBP:</span> {recruiterName}
+                </span>
+              )}
+              {job.closing_date && (
+                <span className="flex items-center gap-1 text-amber-600">
+                  <CalendarClock className="h-4 w-4" />
+                  <span className="font-medium">Closing Date:</span> {new Date(job.closing_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                 </span>
               )}
             </div>
