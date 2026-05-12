@@ -155,13 +155,13 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="recruiter">Recruiter</Label>
+              <Label htmlFor="recruiter">Recruiter/HRBP</Label>
               <Select
                 value={formData.recruiter_id}
                 onValueChange={(value) => setFormData({ ...formData, recruiter_id: value })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select recruiter" />
+                  <SelectValue placeholder="Select Recruiter/HRBP" />
                 </SelectTrigger>
                 <SelectContent>
                   {recruiters.map((recruiter) => (

@@ -46,7 +46,7 @@ export function CareersHeader() {
             <Linkedin className="h-5 w-5" />
           </a>
           <Button asChild className="bg-red-600 hover:bg-red-700">
-            <Link href="/auth/login">Recruiter Login</Link>
+            <Link href="/auth/login">Recruiter/HRBP Login</Link>
           </Button>
         </nav>
       </div>

@@ -30,7 +30,7 @@ export default async function UsersPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">User Management</h1>
         <p className="text-muted-foreground">
-          Approve or reject recruiter and hiring manager registrations
+          Approve or reject Recruiter/HRBP and Hiring Manager registrations
         </p>
       </div>
       

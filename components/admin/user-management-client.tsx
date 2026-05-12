@@ -55,6 +55,20 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
   const approvedUsers = users.filter(u => u.approval_status === 'approved')
   const rejectedUsers = users.filter(u => u.approval_status === 'rejected')
 
+  // Helper to display user-friendly role names
+  const getRoleDisplayName = (role: string) => {
+    switch (role) {
+      case 'recruiter':
+        return 'Recruiter/HRBP'
+      case 'hiring_manager':
+        return 'Hiring Manager'
+      case 'admin':
+        return 'Admin'
+      default:
+        return role.replace('_', ' ')
+    }
+  }
+
   const filterUsers = (userList: Profile[]) => {
     if (!searchQuery) return userList
     const query = searchQuery.toLowerCase()
@@ -207,7 +221,7 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
             <TableRow key={user.id}>
               <TableCell className="font-medium">{user.full_name || 'N/A'}</TableCell>
               <TableCell>{user.email}</TableCell>
-              <TableCell className="capitalize">{user.role.replace('_', ' ')}</TableCell>
+              <TableCell>{getRoleDisplayName(user.role)}</TableCell>
               <TableCell>
                 <Badge className={APPROVAL_STATUS_COLORS[user.approval_status]}>
                   {APPROVAL_STATUS_LABELS[user.approval_status]}

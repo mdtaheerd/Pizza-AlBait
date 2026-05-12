@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { MapPin, Clock, Banknote, Search, HardHat, ArrowRight, Users, Briefcase, Shield, Linkedin, Globe } from 'lucide-react'
+import { MapPin, Clock, Banknote, Search, HardHat, ArrowRight, Users, Briefcase, Shield, Linkedin, Globe, CalendarClock, User } from 'lucide-react'
 import { EMPLOYMENT_TYPE_LABELS } from '@/lib/types'
 import Link from 'next/link'
 import { CareersSearch } from '@/components/careers/careers-search'
@@ -25,7 +25,8 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
     .from('jobs')
     .select(`
       *,
-      department:departments(id, name)
+      department:departments(id, name),
+      recruiter:profiles!jobs_recruiter_id_fkey(full_name)
     `)
     .eq('status', 'open')
     .order('published_at', { ascending: false })
@@ -77,7 +78,7 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
               <Link href="/">Home</Link>
             </Button>
             <Button asChild className="rounded-xl shadow-md bg-red-600 hover:bg-red-700">
-              <Link href="/auth/login">Recruiter Login</Link>
+              <Link href="/auth/login">Recruiter/HRBP Login</Link>
             </Button>
           </div>
         </div>
@@ -215,6 +216,21 @@ export default async function CareersPage({ searchParams }: CareersPageProps) {
                       <span className="flex items-center gap-1.5">
                         <Banknote className="h-4 w-4" />
                         {formatSalary(job.salary_min, job.salary_max)}
+                      </span>
+                    )}
+                  </div>
+                  {/* Closing Date and Recruiter/HRBP */}
+                  <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
+                    {job.closing_date && (
+                      <span className="flex items-center gap-1.5 text-amber-600">
+                        <CalendarClock className="h-4 w-4" />
+                        Closes: {new Date(job.closing_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    )}
+                    {job.recruiter?.full_name && (
+                      <span className="flex items-center gap-1.5 text-muted-foreground">
+                        <User className="h-4 w-4" />
+                        Recruiter/HRBP: {job.recruiter.full_name}
                       </span>
                     )}
                   </div>

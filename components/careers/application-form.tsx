@@ -21,6 +21,63 @@ interface ApplicationFormProps {
   jobTitle: string
 }
 
+// Common nationalities for the dropdown
+const NATIONALITIES = [
+  'Emirati',
+  'Saudi',
+  'Qatari',
+  'Kuwaiti',
+  'Bahraini',
+  'Omani',
+  'Egyptian',
+  'Jordanian',
+  'Lebanese',
+  'Syrian',
+  'Iraqi',
+  'Palestinian',
+  'Yemeni',
+  'Sudanese',
+  'Moroccan',
+  'Algerian',
+  'Tunisian',
+  'Libyan',
+  'Indian',
+  'Pakistani',
+  'Bangladeshi',
+  'Sri Lankan',
+  'Nepali',
+  'Filipino',
+  'Indonesian',
+  'Malaysian',
+  'Thai',
+  'Vietnamese',
+  'Chinese',
+  'Japanese',
+  'Korean',
+  'British',
+  'American',
+  'Canadian',
+  'Australian',
+  'French',
+  'German',
+  'Italian',
+  'Spanish',
+  'Dutch',
+  'Russian',
+  'Turkish',
+  'Iranian',
+  'Afghan',
+  'South African',
+  'Nigerian',
+  'Kenyan',
+  'Ghanaian',
+  'Ethiopian',
+  'Brazilian',
+  'Mexican',
+  'Colombian',
+  'Argentine',
+]
+
 export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -29,6 +86,7 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [cvFile, setCvFile] = useState<File | null>(null)
   const [cvUrl, setCvUrl] = useState<string | null>(null)
+  const [showOtherNationality, setShowOtherNationality] = useState(false)
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -329,13 +387,55 @@ export function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
 
             <div className="space-y-2">
               <Label htmlFor="nationality">Nationality *</Label>
-              <Input
-                id="nationality"
-                value={formData.nationality}
-                onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
-                placeholder="e.g., Indian, Pakistani, Filipino"
-                required
-              />
+              {!showOtherNationality ? (
+                <Select
+                  value={formData.nationality}
+                  onValueChange={(value) => {
+                    if (value === 'other') {
+                      setShowOtherNationality(true)
+                      setFormData({ ...formData, nationality: '' })
+                    } else {
+                      setFormData({ ...formData, nationality: value })
+                    }
+                  }}
+                  required
+                >
+                  <SelectTrigger id="nationality">
+                    <SelectValue placeholder="Select nationality" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {NATIONALITIES.map((nationality) => (
+                      <SelectItem key={nationality} value={nationality}>
+                        {nationality}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="other" className="text-muted-foreground">
+                      Other (specify)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="flex gap-2">
+                  <Input
+                    id="nationality"
+                    value={formData.nationality}
+                    onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
+                    placeholder="Enter your nationality"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      setShowOtherNationality(false)
+                      setFormData({ ...formData, nationality: '' })
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
