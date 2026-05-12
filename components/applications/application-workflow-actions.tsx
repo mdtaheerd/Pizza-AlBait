@@ -39,7 +39,8 @@ import {
   Send,
   Briefcase,
   Clock,
-  CalendarClock
+  CalendarClock,
+  Mail
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
@@ -92,6 +93,8 @@ export function ApplicationWorkflowActions({
   const [interviewerName, setInterviewerName] = useState('')
   const [interviewerEmail, setInterviewerEmail] = useState('')
   const [rejectionComments, setRejectionComments] = useState('')
+  const [rejectionReason, setRejectionReason] = useState<'screening' | 'interview' | 'noshow' | 'general'>('general')
+  const [sendRejectionEmail, setSendRejectionEmail] = useState(true)
   const [recruiterComments, setRecruiterComments] = useState('')
   const [hiringManagerComments, setHiringManagerComments] = useState('')
   const [interviewResult, setInterviewResult] = useState<'hire' | 'reject'>('hire')
@@ -271,17 +274,19 @@ export function ApplicationWorkflowActions({
 
       if (error) throw error
 
-      // Send rejection email
-      await fetch('/api/send-rejection-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          candidateEmail: application.candidate?.email,
-          candidateName: application.candidate?.full_name,
-          jobTitle: application.job?.title,
-          reason: rejectionComments,
-        }),
-      })
+      // Send rejection email if option is selected
+      if (sendRejectionEmail && application.candidate?.email) {
+        await fetch('/api/send-rejection-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            candidateEmail: application.candidate?.email,
+            candidateName: application.candidate?.full_name,
+            jobTitle: application.job?.title,
+            rejectionReason: rejectionReason,
+          }),
+        })
+      }
 
       setRejectDialogOpen(false)
       router.refresh()
@@ -704,34 +709,66 @@ export function ApplicationWorkflowActions({
           <DialogHeader>
             <DialogTitle>Reject Application</DialogTitle>
             <DialogDescription>
-              This will reject the application and notify the candidate.
+              This will reject the application. You can optionally send a rejection email to the candidate.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
+              <Label htmlFor="rejection_type">Email Type *</Label>
+              <Select
+                value={rejectionReason}
+                onValueChange={(value) => setRejectionReason(value as 'screening' | 'interview' | 'noshow' | 'general')}
+              >
+                <SelectTrigger id="rejection_type">
+                  <SelectValue placeholder="Select rejection reason" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="screening">Rejected after Screening</SelectItem>
+                  <SelectItem value="interview">Rejected after Interview</SelectItem>
+                  <SelectItem value="noshow">No Show</SelectItem>
+                  <SelectItem value="general">General Rejection</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                This determines the email content sent to the candidate
+              </p>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="rejection_comments">
-                Rejection Reason (max 30 characters)
+                Internal Notes (max 30 characters)
               </Label>
               <Input
                 id="rejection_comments"
                 value={rejectionComments}
                 onChange={(e) => setRejectionComments(e.target.value.slice(0, 30))}
-                placeholder="Brief reason..."
+                placeholder="Brief reason for internal records..."
                 maxLength={30}
               />
               <p className="text-xs text-muted-foreground">
-                {rejectionComments.length}/30 characters
+                {rejectionComments.length}/30 characters (not sent to candidate)
               </p>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleReject} disabled={isLoading}>
+            <Button variant="destructive" onClick={() => { setSendRejectionEmail(false); handleReject(); }} disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Reject & Notify
+              Reject Only
             </Button>
+            {application.candidate?.email && (
+              <Button 
+                variant="destructive" 
+                onClick={() => { setSendRejectionEmail(true); handleReject(); }} 
+                disabled={isLoading}
+                className="bg-red-700 hover:bg-red-800"
+              >
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Mail className="mr-2 h-4 w-4" />
+                Reject & Send Email
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
