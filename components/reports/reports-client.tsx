@@ -134,20 +134,36 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
 
-  // Format salary with currency
+  // Format salary with currency (for display)
   const formatSalary = (amount: number | null | undefined, currency: SalaryCurrency = 'AED') => {
     if (!amount) return 'N/A'
     const symbol = CURRENCY_SYMBOLS[currency] || 'AED '
     return `${symbol}${amount.toLocaleString()}`
   }
 
-  // Format job salary range with currency
+  // Format job salary range with currency (for display)
   const formatJobSalary = (min: number | null, max: number | null, currency: SalaryCurrency = 'USD') => {
     if (!min && !max) return 'N/A'
     const symbol = CURRENCY_SYMBOLS[currency] || '$'
     if (min && max) return `${symbol}${min.toLocaleString()} - ${symbol}${max.toLocaleString()}`
     if (min) return `From ${symbol}${min.toLocaleString()}`
     if (max) return `Up to ${symbol}${max.toLocaleString()}`
+    return 'N/A'
+  }
+
+  // Format salary for CSV export (uses text currency codes instead of Unicode symbols)
+  const formatSalaryForCSV = (amount: number | null | undefined, currency: SalaryCurrency = 'AED') => {
+    if (!amount) return 'N/A'
+    return `${currency} ${amount.toLocaleString()}`
+  }
+
+  // Format job salary range for CSV export (uses text currency codes)
+  const formatJobSalaryForCSV = (min: number | null, max: number | null, currency: SalaryCurrency = 'AED') => {
+    if (!min && !max) return 'N/A'
+    const code = currency || 'AED'
+    if (min && max) return `${code} ${min.toLocaleString()} - ${code} ${max.toLocaleString()}`
+    if (min) return `From ${code} ${min.toLocaleString()}`
+    if (max) return `Up to ${code} ${max.toLocaleString()}`
     return 'N/A'
   }
 
@@ -339,9 +355,9 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
       app.candidate?.phone ? `${app.candidate.country_code || ''} ${app.candidate.phone}` : '',
       app.candidate?.home_country_phone ? `${app.candidate.home_country_code || ''} ${app.candidate.home_country_phone}` : '',
       app.candidate?.nationality || '',
-      formatSalary(app.candidate?.current_salary),
-      formatSalary(app.candidate?.expected_salary),
-      formatJobSalary(app.job?.salary_min ?? null, app.job?.salary_max ?? null, app.job?.salary_currency as SalaryCurrency | undefined),
+      formatSalaryForCSV(app.candidate?.current_salary, (app.candidate?.current_salary_currency as SalaryCurrency) || 'AED'),
+      formatSalaryForCSV(app.candidate?.expected_salary, (app.candidate?.expected_salary_currency as SalaryCurrency) || 'AED'),
+      formatJobSalaryForCSV(app.job?.salary_min ?? null, app.job?.salary_max ?? null, (app.job?.salary_currency as SalaryCurrency) || 'AED'),
       app.candidate?.notice_period_days?.toString() || '',
       format(new Date(app.applied_at), 'yyyy-MM-dd'),
       STAGE_LABELS[app.stage as keyof typeof STAGE_LABELS] || app.stage,
