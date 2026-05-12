@@ -12,7 +12,7 @@ export default async function InterviewsPage() {
       application:applications(
         id,
         candidate:candidates(id, full_name, email),
-        job:jobs(id, title, department:departments(name))
+        job:jobs(id, title, department:departments(name), hiring_manager:profiles!jobs_hiring_manager_id_fkey(email, full_name))
       )
     `)
     .order('scheduled_at', { ascending: false })

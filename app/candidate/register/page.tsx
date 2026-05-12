@@ -31,7 +31,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Loader2, Home, Check, ChevronsUpDown } from 'lucide-react'
+import { Loader2, Home, Check, ChevronsUpDown, Upload, FileText, X } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -42,8 +42,11 @@ import { cn } from '@/lib/utils'
 export default function CandidateRegisterPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [nationalityOpen, setNationalityOpen] = useState(false)
+  const [cvFile, setCvFile] = useState<File | null>(null)
+  const [cvUrl, setCvUrl] = useState<string | null>(null)
   
   const [formData, setFormData] = useState({
     email: '',
@@ -69,10 +72,52 @@ export default function CandidateRegisterPage() {
     notice_period_days: '',
   })
 
+  const handleCvSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ]
+    
+    if (!allowedTypes.includes(file.type)) {
+      setError('Invalid file type. Please upload PDF or Word document.')
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File too large. Maximum size is 5MB.')
+      return
+    }
+
+    setError(null)
+    setCvFile(file)
+  }
+
+  const handleRemoveCv = () => {
+    setCvFile(null)
+    setCvUrl(null)
+  }
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + ' B'
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
+
+    // Validate CV is uploaded
+    if (!cvFile) {
+      setError('Please upload your CV/Resume')
+      setIsLoading(false)
+      return
+    }
 
     // Validate required fields
     if (!formData.email || !formData.password || !formData.full_name || !formData.phone || !formData.gender || !formData.nationality) {
@@ -124,7 +169,32 @@ export default function CandidateRegisterPage() {
     const supabase = createClient()
 
     try {
-      // 1. Sign up the user
+      // 1. Upload CV first
+      setIsUploading(true)
+      let uploadedCvUrl: string | null = null
+      let cvFilename: string | null = null
+      let cvSize: number | null = null
+      
+      if (cvFile) {
+        const formDataUpload = new FormData()
+        formDataUpload.append('cv', cvFile)
+        
+        const uploadResponse = await fetch('/api/upload-cv', {
+          method: 'POST',
+          body: formDataUpload,
+        })
+        
+        const uploadResult = await uploadResponse.json()
+        if (!uploadResponse.ok || uploadResult.error) {
+          throw new Error(uploadResult.error || 'Failed to upload CV')
+        }
+        uploadedCvUrl = uploadResult.url
+        cvFilename = cvFile.name
+        cvSize = cvFile.size
+      }
+      setIsUploading(false)
+
+      // 2. Sign up the user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -157,7 +227,7 @@ export default function CandidateRegisterPage() {
         console.error('[v0] Profile creation error:', profileError)
       }
 
-      // 3. Create the candidate record
+      // 4. Create the candidate record with CV info
       const { error: candidateError } = await supabase
         .from('candidates')
         .insert({
@@ -182,6 +252,10 @@ export default function CandidateRegisterPage() {
           notice_period_days: parseInt(formData.notice_period_days),
           user_id: authData.user.id,
           source: 'career_page',
+          resume_url: uploadedCvUrl,
+          cv_filename: cvFilename,
+          cv_size_bytes: cvSize,
+          cv_uploaded_at: uploadedCvUrl ? new Date().toISOString() : null,
         })
 
       if (candidateError) {
@@ -576,13 +650,70 @@ export default function CandidateRegisterPage() {
                 </div>
               </div>
 
+              {/* CV Upload Section */}
+              <div className="space-y-3 pt-2 border-t">
+                <p className="text-sm font-medium pt-2">Resume / CV *</p>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    onChange={handleCvSelect}
+                    className="hidden"
+                    id="cv-upload"
+                  />
+                  
+                  {!cvFile ? (
+                    <label
+                      htmlFor="cv-upload"
+                      className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors"
+                    >
+                      <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                      <span className="text-sm font-medium text-muted-foreground">
+                        Click to upload your CV
+                      </span>
+                      <span className="text-xs text-muted-foreground mt-1">
+                        PDF, DOC, DOCX (Max 5MB)
+                      </span>
+                    </label>
+                  ) : (
+                    <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                          <FileText className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium truncate max-w-[200px]">
+                            {cvFile.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatFileSize(cvFile.size)}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleRemoveCv}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Your CV will be used for all job applications. You can update it anytime.
+                </p>
+              </div>
+
               {error && (
                 <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3">
                   <p className="text-sm text-destructive">{error}</p>
                 </div>
               )}
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full" disabled={isLoading || isUploading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Create Account
               </Button>
