@@ -9,6 +9,7 @@ import { format } from 'date-fns'
 import { STAGE_LABELS, STAGE_COLORS, LOCK_STATUS_LABELS, LOCK_STATUS_COLORS } from '@/lib/types'
 import type { Application, CandidateHistory } from '@/lib/types'
 import { CandidateHistoryTimeline } from '@/components/candidates/candidate-history'
+import { CandidateRemarks } from '@/components/candidates/candidate-remarks'
 
 interface CandidateDetailPageProps {
   params: Promise<{ id: string }>
@@ -26,6 +27,14 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   const { id } = await params
   const supabase = await createClient()
 
+  // Get current user profile
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: currentUserProfile } = user ? await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single() : { data: null }
+
   const { data: candidate, error } = await supabase
     .from('candidates')
     .select('*, global_locker:profiles!candidates_global_locked_by_fkey(full_name, email), locked_job:jobs!candidates_global_lock_job_id_fkey(title)')
@@ -38,7 +47,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
 
   const { data: applications } = await supabase
     .from('applications')
-    .select('*, job:jobs(id, title, department:departments(name)), locker:profiles!applications_locked_by_fkey(full_name, email), interviews:interviews(id, scheduled_at, status)')
+    .select('*, job:jobs(id, title, department:departments(name)), locker:profiles!applications_locked_by_fkey(full_name, email), interviews:interviews(id, scheduled_at, status), recruiter_remarks, recruiter_remarks_updated_at, hm_remarks, hm_remarks_updated_at')
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
 
@@ -206,7 +215,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
                   </div>
                 </div>
                 <Button variant="outline" size="sm" asChild>
-                  <a href={candidate.resume_url} target="_blank" rel="noopener noreferrer" download>
+                  <a href={`/api/download-cv?candidateId=${candidate.id}`}>
                     <Download className="mr-2 h-4 w-4" />
                     Download
                   </a>
@@ -277,56 +286,67 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
           ) : (
             <div className="space-y-3">
               {(applications as Application[]).map((application) => (
-                <div
-                  key={application.id}
-                  className="flex items-center justify-between rounded-lg border p-4"
-                >
-                  <div>
-                    <Link
-                      href={`/dashboard/jobs/${application.job?.id}`}
-                      className="font-medium hover:underline"
-                    >
-                      {application.job?.title}
-                    </Link>
-                    {application.job?.department?.name && (
-                      <p className="text-sm text-muted-foreground">
-                        {application.job.department.name}
-                      </p>
-                    )}
-                    {/* Show lock status */}
-                    {application.lock_status && application.lock_status !== 'available' && (
-                      <div className="mt-1 flex items-center gap-2">
-                        <Lock className="h-3 w-3 text-muted-foreground" />
-                        <Badge variant="outline" className={`text-xs ${LOCK_STATUS_COLORS[application.lock_status]}`}>
-                          {LOCK_STATUS_LABELS[application.lock_status]}
-                        </Badge>
-                        {application.locker && (
-                          <span className="text-xs text-muted-foreground">
-                            by {application.locker.full_name}
-                          </span>
-                        )}
-                      </div>
-                    )}
+                <div key={application.id} className="space-y-3">
+                  <div className="flex items-center justify-between rounded-lg border p-4">
+                    <div>
+                      <Link
+                        href={`/dashboard/jobs/${application.job?.id}`}
+                        className="font-medium hover:underline"
+                      >
+                        {application.job?.title}
+                      </Link>
+                      {application.job?.department?.name && (
+                        <p className="text-sm text-muted-foreground">
+                          {application.job.department.name}
+                        </p>
+                      )}
+                      {/* Show lock status */}
+                      {application.lock_status && application.lock_status !== 'available' && (
+                        <div className="mt-1 flex items-center gap-2">
+                          <Lock className="h-3 w-3 text-muted-foreground" />
+                          <Badge variant="outline" className={`text-xs ${LOCK_STATUS_COLORS[application.lock_status]}`}>
+                            {LOCK_STATUS_LABELS[application.lock_status]}
+                          </Badge>
+                          {application.locker && (
+                            <span className="text-xs text-muted-foreground">
+                              by {application.locker.full_name}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge variant="secondary" className={STAGE_COLORS[application.stage]}>
+                        {STAGE_LABELS[application.stage]}
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">
+                        {(() => {
+                          // Get the latest scheduled interview for this application
+                          const interviews = (application as any).interviews || []
+                          const latestInterview = interviews
+                            .filter((i: any) => i.status === 'scheduled')
+                            .sort((a: any, b: any) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime())[0]
+                          
+                          if (latestInterview && application.stage === 'interview_scheduled') {
+                            return format(new Date(latestInterview.scheduled_at), 'MMM d, yyyy')
+                          }
+                          return format(new Date(application.applied_at), 'MMM d, yyyy')
+                        })()}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="secondary" className={STAGE_COLORS[application.stage]}>
-                      {STAGE_LABELS[application.stage]}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      {(() => {
-                        // Get the latest scheduled interview for this application
-                        const interviews = (application as any).interviews || []
-                        const latestInterview = interviews
-                          .filter((i: any) => i.status === 'scheduled')
-                          .sort((a: any, b: any) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime())[0]
-                        
-                        if (latestInterview && application.stage === 'interview_scheduled') {
-                          return format(new Date(latestInterview.scheduled_at), 'MMM d, yyyy')
-                        }
-                        return format(new Date(application.applied_at), 'MMM d, yyyy')
-                      })()}
-                    </span>
-                  </div>
+                  
+                  {/* Remarks for this application */}
+                  {currentUserProfile && (
+                    <CandidateRemarks
+                      applicationId={application.id}
+                      recruiterRemarks={(application as any).recruiter_remarks}
+                      recruiterRemarksUpdatedAt={(application as any).recruiter_remarks_updated_at}
+                      hmRemarks={(application as any).hm_remarks}
+                      hmRemarksUpdatedAt={(application as any).hm_remarks_updated_at}
+                      currentUser={currentUserProfile}
+                    />
+                  )}
                 </div>
               ))}
             </div>

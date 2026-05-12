@@ -17,6 +17,7 @@ import {
   Linkedin,
   UserCheck,
   ClipboardList,
+  FolderOpen,
 } from 'lucide-react'
 
 interface DashboardSidebarProps {
@@ -27,6 +28,7 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Jobs', href: '/dashboard/jobs', icon: FileText },
   { name: 'Candidates', href: '/dashboard/candidates', icon: Users },
+  { name: 'CV Pool', href: '/dashboard/cv-pool', icon: FolderOpen },
   { name: 'Pipeline', href: '/dashboard/pipeline', icon: Briefcase },
   { name: 'Interviews', href: '/dashboard/interviews', icon: Calendar },
   { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },

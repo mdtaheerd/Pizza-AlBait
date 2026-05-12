@@ -3,7 +3,13 @@ import { notFound } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Pencil, ExternalLink, MapPin, Banknote, Clock, Users } from 'lucide-react'
+import { Pencil, ExternalLink, MapPin, Banknote, Clock, Users, MessageSquare } from 'lucide-react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import {
@@ -50,7 +56,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
 
   const { data: applications } = await supabase
     .from('applications')
-    .select('*, candidate:candidates(*)')
+    .select('*, candidate:candidates(*), recruiter_remarks, recruiter_remarks_updated_at, hm_remarks, hm_remarks_updated_at')
     .eq('job_id', id)
     .order('applied_at', { ascending: false })
 
@@ -217,6 +223,18 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
+                    {(application.recruiter_remarks || application.hm_remarks) && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <MessageSquare className="h-4 w-4 text-blue-500" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Has remarks from {application.recruiter_remarks && application.hm_remarks ? 'Recruiter & HM' : application.recruiter_remarks ? 'Recruiter' : 'Hiring Manager'}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
                     <Badge variant="secondary" className={STAGE_COLORS[application.stage]}>
                       {STAGE_LABELS[application.stage]}
                     </Badge>
