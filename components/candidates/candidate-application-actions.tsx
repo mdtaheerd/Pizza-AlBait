@@ -94,7 +94,6 @@ export function CandidateApplicationActions({
   const [interviewerEmail, setInterviewerEmail] = useState('')
   const [interviewerEmail2, setInterviewerEmail2] = useState('')
   const [interviewerEmail3, setInterviewerEmail3] = useState('')
-  const [rejectionComments, setRejectionComments] = useState('')
   const [recruiterComments, setRecruiterComments] = useState('')
   const [hiringManagerComments, setHiringManagerComments] = useState('')
   const [interviewResult, setInterviewResult] = useState<'hire' | 'reject'>('hire')
