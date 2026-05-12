@@ -229,10 +229,10 @@ export default async function HomePage() {
               </p>
               <div className="space-y-4">
                 {[
-                  'Competitive salary and benefits package',
                   'Career development and training opportunities',
                   'Work on major international projects',
-                  'Diverse and inclusive work environment'
+                  'Diverse and inclusive work environment',
+                  'Competitive salary and benefits package'
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <CheckCircle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
