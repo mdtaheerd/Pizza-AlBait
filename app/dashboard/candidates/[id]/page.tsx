@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 
 // Force dynamic rendering to ensure fresh data on every request
@@ -51,7 +51,8 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   }
 
   // Fetch applications using the same supabase client (RLS is disabled on all tables)
-  const { data: applications, error: applicationsError } = await supabase
+  const serviceClient = createServiceClient()
+  const { data: applications, error: applicationsError } = await serviceClient
     .from('applications')
     .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager_id)')
     .eq('candidate_id', id)
@@ -60,7 +61,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   // Fetch interviews separately for each application
   const applicationIds = (applications || []).map(a => a.id)
   const { data: allInterviews } = applicationIds.length > 0
-    ? await supabase.from('interviews').select('id, application_id, scheduled_at, status').in('application_id', applicationIds)
+    ? await serviceClient.from('interviews').select('id, application_id, scheduled_at, status').in('application_id', applicationIds)
     : { data: [] }
   
   // Group interviews by application_id
@@ -82,7 +83,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   const allProfileIds = [...new Set([...lockerIds, ...hmIds])]
   
   const { data: relatedProfiles } = allProfileIds.length > 0
-    ? await supabase.from('profiles').select('id, full_name, email').in('id', allProfileIds)
+    ? await serviceClient.from('profiles').select('id, full_name, email').in('id', allProfileIds)
     : { data: [] }
   
   const profileMap = (relatedProfiles || []).reduce((acc, p) => {
@@ -101,7 +102,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   }))
 
   // Fetch candidate history
-  const { data: history } = await supabase
+  const { data: history } = await serviceClient
     .from('candidate_history')
     .select('*, job:jobs(title)')
     .eq('candidate_id', id)
@@ -110,7 +111,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   // Fetch actor profiles separately for history
   const actorIds = [...new Set((history || []).map(h => h.actor_id).filter(Boolean))]
   const { data: actors } = actorIds.length > 0
-    ? await supabase.from('profiles').select('id, full_name, email').in('id', actorIds)
+    ? await serviceClient.from('profiles').select('id, full_name, email').in('id', actorIds)
     : { data: [] }
 
   const actorMap = (actors || []).reduce((acc, a) => {
