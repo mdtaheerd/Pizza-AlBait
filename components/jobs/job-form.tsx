@@ -45,6 +45,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
     recruiter_id: job?.recruiter_id || '',
     project_name: job?.project_name || '',
     qualification: job?.qualification || '',
+    qualification_other: (job as any)?.qualification_other || '',
     years_of_experience: (job as any)?.years_of_experience || '',
     age_criteria: (job as any)?.age_criteria || '',
     required_languages: (job as any)?.required_languages || [] as string[],
@@ -89,6 +90,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
         recruiter_id: formData.recruiter_id || null,
         project_name: formData.project_name || null,
         qualification: formData.qualification || null,
+        qualification_other: formData.qualification === 'Other' ? formData.qualification_other : null,
         years_of_experience: formData.years_of_experience || null,
         age_criteria: formData.age_criteria || null,
         required_languages: formData.required_languages.length > 0 ? formData.required_languages : null,
@@ -333,12 +335,55 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
             <div className="grid gap-4 sm:grid-cols-2 mt-4">
               <div className="space-y-2">
                 <Label htmlFor="qualification">Qualification <RequiredMark /></Label>
-                <Input
-                  id="qualification"
+                <Select
                   value={formData.qualification}
-                  onChange={(e) => setFormData({ ...formData, qualification: e.target.value })}
-                  placeholder="e.g. Bachelor's in Engineering"
-                />
+                  onValueChange={(value) => setFormData({ ...formData, qualification: value, qualification_other: value !== 'Other' ? '' : formData.qualification_other })}
+                >
+                  <SelectTrigger id="qualification">
+                    <SelectValue placeholder="Select qualification" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="High School">High School</SelectItem>
+                    <SelectItem value="Secondary School">Secondary School</SelectItem>
+                    <SelectItem value="Diploma in Engineering - Civil">Diploma in Engineering - Civil</SelectItem>
+                    <SelectItem value="Diploma in Engineering - Mechanical">Diploma in Engineering - Mechanical</SelectItem>
+                    <SelectItem value="Diploma in Engineering - Electrical">Diploma in Engineering - Electrical</SelectItem>
+                    <SelectItem value="Diploma in Engineering - Electronics & Communication">Diploma in Engineering - Electronics & Communication</SelectItem>
+                    <SelectItem value="Diploma in Engineering - Computer Science">Diploma in Engineering - Computer Science</SelectItem>
+                    <SelectItem value="Diploma in Engineering - Other">Diploma in Engineering - Other</SelectItem>
+                    <SelectItem value="Bachelor Degree - Science">Bachelor Degree - Science</SelectItem>
+                    <SelectItem value="Bachelor Degree - Commerce">Bachelor Degree - Commerce</SelectItem>
+                    <SelectItem value="Bachelor Degree - Arts">Bachelor Degree - Arts</SelectItem>
+                    <SelectItem value="Bachelor Degree - Business Administration">Bachelor Degree - Business Administration</SelectItem>
+                    <SelectItem value="Bachelor Degree - Engineering - Civil">Bachelor Degree - Engineering - Civil</SelectItem>
+                    <SelectItem value="Bachelor Degree - Engineering - Mechanical">Bachelor Degree - Engineering - Mechanical</SelectItem>
+                    <SelectItem value="Bachelor Degree - Engineering - Electrical">Bachelor Degree - Engineering - Electrical</SelectItem>
+                    <SelectItem value="Bachelor Degree - Engineering - Electronics & Communication">Bachelor Degree - Engineering - Electronics & Communication</SelectItem>
+                    <SelectItem value="Bachelor Degree - Engineering - Computer Science">Bachelor Degree - Engineering - Computer Science</SelectItem>
+                    <SelectItem value="Bachelor Degree - Other">Bachelor Degree - Other</SelectItem>
+                    <SelectItem value="Master Degree - Science">Master Degree - Science</SelectItem>
+                    <SelectItem value="Master Degree - Commerce">Master Degree - Commerce</SelectItem>
+                    <SelectItem value="Master Degree - Arts">Master Degree - Arts</SelectItem>
+                    <SelectItem value="Master Degree - Business Administration (MBA)">Master Degree - Business Administration (MBA)</SelectItem>
+                    <SelectItem value="Master Degree - Engineering - Civil">Master Degree - Engineering - Civil</SelectItem>
+                    <SelectItem value="Master Degree - Engineering - Mechanical">Master Degree - Engineering - Mechanical</SelectItem>
+                    <SelectItem value="Master Degree - Engineering - Electrical">Master Degree - Engineering - Electrical</SelectItem>
+                    <SelectItem value="Master Degree - Engineering - Electronics & Communication">Master Degree - Engineering - Electronics & Communication</SelectItem>
+                    <SelectItem value="Master Degree - Engineering - Computer Science">Master Degree - Engineering - Computer Science</SelectItem>
+                    <SelectItem value="Master Degree - Engineering - Other">Master Degree - Engineering - Other</SelectItem>
+                    <SelectItem value="PhD / Doctorate">PhD / Doctorate</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                {formData.qualification === 'Other' && (
+                  <Input
+                    id="qualification_other"
+                    value={formData.qualification_other}
+                    onChange={(e) => setFormData({ ...formData, qualification_other: e.target.value })}
+                    placeholder="Please specify qualification"
+                    className="mt-2"
+                  />
+                )}
               </div>
 
               <div className="space-y-3">
@@ -373,7 +418,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
             </div>
 
             <div className="space-y-2 mt-4">
-              <Label htmlFor="other_certifications">Other Certifications <RequiredMark /></Label>
+              <Label htmlFor="other_certifications">Other Certifications</Label>
               <Input
                 id="other_certifications"
                 value={formData.other_certifications}
