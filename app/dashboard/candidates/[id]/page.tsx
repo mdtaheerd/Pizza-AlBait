@@ -61,11 +61,17 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
 
   // Use direct client to fetch applications (bypasses SSR cookie handling that might cause RLS issues)
   const directClient = getDirectClient()
+  console.log('[v0] Fetching applications for candidate:', id)
+  console.log('[v0] SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'NOT SET')
+  console.log('[v0] ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'NOT SET')
+  
   const { data: applications, error: applicationsError } = await directClient
     .from('applications')
     .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager_id)')
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
+  
+  console.log('[v0] Applications result:', applications?.length ?? 0, 'Error:', applicationsError?.message ?? 'none')
   
   // Fetch interviews separately for each application
   const applicationIds = (applications || []).map(a => a.id)
