@@ -64,7 +64,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
         !formData.status || !formData.closing_date || !formData.qualification ||
         !formData.salary_currency || !formData.budgeted_salary || !formData.years_of_experience ||
         !formData.age_criteria || formData.required_languages.length === 0 ||
-        !formData.description || !formData.requirements) {
+        !formData.description || !formData.requirements || !formData.place_of_work) {
       setError('Please fill in all required fields')
       setIsLoading(false)
       return
@@ -171,7 +171,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="place_of_work">Place of Work</Label>
+              <Label htmlFor="place_of_work">Place of Work <RequiredMark /></Label>
               <Select
                 value={formData.place_of_work}
                 onValueChange={(value) => setFormData({ ...formData, place_of_work: value })}
