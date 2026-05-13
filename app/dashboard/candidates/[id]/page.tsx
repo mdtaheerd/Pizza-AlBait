@@ -1,18 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createDirectClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 
 // Force dynamic rendering to ensure fresh data on every request
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
-
-// Direct Supabase client that bypasses SSR cookie handling
-function getDirectClient() {
-  return createDirectClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -59,24 +50,17 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
     notFound()
   }
 
-  // Use direct client to fetch applications (bypasses SSR cookie handling that might cause RLS issues)
-  const directClient = getDirectClient()
-  console.log('[v0] Fetching applications for candidate:', id)
-  console.log('[v0] SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'NOT SET')
-  console.log('[v0] ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'NOT SET')
-  
-  const { data: applications, error: applicationsError } = await directClient
+  // Fetch applications using the same supabase client (RLS is disabled on all tables)
+  const { data: applications, error: applicationsError } = await supabase
     .from('applications')
     .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager_id)')
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
   
-  console.log('[v0] Applications result:', applications?.length ?? 0, 'Error:', applicationsError?.message ?? 'none')
-  
   // Fetch interviews separately for each application
   const applicationIds = (applications || []).map(a => a.id)
   const { data: allInterviews } = applicationIds.length > 0
-    ? await directClient.from('interviews').select('id, application_id, scheduled_at, status').in('application_id', applicationIds)
+    ? await supabase.from('interviews').select('id, application_id, scheduled_at, status').in('application_id', applicationIds)
     : { data: [] }
   
   // Group interviews by application_id
@@ -98,7 +82,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   const allProfileIds = [...new Set([...lockerIds, ...hmIds])]
   
   const { data: relatedProfiles } = allProfileIds.length > 0
-    ? await directClient.from('profiles').select('id, full_name, email').in('id', allProfileIds)
+    ? await supabase.from('profiles').select('id, full_name, email').in('id', allProfileIds)
     : { data: [] }
   
   const profileMap = (relatedProfiles || []).reduce((acc, p) => {
@@ -117,7 +101,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   }))
 
   // Fetch candidate history
-  const { data: history } = await directClient
+  const { data: history } = await supabase
     .from('candidate_history')
     .select('*, job:jobs(title)')
     .eq('candidate_id', id)
@@ -126,7 +110,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   // Fetch actor profiles separately for history
   const actorIds = [...new Set((history || []).map(h => h.actor_id).filter(Boolean))]
   const { data: actors } = actorIds.length > 0
-    ? await directClient.from('profiles').select('id, full_name, email').in('id', actorIds)
+    ? await supabase.from('profiles').select('id, full_name, email').in('id', actorIds)
     : { data: [] }
 
   const actorMap = (actors || []).reduce((acc, a) => {
