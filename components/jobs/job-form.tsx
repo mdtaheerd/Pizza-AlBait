@@ -65,7 +65,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
         !formData.status || !formData.closing_date || !formData.qualification ||
          !formData.years_of_experience ||
         !formData.age_criteria || formData.required_languages.length === 0 ||
-        !formData.description || !formData.requirements || !formData.place_of_work) {
+        !formData.description || !formData.place_of_work) {
       setError('Please fill in all required fields')
       setIsLoading(false)
       return
@@ -436,15 +436,6 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
               content={formData.description}
               onChange={(content) => setFormData({ ...formData, description: content })}
               placeholder="Describe the role, responsibilities, and what the ideal candidate looks like..."
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="requirements">Requirements <RequiredMark /></Label>
-            <RichTextEditor
-              content={formData.requirements}
-              onChange={(content) => setFormData({ ...formData, requirements: content })}
-              placeholder="List the required qualifications, skills, and experience..."
             />
           </div>
 
