@@ -54,7 +54,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   const serviceClient = createServiceClient()
   const { data: applications, error: applicationsError } = await serviceClient
     .from('applications')
-    .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager_id)')
+    .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by)')
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
   
