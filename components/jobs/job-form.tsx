@@ -328,7 +328,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
                 {['English', 'Chinese', 'Hindi/Urdu'].map((lang) => (
                   <div key={lang} className="flex items-center space-x-2">
                     <Checkbox
-                      id={\`lang-\${lang}\`}
+                      id={`lang-${lang}`}
                       checked={formData.required_languages.includes(lang)}
                       onCheckedChange={(checked) => {
                         if (checked) {
@@ -344,7 +344,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
                         }
                       }}
                     />
-                    <Label htmlFor={\`lang-\${lang}\`} className="text-sm font-normal cursor-pointer">
+                    <Label htmlFor={`lang-${lang}`} className="text-sm font-normal cursor-pointer">
                       {lang}
                     </Label>
                   </div>
