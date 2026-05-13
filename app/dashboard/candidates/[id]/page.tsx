@@ -1,5 +1,9 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
+
+// Force dynamic rendering to ensure fresh data on every request
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -46,34 +50,15 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
     notFound()
   }
 
-  // Fetch applications - try service client first, fall back to regular client
-  let applications: any[] | null = null
-  let applicationsError: any = null
+  // Create service client for all queries (bypasses RLS completely)
+  const serviceClient = createServiceClient()
   
-  // Try service client first (bypasses RLS)
-  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    const serviceClient = createServiceClient()
-    const result = await serviceClient
-      .from('applications')
-      .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager_id), interviews:interviews(id, scheduled_at, status)')
-      .eq('candidate_id', id)
-      .order('applied_at', { ascending: false })
-    applications = result.data
-    applicationsError = result.error
-  }
-  
-  // Fallback to regular client if service client failed or not available
-  if (!applications || applications.length === 0) {
-    const result = await supabase
-      .from('applications')
-      .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager_id), interviews:interviews(id, scheduled_at, status)')
-      .eq('candidate_id', id)
-      .order('applied_at', { ascending: false })
-    if (!applications || result.data?.length) {
-      applications = result.data
-      applicationsError = result.error
-    }
-  }
+  // Fetch applications using service client
+  const { data: applications, error: applicationsError } = await serviceClient
+    .from('applications')
+    .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager_id), interviews:interviews(id, scheduled_at, status)')
+    .eq('candidate_id', id)
+    .order('applied_at', { ascending: false })
 
   // Fetch locker and hiring manager profiles separately to avoid join issues
   const lockerIds = [...new Set((applications || []).map(a => a.locked_by).filter(Boolean))]
