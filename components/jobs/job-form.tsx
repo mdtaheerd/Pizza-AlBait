@@ -157,7 +157,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="place_of_work">Place of Work</Label>
+              <Label htmlFor="place_of_work">Place of Work <span className="text-red-500">*</span></Label>
               <Select
                 value={formData.place_of_work}
                 onValueChange={(value) => setFormData({ ...formData, place_of_work: value })}
