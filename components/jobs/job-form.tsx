@@ -50,6 +50,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
     required_languages: (job as any)?.required_languages || [] as string[],
     other_certifications: (job as any)?.other_certifications || '',
     other_requirements: (job as any)?.other_requirements || '',
+    place_of_work: (job as any)?.place_of_work || '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -81,6 +82,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
         required_languages: formData.required_languages.length > 0 ? formData.required_languages : null,
         other_certifications: formData.other_certifications || null,
         other_requirements: formData.other_requirements || null,
+        place_of_work: formData.place_of_work || null,
         created_by: user?.id || null,
         published_at: formData.status === 'open' ? new Date().toISOString() : null,
       }
@@ -151,6 +153,35 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 placeholder="e.g. AUH"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="place_of_work">Place of Work</Label>
+              <Select
+                value={formData.place_of_work}
+                onValueChange={(value) => setFormData({ ...formData, place_of_work: value })}
+              >
+                <SelectTrigger id="place_of_work">
+                  <SelectValue placeholder="Select work location type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="home_office">Home Office</SelectItem>
+                  <SelectItem value="site">Site</SelectItem>
+                  <SelectItem value="both">Both</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="project_name">Project Name</Label>
+              <Input
+                id="project_name"
+                value={formData.project_name}
+                onChange={(e) => setFormData({ ...formData, project_name: e.target.value })}
+                placeholder="e.g. Main Project"
               />
             </div>
           </div>
