@@ -156,22 +156,6 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="place_of_work">Place of Work <span className="text-red-500">*</span></Label>
-              <Select
-                value={formData.place_of_work}
-                onValueChange={(value) => setFormData({ ...formData, place_of_work: value })}
-              >
-                <SelectTrigger id="place_of_work">
-                  <SelectValue placeholder="Select work location type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="home_office">Home Office</SelectItem>
-                  <SelectItem value="site">Site</SelectItem>
-                  <SelectItem value="both">Both</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -387,6 +371,23 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
               <p className="text-xs text-muted-foreground">
                 Use the toolbar above for bullet points, bold text, and font size options
               </p>
+
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="place_of_work">Place of Work <span className="text-red-500">*</span></Label>
+              <Select
+                value={formData.place_of_work}
+                onValueChange={(value) => setFormData({ ...formData, place_of_work: value })}
+              >
+                <SelectTrigger id="place_of_work">
+                  <SelectValue placeholder="Select work location type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="home_office">Home Office</SelectItem>
+                  <SelectItem value="site">Site</SelectItem>
+                  <SelectItem value="both">Both</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             </div>
           </div>
 
