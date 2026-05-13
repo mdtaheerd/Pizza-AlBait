@@ -234,7 +234,20 @@ export function PipelineBoard({ applications: initialApplications, currentUser }
     if (!over) return
 
     const applicationId = active.id as string
-    const newStage = over.id as ApplicationStage
+    let newStage = over.id as string
+
+    // Check if over.id is a valid stage name
+    // If not, it might be an application ID (dropped on a card) - find the stage of that application
+    if (!STAGES.includes(newStage as ApplicationStage)) {
+      // over.id might be an application ID - find its stage
+      const targetApp = applications.find(app => app.id === newStage)
+      if (targetApp) {
+        newStage = targetApp.stage
+      } else {
+        // Invalid target, ignore
+        return
+      }
+    }
 
     const application = applications.find((app) => app.id === applicationId)
     if (!application || application.stage === newStage) return

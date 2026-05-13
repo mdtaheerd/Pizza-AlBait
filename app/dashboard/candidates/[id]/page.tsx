@@ -1,4 +1,4 @@
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 
 // Force dynamic rendering to ensure fresh data on every request
@@ -50,15 +50,18 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
     notFound()
   }
 
-  // Create service client for all queries (bypasses RLS completely)
-  const serviceClient = createServiceClient()
-  
-  // Fetch applications using service client
-  const { data: applications, error: applicationsError } = await serviceClient
+  // Fetch applications - use regular client since RLS is disabled
+  const { data: applications, error: applicationsError } = await supabase
     .from('applications')
     .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager_id), interviews:interviews(id, scheduled_at, status)')
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
+  
+  // Log for debugging
+  if (applicationsError) {
+    console.error('[v0] Applications query error:', applicationsError.message, applicationsError.code)
+  }
+  console.log('[v0] Applications found for candidate', id, ':', applications?.length ?? 0)
 
   // Fetch locker and hiring manager profiles separately to avoid join issues
   const lockerIds = [...new Set((applications || []).map(a => a.locked_by).filter(Boolean))]
@@ -66,7 +69,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   const allProfileIds = [...new Set([...lockerIds, ...hmIds])]
   
   const { data: relatedProfiles } = allProfileIds.length > 0
-    ? await serviceClient.from('profiles').select('id, full_name, email').in('id', allProfileIds)
+    ? await supabase.from('profiles').select('id, full_name, email').in('id', allProfileIds)
     : { data: [] }
   
   const profileMap = (relatedProfiles || []).reduce((acc, p) => {
@@ -85,7 +88,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   }))
 
   // Fetch candidate history
-  const { data: history } = await serviceClient
+  const { data: history } = await supabase
     .from('candidate_history')
     .select('*, job:jobs(title)')
     .eq('candidate_id', id)
@@ -94,7 +97,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   // Fetch actor profiles separately for history
   const actorIds = [...new Set((history || []).map(h => h.actor_id).filter(Boolean))]
   const { data: actors } = actorIds.length > 0
-    ? await serviceClient.from('profiles').select('id, full_name, email').in('id', actorIds)
+    ? await supabase.from('profiles').select('id, full_name, email').in('id', actorIds)
     : { data: [] }
 
   const actorMap = (actors || []).reduce((acc, a) => {
