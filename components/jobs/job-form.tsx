@@ -440,18 +440,6 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
           </div>
 
 
-          <div className="space-y-2">
-            <Label htmlFor="other_requirements">Other Requirements (Optional)</Label>
-            <RichTextEditor
-              content={formData.other_requirements}
-              onChange={(content) => setFormData({ ...formData, other_requirements: content })}
-              placeholder="Additional requirements with formatting options..."
-            />
-            <p className="text-xs text-muted-foreground">
-              Use the toolbar above for bullet points, bold text, and font size options
-            </p>
-          </div>
-
           {error && <p className="text-sm text-destructive">{error}</p>}
 
           <div className="flex gap-3">
