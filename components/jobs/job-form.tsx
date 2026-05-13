@@ -270,15 +270,6 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="qualification">Qualification <RequiredMark /></Label>
-              <Input
-                id="qualification"
-                value={formData.qualification}
-                onChange={(e) => setFormData({ ...formData, qualification: e.target.value })}
-                placeholder="e.g. Bachelor's in Engineering"
-              />
-            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -339,8 +330,19 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
               </div>
             </div>
 
-            <div className="space-y-3 mt-4">
-              <Label>Required Languages <RequiredMark /></Label>
+            <div className="grid gap-4 sm:grid-cols-2 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="qualification">Qualification <RequiredMark /></Label>
+                <Input
+                  id="qualification"
+                  value={formData.qualification}
+                  onChange={(e) => setFormData({ ...formData, qualification: e.target.value })}
+                  placeholder="e.g. Bachelor's in Engineering"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <Label>Required Languages <RequiredMark /></Label>
               <div className="flex flex-wrap gap-4">
                 {['English', 'Chinese', 'Hindi/Urdu'].map((lang) => (
                   <div key={lang} className="flex items-center space-x-2">
@@ -366,7 +368,8 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
                     </Label>
                   </div>
                 ))}
-              </div>
+                </div>
+            </div>
             </div>
 
             <div className="space-y-2 mt-4">
