@@ -58,6 +58,18 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
     setIsLoading(true)
     setError(null)
 
+    // Validate all mandatory fields
+    if (!formData.title || !formData.department_id || !formData.location || 
+        !formData.project_name || !formData.recruiter_id || !formData.employment_type ||
+        !formData.status || !formData.closing_date || !formData.qualification ||
+        !formData.salary_currency || !formData.budgeted_salary || !formData.years_of_experience ||
+        !formData.age_criteria || formData.required_languages.length === 0 ||
+        !formData.description || !formData.requirements || !formData.place_of_work) {
+      setError('Please fill in all required fields')
+      setIsLoading(false)
+      return
+    }
+
     const supabase = createClient()
 
     try {
@@ -111,12 +123,14 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
     }
   }
 
+  const RequiredMark = () => <span className="text-red-500">*</span>
+
   return (
     <Card>
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="title">Job Title *</Label>
+            <Label htmlFor="title">Job Title <RequiredMark /></Label>
             <Input
               id="title"
               value={formData.title}
@@ -128,7 +142,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="department">Department</Label>
+              <Label htmlFor="department">Department <RequiredMark /></Label>
               <Select
                 value={formData.department_id}
                 onValueChange={(value) => setFormData({ ...formData, department_id: value })}
@@ -147,7 +161,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="location">Location <RequiredMark /></Label>
               <Input
                 id="location"
                 value={formData.location}
@@ -155,24 +169,11 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
                 placeholder="e.g. AUH"
               />
             </div>
-
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="project_name">Project Name</Label>
-              <Input
-                id="project_name"
-                value={formData.project_name}
-                onChange={(e) => setFormData({ ...formData, project_name: e.target.value })}
-                placeholder="e.g. Main Project"
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="project_name">Project Name</Label>
+              <Label htmlFor="project_name">Project Name <RequiredMark /></Label>
               <Input
                 id="project_name"
                 value={formData.project_name}
@@ -182,7 +183,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="recruiter">Recruiter/HRBP</Label>
+              <Label htmlFor="recruiter">Recruiter/HRBP <RequiredMark /></Label>
               <Select
                 value={formData.recruiter_id}
                 onValueChange={(value) => setFormData({ ...formData, recruiter_id: value })}
@@ -203,7 +204,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="employment_type">Employment Type</Label>
+              <Label htmlFor="employment_type">Employment Type <RequiredMark /></Label>
               <Select
                 value={formData.employment_type}
                 onValueChange={(value) => setFormData({ ...formData, employment_type: value })}
@@ -222,7 +223,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status">Status <RequiredMark /></Label>
               <Select
                 value={formData.status}
                 onValueChange={(value) => setFormData({ ...formData, status: value as JobStatus })}
@@ -243,7 +244,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="closing_date">Closing Date</Label>
+              <Label htmlFor="closing_date">Closing Date <RequiredMark /></Label>
               <Input
                 id="closing_date"
                 type="date"
@@ -253,7 +254,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="qualification">Qualification</Label>
+              <Label htmlFor="qualification">Qualification <RequiredMark /></Label>
               <Input
                 id="qualification"
                 value={formData.qualification}
@@ -265,7 +266,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="salary_currency">Salary Currency</Label>
+              <Label htmlFor="salary_currency">Salary Currency <RequiredMark /></Label>
               <Select
                 value={formData.salary_currency}
                 onValueChange={(value) => setFormData({ ...formData, salary_currency: value as SalaryCurrency })}
@@ -284,7 +285,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="budgeted_salary">Budgeted Salary (Annual)</Label>
+              <Label htmlFor="budgeted_salary">Budgeted Salary (Annual) <RequiredMark /></Label>
               <Input
                 id="budgeted_salary"
                 type="number"
@@ -301,7 +302,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
             
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="years_of_experience">Years of Experience</Label>
+                <Label htmlFor="years_of_experience">Years of Experience <RequiredMark /></Label>
                 <Input
                   id="years_of_experience"
                   value={formData.years_of_experience}
@@ -311,7 +312,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="age_criteria">Age Criteria</Label>
+                <Label htmlFor="age_criteria">Age Criteria <RequiredMark /></Label>
                 <Input
                   id="age_criteria"
                   value={formData.age_criteria}
@@ -322,12 +323,12 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
             </div>
 
             <div className="space-y-3 mt-4">
-              <Label>Required Languages</Label>
+              <Label>Required Languages <RequiredMark /></Label>
               <div className="flex flex-wrap gap-4">
                 {['English', 'Chinese', 'Hindi/Urdu'].map((lang) => (
                   <div key={lang} className="flex items-center space-x-2">
                     <Checkbox
-                      id={`lang-${lang}`}
+                      id={\`lang-\${lang}\`}
                       checked={formData.required_languages.includes(lang)}
                       onCheckedChange={(checked) => {
                         if (checked) {
@@ -343,7 +344,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
                         }
                       }}
                     />
-                    <Label htmlFor={`lang-${lang}`} className="text-sm font-normal cursor-pointer">
+                    <Label htmlFor={\`lang-\${lang}\`} className="text-sm font-normal cursor-pointer">
                       {lang}
                     </Label>
                   </div>
@@ -352,7 +353,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
             </div>
 
             <div className="space-y-2 mt-4">
-              <Label htmlFor="other_certifications">Other Certifications (Optional)</Label>
+              <Label htmlFor="other_certifications">Other Certifications <RequiredMark /></Label>
               <Input
                 id="other_certifications"
                 value={formData.other_certifications}
@@ -371,9 +372,10 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
               <p className="text-xs text-muted-foreground">
                 Use the toolbar above for bullet points, bold text, and font size options
               </p>
+            </div>
 
             <div className="space-y-2 mt-4">
-              <Label htmlFor="place_of_work">Place of Work <span className="text-red-500">*</span></Label>
+              <Label htmlFor="place_of_work">Place of Work <RequiredMark /></Label>
               <Select
                 value={formData.place_of_work}
                 onValueChange={(value) => setFormData({ ...formData, place_of_work: value })}
@@ -388,11 +390,10 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
                 </SelectContent>
               </Select>
             </div>
-            </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Description <RequiredMark /></Label>
             <RichTextEditor
               content={formData.description}
               onChange={(content) => setFormData({ ...formData, description: content })}
@@ -401,7 +402,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="requirements">Requirements</Label>
+            <Label htmlFor="requirements">Requirements <RequiredMark /></Label>
             <RichTextEditor
               content={formData.requirements}
               onChange={(content) => setFormData({ ...formData, requirements: content })}
