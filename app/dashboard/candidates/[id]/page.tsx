@@ -50,22 +50,35 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
     notFound()
   }
 
-  // Fetch applications - use regular client since RLS is disabled
+  // Fetch applications with simplified query - no nested interviews join
   const { data: applications, error: applicationsError } = await supabase
     .from('applications')
-    .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager_id), interviews:interviews(id, scheduled_at, status)')
+    .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager_id)')
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
   
-  // Log for debugging
-  if (applicationsError) {
-    console.error('[v0] Applications query error:', applicationsError.message, applicationsError.code)
-  }
-  console.log('[v0] Applications found for candidate', id, ':', applications?.length ?? 0)
+  // Fetch interviews separately for each application
+  const applicationIds = (applications || []).map(a => a.id)
+  const { data: allInterviews } = applicationIds.length > 0
+    ? await supabase.from('interviews').select('id, application_id, scheduled_at, status').in('application_id', applicationIds)
+    : { data: [] }
+  
+  // Group interviews by application_id
+  const interviewsByApp = (allInterviews || []).reduce((acc, interview) => {
+    if (!acc[interview.application_id]) acc[interview.application_id] = []
+    acc[interview.application_id].push(interview)
+    return acc
+  }, {} as Record<string, any[]>)
+  
+  // Attach interviews to applications
+  const applicationsWithInterviews = (applications || []).map(app => ({
+    ...app,
+    interviews: interviewsByApp[app.id] || []
+  }))
 
   // Fetch locker and hiring manager profiles separately to avoid join issues
-  const lockerIds = [...new Set((applications || []).map(a => a.locked_by).filter(Boolean))]
-  const hmIds = [...new Set((applications || []).map(a => a.job?.hiring_manager_id).filter(Boolean))]
+  const lockerIds = [...new Set((applicationsWithInterviews || []).map(a => a.locked_by).filter(Boolean))]
+  const hmIds = [...new Set((applicationsWithInterviews || []).map(a => a.job?.hiring_manager_id).filter(Boolean))]
   const allProfileIds = [...new Set([...lockerIds, ...hmIds])]
   
   const { data: relatedProfiles } = allProfileIds.length > 0
@@ -78,7 +91,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   }, {} as Record<string, { id: string; full_name: string; email: string }>)
   
   // Enrich applications with profile data
-  const enrichedApplications = (applications || []).map(app => ({
+  const enrichedApplications = (applicationsWithInterviews || []).map(app => ({
     ...app,
     locker: app.locked_by ? profileMap[app.locked_by] : null,
     job: app.job ? {
