@@ -64,7 +64,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
         !formData.status || !formData.closing_date || !formData.qualification ||
         !formData.salary_currency || !formData.budgeted_salary || !formData.years_of_experience ||
         !formData.age_criteria || formData.required_languages.length === 0 ||
-        !formData.description || !formData.requirements || !formData.place_of_work) {
+        !formData.description || !formData.requirements) {
       setError('Please fill in all required fields')
       setIsLoading(false)
       return
@@ -161,13 +161,30 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="location">Location <RequiredMark /></Label>
+              <Label htmlFor="location">Job Location <RequiredMark /></Label>
               <Input
                 id="location"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 placeholder="e.g. AUH"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="place_of_work">Place of Work</Label>
+              <Select
+                value={formData.place_of_work}
+                onValueChange={(value) => setFormData({ ...formData, place_of_work: value })}
+              >
+                <SelectTrigger id="place_of_work">
+                  <SelectValue placeholder="Select work location type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="home_office">Home Office</SelectItem>
+                  <SelectItem value="site">Site</SelectItem>
+                  <SelectItem value="both">Both</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -363,22 +380,6 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
             </div>
 
 
-            <div className="space-y-2 mt-4">
-              <Label htmlFor="place_of_work">Place of Work <RequiredMark /></Label>
-              <Select
-                value={formData.place_of_work}
-                onValueChange={(value) => setFormData({ ...formData, place_of_work: value })}
-              >
-                <SelectTrigger id="place_of_work">
-                  <SelectValue placeholder="Select work location type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="home_office">Home Office</SelectItem>
-                  <SelectItem value="site">Site</SelectItem>
-                  <SelectItem value="both">Both</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
           <div className="space-y-2">
