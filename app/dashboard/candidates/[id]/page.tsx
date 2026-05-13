@@ -46,13 +46,34 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
     notFound()
   }
 
-  // Use service client for applications to ensure we get all data
-  const serviceClient = createServiceClient()
-  const { data: applications, error: applicationsError } = await serviceClient
-    .from('applications')
-    .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager_id), interviews:interviews(id, scheduled_at, status)')
-    .eq('candidate_id', id)
-    .order('applied_at', { ascending: false })
+  // Fetch applications - try service client first, fall back to regular client
+  let applications: any[] | null = null
+  let applicationsError: any = null
+  
+  // Try service client first (bypasses RLS)
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const serviceClient = createServiceClient()
+    const result = await serviceClient
+      .from('applications')
+      .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager_id), interviews:interviews(id, scheduled_at, status)')
+      .eq('candidate_id', id)
+      .order('applied_at', { ascending: false })
+    applications = result.data
+    applicationsError = result.error
+  }
+  
+  // Fallback to regular client if service client failed or not available
+  if (!applications || applications.length === 0) {
+    const result = await supabase
+      .from('applications')
+      .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager_id), interviews:interviews(id, scheduled_at, status)')
+      .eq('candidate_id', id)
+      .order('applied_at', { ascending: false })
+    if (!applications || result.data?.length) {
+      applications = result.data
+      applicationsError = result.error
+    }
+  }
 
   // Fetch locker and hiring manager profiles separately to avoid join issues
   const lockerIds = [...new Set((applications || []).map(a => a.locked_by).filter(Boolean))]
