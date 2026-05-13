@@ -20,8 +20,6 @@ export async function createClient() {
             )
           } catch {
             // The "setAll" method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
           }
         },
       },
@@ -30,14 +28,15 @@ export async function createClient() {
 }
 
 // Service role client for server-side operations that need to bypass RLS
-// Falls back to anon key if service role key is not available
 export function createServiceClient() {
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  // Try multiple possible environment variable names
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY 
+    || process.env.SUPABASE_SECRET_KEY
+    || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    serviceKey || anonKey,
+    serviceKey,
     {
       auth: {
         autoRefreshToken: false,
