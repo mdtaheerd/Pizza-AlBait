@@ -1,5 +1,9 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
+
+// Force dynamic rendering to ensure fresh data on every request
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -46,8 +50,10 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
     notFound()
   }
 
-  // Use service client for applications to ensure we get all data
+  // Create service client for all queries (bypasses RLS completely)
   const serviceClient = createServiceClient()
+  
+  // Fetch applications using service client
   const { data: applications, error: applicationsError } = await serviceClient
     .from('applications')
     .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, hiring_manager_id), interviews:interviews(id, scheduled_at, status)')
