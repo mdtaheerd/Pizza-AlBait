@@ -1,276 +1,177 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Pencil, Save, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { Loader2, MessageSquare, Pencil, Check, X } from 'lucide-react'
-import { format } from 'date-fns'
-import type { Profile } from '@/lib/types'
+import { useRouter } from 'next/navigation'
 
 interface CandidateRemarksProps {
   applicationId: string
-  recruiterRemarks: string | null
-  recruiterRemarksUpdatedAt: string | null
-  hmRemarks: string | null
-  hmRemarksUpdatedAt: string | null
-  currentUser: Profile
+  recruiterRemarks?: string | null
+  hiringManagerRemarks?: string | null
+  currentUser?: {
+    id: string
+    role: string
+  } | null
 }
 
 export function CandidateRemarks({
   applicationId,
   recruiterRemarks,
-  recruiterRemarksUpdatedAt,
-  hmRemarks,
-  hmRemarksUpdatedAt,
-  currentUser,
+  hiringManagerRemarks,
+  currentUser
 }: CandidateRemarksProps) {
-  const router = useRouter()
   const [isEditingRecruiter, setIsEditingRecruiter] = useState(false)
   const [isEditingHM, setIsEditingHM] = useState(false)
   const [recruiterText, setRecruiterText] = useState(recruiterRemarks || '')
-  const [hmText, setHMText] = useState(hmRemarks || '')
-  const [isSaving, setIsSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [hmText, setHmText] = useState(hiringManagerRemarks || '')
+  const [saving, setSaving] = useState(false)
+  const router = useRouter()
 
-  const isRecruiter = currentUser.role === 'recruiter' || currentUser.role === 'admin'
-  const isHiringManager = currentUser.role === 'hiring_manager' || currentUser.role === 'admin'
+  const isRecruiter = currentUser?.role === 'admin' || currentUser?.role === 'recruiter'
+  const isHiringManager = currentUser?.role === 'admin' || currentUser?.role === 'hiring_manager'
 
-  const handleSaveRecruiterRemarks = async () => {
-    if (recruiterText.length > 350) {
-      setError('Recruiter remarks cannot exceed 350 characters')
-      return
-    }
-
-    setIsSaving(true)
-    setError(null)
-
+  const handleSaveRecruiter = async () => {
+    setSaving(true)
     try {
       const supabase = createClient()
-      const { error: updateError } = await supabase
+      await supabase
         .from('applications')
-        .update({
-          recruiter_remarks: recruiterText || null,
-          recruiter_remarks_updated_at: new Date().toISOString(),
-        })
+        .update({ recruiter_remarks: recruiterText })
         .eq('id', applicationId)
-
-      if (updateError) throw updateError
-
       setIsEditingRecruiter(false)
       router.refresh()
-    } catch (err) {
-      console.error('[v0] Error saving recruiter remarks:', err)
-      setError('Failed to save remarks')
+    } catch (error) {
+      console.error('Failed to save recruiter remarks:', error)
     } finally {
-      setIsSaving(false)
+      setSaving(false)
     }
   }
 
-  const handleSaveHMRemarks = async () => {
-    if (hmText.length > 350) {
-      setError('Hiring manager remarks cannot exceed 350 characters')
-      return
-    }
-
-    setIsSaving(true)
-    setError(null)
-
+  const handleSaveHM = async () => {
+    setSaving(true)
     try {
       const supabase = createClient()
-      const { error: updateError } = await supabase
+      await supabase
         .from('applications')
-        .update({
-          hm_remarks: hmText || null,
-          hm_remarks_updated_at: new Date().toISOString(),
-        })
+        .update({ hiring_manager_remarks: hmText })
         .eq('id', applicationId)
-
-      if (updateError) throw updateError
-
       setIsEditingHM(false)
       router.refresh()
-    } catch (err) {
-      console.error('[v0] Error saving HM remarks:', err)
-      setError('Failed to save remarks')
+    } catch (error) {
+      console.error('Failed to save hiring manager remarks:', error)
     } finally {
-      setIsSaving(false)
+      setSaving(false)
     }
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MessageSquare className="h-5 w-5" />
-          Processing Remarks
-        </CardTitle>
-        <CardDescription>
-          Internal comments visible to recruiters, hiring managers, and admin
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Recruiter Remarks */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                Recruiter/HRBP
-              </Badge>
-              {recruiterRemarksUpdatedAt && (
-                <span className="text-xs text-muted-foreground">
-                  Updated {format(new Date(recruiterRemarksUpdatedAt), 'MMM d, yyyy h:mm a')}
-                </span>
-              )}
-            </div>
-            {isRecruiter && !isEditingRecruiter && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsEditingRecruiter(true)}
-              >
-                <Pencil className="h-4 w-4 mr-1" />
-                {recruiterRemarks ? 'Edit' : 'Add'}
-              </Button>
-            )}
-          </div>
+    <div className="mt-4 space-y-4 border-t pt-4">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <span className="font-medium">Processing Remarks</span>
+        <span className="text-xs">Internal comments visible to recruiters, hiring managers, and admin</span>
+      </div>
 
-          {isEditingRecruiter ? (
-            <div className="space-y-2">
-              <Textarea
-                value={recruiterText}
-                onChange={(e) => setRecruiterText(e.target.value)}
-                placeholder="Enter your remarks about the candidate (max 350 characters)"
-                maxLength={350}
-                rows={4}
-              />
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">
-                  {recruiterText.length}/350 characters
-                </span>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setIsEditingRecruiter(false)
-                      setRecruiterText(recruiterRemarks || '')
-                    }}
-                    disabled={isSaving}
-                  >
-                    <X className="h-4 w-4 mr-1" />
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleSaveRecruiterRemarks}
-                    disabled={isSaving}
-                  >
-                    {isSaving ? (
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                    ) : (
-                      <Check className="h-4 w-4 mr-1" />
-                    )}
-                    Save
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-lg border bg-muted/30 p-3">
-              {recruiterRemarks ? (
-                <p className="text-sm whitespace-pre-wrap">{recruiterRemarks}</p>
-              ) : (
-                <p className="text-sm text-muted-foreground italic">No remarks added yet</p>
-              )}
-            </div>
+      {/* Recruiter/HRBP Remarks */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Badge variant="outline" className="text-xs">Recruiter/HRBP</Badge>
+          {isRecruiter && !isEditingRecruiter && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => {
+                console.log('[v0] Clicked Add for Recruiter')
+                setIsEditingRecruiter(true)
+              }}
+              className="h-7 text-xs"
+            >
+              <Pencil className="h-3 w-3 mr-1" />
+              {recruiterRemarks ? 'Edit' : 'Add'}
+            </Button>
           )}
         </div>
-
-        {/* Hiring Manager Remarks */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                Hiring Manager
-              </Badge>
-              {hmRemarksUpdatedAt && (
-                <span className="text-xs text-muted-foreground">
-                  Updated {format(new Date(hmRemarksUpdatedAt), 'MMM d, yyyy h:mm a')}
-                </span>
-              )}
-            </div>
-            {isHiringManager && !isEditingHM && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsEditingHM(true)}
-              >
-                <Pencil className="h-4 w-4 mr-1" />
-                {hmRemarks ? 'Edit' : 'Add'}
+        {isEditingRecruiter ? (
+          <div className="space-y-2">
+            <Textarea
+              value={recruiterText}
+              onChange={(e) => setRecruiterText(e.target.value)}
+              placeholder="Enter recruiter remarks..."
+              className="min-h-[80px] text-sm"
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleSaveRecruiter} disabled={saving}>
+                <Save className="h-3 w-3 mr-1" />
+                {saving ? 'Saving...' : 'Save'}
               </Button>
-            )}
+              <Button size="sm" variant="outline" onClick={() => {
+                setIsEditingRecruiter(false)
+                setRecruiterText(recruiterRemarks || '')
+              }}>
+                <X className="h-3 w-3 mr-1" />
+                Cancel
+              </Button>
+            </div>
           </div>
-
-          {isEditingHM ? (
-            <div className="space-y-2">
-              <Textarea
-                value={hmText}
-                onChange={(e) => setHMText(e.target.value)}
-                placeholder="Enter your remarks about the candidate (max 350 characters)"
-                maxLength={350}
-                rows={4}
-              />
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">
-                  {hmText.length}/350 characters
-                </span>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setIsEditingHM(false)
-                      setHMText(hmRemarks || '')
-                    }}
-                    disabled={isSaving}
-                  >
-                    <X className="h-4 w-4 mr-1" />
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleSaveHMRemarks}
-                    disabled={isSaving}
-                  >
-                    {isSaving ? (
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                    ) : (
-                      <Check className="h-4 w-4 mr-1" />
-                    )}
-                    Save
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-lg border bg-muted/30 p-3">
-              {hmRemarks ? (
-                <p className="text-sm whitespace-pre-wrap">{hmRemarks}</p>
-              ) : (
-                <p className="text-sm text-muted-foreground italic">No remarks added yet</p>
-              )}
-            </div>
-          )}
-        </div>
-
-        {error && (
-          <p className="text-sm text-destructive">{error}</p>
+        ) : (
+          <p className="text-sm text-muted-foreground bg-muted/50 p-2 rounded">
+            {recruiterRemarks || 'No remarks added yet'}
+          </p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Hiring Manager Remarks */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Badge variant="outline" className="text-xs bg-blue-50">Hiring Manager</Badge>
+          {isHiringManager && !isEditingHM && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => {
+                console.log('[v0] Clicked Add for Hiring Manager')
+                setIsEditingHM(true)
+              }}
+              className="h-7 text-xs"
+            >
+              <Pencil className="h-3 w-3 mr-1" />
+              {hiringManagerRemarks ? 'Edit' : 'Add'}
+            </Button>
+          )}
+        </div>
+        {isEditingHM ? (
+          <div className="space-y-2">
+            <Textarea
+              value={hmText}
+              onChange={(e) => setHmText(e.target.value)}
+              placeholder="Enter hiring manager remarks..."
+              className="min-h-[80px] text-sm"
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleSaveHM} disabled={saving}>
+                <Save className="h-3 w-3 mr-1" />
+                {saving ? 'Saving...' : 'Save'}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => {
+                setIsEditingHM(false)
+                setHmText(hiringManagerRemarks || '')
+              }}>
+                <X className="h-3 w-3 mr-1" />
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground bg-muted/50 p-2 rounded">
+            {hiringManagerRemarks || 'No remarks added yet'}
+          </p>
+        )}
+      </div>
+    </div>
   )
 }
