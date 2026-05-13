@@ -62,7 +62,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
     if (!formData.title || !formData.department_id || !formData.location || 
         !formData.project_name || !formData.recruiter_id || !formData.employment_type ||
         !formData.status || !formData.closing_date || !formData.qualification ||
-        !formData.salary_currency || !formData.budgeted_salary || !formData.years_of_experience ||
+         !formData.years_of_experience ||
         !formData.age_criteria || formData.required_languages.length === 0 ||
         !formData.description || !formData.requirements || !formData.place_of_work) {
       setError('Please fill in all required fields')
@@ -274,7 +274,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="salary_currency">Salary Currency <RequiredMark /></Label>
+              <Label htmlFor="salary_currency">Salary Currency</Label>
               <Select
                 value={formData.salary_currency}
                 onValueChange={(value) => setFormData({ ...formData, salary_currency: value as SalaryCurrency })}
@@ -293,7 +293,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="budgeted_salary">Budgeted Salary (Annual) <RequiredMark /></Label>
+              <Label htmlFor="budgeted_salary">Budgeted Salary (Annual)</Label>
               <Input
                 id="budgeted_salary"
                 type="number"
