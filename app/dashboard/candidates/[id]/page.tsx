@@ -58,8 +58,6 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
   
-  if (applicationsError) {
-  }
   
   // Fetch interviews separately for each application
   const applicationIds = (applications || []).map(a => a.id)
