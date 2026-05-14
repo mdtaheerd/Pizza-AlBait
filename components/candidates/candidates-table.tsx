@@ -25,7 +25,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Eye, Pencil, Trash2, FileText, Linkedin, Globe, Search, X, Filter } from 'lucide-react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { MoreHorizontal, Eye, Pencil, Trash2, FileText, Linkedin, Globe, Search, X, Filter, Briefcase } from 'lucide-react'
 import { format } from 'date-fns'
 import type { Candidate } from '@/lib/types'
 import Link from 'next/link'
@@ -43,11 +49,16 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Card, CardContent } from '@/components/ui/card'
 
+interface PositionInfo {
+  title: string
+  projectName: string | null
+}
+
 interface CandidateWithStats extends Candidate {
   _stats: {
     total: number
     active: number
-    positions: string[]
+    positions: PositionInfo[]
   }
 }
 
@@ -59,7 +70,6 @@ interface Job {
 interface CandidatesTableProps {
   candidates: CandidateWithStats[]
   nationalities: string[]
-  qualifications: string[]
   jobs: Job[]
 }
 
@@ -71,25 +81,15 @@ const SOURCE_LABELS: Record<string, string> = {
   other: 'Other',
 }
 
-const EXPERIENCE_RANGES = [
-  { value: '0-2', label: '0-2 years', min: 0, max: 2 },
-  { value: '3-5', label: '3-5 years', min: 3, max: 5 },
-  { value: '6-10', label: '6-10 years', min: 6, max: 10 },
-  { value: '11-15', label: '11-15 years', min: 11, max: 15 },
-  { value: '15+', label: '15+ years', min: 15, max: 100 },
-]
-
-export function CandidatesTable({ candidates, nationalities, qualifications, jobs }: CandidatesTableProps) {
+export function CandidatesTable({ candidates, nationalities, jobs }: CandidatesTableProps) {
   const router = useRouter()
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   
-  // Filter states
+  // Filter states - removed qualification and experience
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedNationality, setSelectedNationality] = useState<string>('all')
-  const [selectedQualification, setSelectedQualification] = useState<string>('all')
   const [selectedPosition, setSelectedPosition] = useState<string>('all')
-  const [selectedExperience, setSelectedExperience] = useState<string>('all')
 
   const handleDelete = async () => {
     if (!deleteId) return
@@ -105,12 +105,10 @@ export function CandidatesTable({ candidates, nationalities, qualifications, job
   const clearFilters = () => {
     setSearchQuery('')
     setSelectedNationality('all')
-    setSelectedQualification('all')
     setSelectedPosition('all')
-    setSelectedExperience('all')
   }
 
-  const hasActiveFilters = searchQuery || selectedNationality !== 'all' || selectedQualification !== 'all' || selectedPosition !== 'all' || selectedExperience !== 'all'
+  const hasActiveFilters = searchQuery || selectedNationality !== 'all' || selectedPosition !== 'all'
 
   // Filter candidates based on all criteria
   const filteredCandidates = useMemo(() => {
@@ -129,27 +127,18 @@ export function CandidatesTable({ candidates, nationalities, qualifications, job
         return false
       }
 
-      // Filter by qualification
-      if (selectedQualification !== 'all' && candidate.qualification !== selectedQualification) {
-        return false
-      }
-
       // Filter by position (job title the candidate has applied to)
       if (selectedPosition !== 'all') {
         const appliedPositions = candidate._stats?.positions || []
         const selectedJob = jobs.find(j => j.id === selectedPosition)
-        if (!selectedJob || !appliedPositions.includes(selectedJob.title)) {
+        if (!selectedJob || !appliedPositions.find(p => p.title === selectedJob.title)) {
           return false
         }
       }
 
-      // Filter by experience range (using notice_period_days as a proxy or could be calculated from date_of_birth)
-      // For now, we'll skip this if no experience data is available
-      // This would need a dedicated experience_years field in the candidates table
-
       return true
     })
-  }, [candidates, searchQuery, selectedNationality, selectedQualification, selectedPosition, jobs])
+  }, [candidates, searchQuery, selectedNationality, selectedPosition, jobs])
 
   if (candidates.length === 0) {
     return (
@@ -167,7 +156,7 @@ export function CandidatesTable({ candidates, nationalities, qualifications, job
   }
 
   return (
-    <>
+    <TooltipProvider>
       {/* Filters Section */}
       <Card className="mb-4">
         <CardContent className="pt-4">
@@ -181,9 +170,9 @@ export function CandidatesTable({ candidates, nationalities, qualifications, job
               </Button>
             )}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {/* Search by Name */}
-            <div className="relative xl:col-span-1">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search by name, email..."
@@ -218,32 +207,6 @@ export function CandidatesTable({ candidates, nationalities, qualifications, job
                 ))}
               </SelectContent>
             </Select>
-
-            {/* Qualification Filter */}
-            <Select value={selectedQualification} onValueChange={setSelectedQualification}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Qualifications" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Qualifications</SelectItem>
-                {qualifications.map(qual => (
-                  <SelectItem key={qual} value={qual}>{qual}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Experience Range Filter */}
-            <Select value={selectedExperience} onValueChange={setSelectedExperience}>
-              <SelectTrigger>
-                <SelectValue placeholder="Experience Range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Experience</SelectItem>
-                {EXPERIENCE_RANGES.map(range => (
-                  <SelectItem key={range.value} value={range.value}>{range.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           {/* Results count */}
@@ -260,7 +223,7 @@ export function CandidatesTable({ candidates, nationalities, qualifications, job
               <TableHead>Name</TableHead>
               <TableHead className="hidden md:table-cell">Email</TableHead>
               <TableHead className="hidden sm:table-cell">Source</TableHead>
-              <TableHead>Applications</TableHead>
+              <TableHead>Positions Applied</TableHead>
               <TableHead className="hidden lg:table-cell">Links</TableHead>
               <TableHead className="hidden lg:table-cell">Added</TableHead>
               <TableHead className="w-[50px]"></TableHead>
@@ -298,14 +261,51 @@ export function CandidatesTable({ candidates, nationalities, qualifications, job
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-col">
-                      <span>{candidate._stats.active} active</span>
-                      {candidate._stats.total > candidate._stats.active && (
-                        <span className="text-xs text-muted-foreground">
-                          ({candidate._stats.total} total)
-                        </span>
-                      )}
-                    </div>
+                    {candidate._stats.positions.length === 0 ? (
+                      <span className="text-muted-foreground text-sm">No applications</span>
+                    ) : (
+                      <div className="space-y-1">
+                        {candidate._stats.positions.slice(0, 2).map((pos, idx) => (
+                          <Tooltip key={idx}>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center gap-1.5 cursor-default">
+                                <Briefcase className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                                <span className="text-sm truncate max-w-[180px]">{pos.title}</span>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <div>
+                                <p className="font-medium">{pos.title}</p>
+                                {pos.projectName && (
+                                  <p className="text-xs text-muted-foreground">Project: {pos.projectName}</p>
+                                )}
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        ))}
+                        {candidate._stats.positions.length > 2 && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="text-xs text-muted-foreground cursor-default">
+                                +{candidate._stats.positions.length - 2} more
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <div className="space-y-1">
+                                {candidate._stats.positions.slice(2).map((pos, idx) => (
+                                  <div key={idx}>
+                                    <p className="font-medium">{pos.title}</p>
+                                    {pos.projectName && (
+                                      <p className="text-xs text-muted-foreground">Project: {pos.projectName}</p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
                     <div className="flex items-center gap-2">
@@ -405,6 +405,6 @@ export function CandidatesTable({ candidates, nationalities, qualifications, job
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </TooltipProvider>
   )
 }

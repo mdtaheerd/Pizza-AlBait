@@ -12,10 +12,10 @@ export default async function CandidatesPage() {
     .select('*')
     .order('created_at', { ascending: false })
 
-  // Get application counts and job titles for each candidate
+  // Get applications with job details including project_name
   const { data: applications } = await supabase
     .from('applications')
-    .select('candidate_id, stage, job_id, job:jobs(id, title)')
+    .select('candidate_id, stage, job_id, job:jobs(id, title, project_name)')
 
   const applicationsByCandidate = (applications || []).reduce((acc, app) => {
     if (!acc[app.candidate_id]) {
@@ -25,11 +25,18 @@ export default async function CandidatesPage() {
     if (!['hired', 'rejected'].includes(app.stage)) {
       acc[app.candidate_id].active++
     }
-    if (app.job?.title && !acc[app.candidate_id].positions.includes(app.job.title)) {
-      acc[app.candidate_id].positions.push(app.job.title)
+    if (app.job?.title) {
+      const positionInfo = {
+        title: app.job.title,
+        projectName: app.job.project_name || null
+      }
+      // Avoid duplicates
+      if (!acc[app.candidate_id].positions.find((p: any) => p.title === app.job.title)) {
+        acc[app.candidate_id].positions.push(positionInfo)
+      }
     }
     return acc
-  }, {} as Record<string, { total: number; active: number; positions: string[] }>)
+  }, {} as Record<string, { total: number; active: number; positions: { title: string; projectName: string | null }[] }>)
 
   // Get unique values for filter dropdowns
   const { data: jobs } = await supabase
@@ -42,9 +49,8 @@ export default async function CandidatesPage() {
     _stats: applicationsByCandidate[candidate.id] || { total: 0, active: 0, positions: [] },
   }))
 
-  // Extract unique nationalities and qualifications from candidates
+  // Extract unique nationalities from candidates
   const nationalities = [...new Set((candidates || []).map(c => c.nationality).filter(Boolean))].sort()
-  const qualifications = [...new Set((candidates || []).map(c => c.qualification).filter(Boolean))].sort()
 
   return (
     <div className="space-y-6">
@@ -74,7 +80,6 @@ export default async function CandidatesPage() {
       <CandidatesTable 
         candidates={candidatesWithStats} 
         nationalities={nationalities}
-        qualifications={qualifications}
         jobs={jobs || []}
       />
     </div>
