@@ -51,9 +51,9 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   }
 
   // Fetch applications using the same supabase client (RLS is disabled on all tables)
-  const serviceClient = createServiceClient()
+  // Use the same authenticated client for applications
   console.log('[v0] Fetching applications for candidate:', id)
-  const { data: applications, error: applicationsError } = await serviceClient
+  const { data: applications, error: applicationsError } = await supabase
     .from('applications')
     .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, recruiter_id, hiring_manager_id)')
     .eq('candidate_id', id)
@@ -67,7 +67,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   // Fetch interviews separately for each application
   const applicationIds = (applications || []).map(a => a.id)
   const { data: allInterviews } = applicationIds.length > 0
-    ? await serviceClient.from('interviews').select('id, application_id, scheduled_at, status').in('application_id', applicationIds)
+    ? await supabase.from('interviews').select('id, application_id, scheduled_at, status').in('application_id', applicationIds)
     : { data: [] }
   
   // Group interviews by application_id
@@ -90,7 +90,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   const allProfileIds = [...new Set([...lockerIds, ...hmIds, ...recruiterIds])]
   
   const { data: relatedProfiles } = allProfileIds.length > 0
-    ? await serviceClient.from('profiles').select('id, full_name, email').in('id', allProfileIds)
+    ? await supabase.from('profiles').select('id, full_name, email').in('id', allProfileIds)
     : { data: [] }
   
   const profileMap = (relatedProfiles || []).reduce((acc, p) => {
@@ -119,7 +119,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   // Fetch actor profiles separately for history
   const actorIds = [...new Set((history || []).map(h => h.actor_id).filter(Boolean))]
   const { data: actors } = actorIds.length > 0
-    ? await serviceClient.from('profiles').select('id, full_name, email').in('id', actorIds)
+    ? await supabase.from('profiles').select('id, full_name, email').in('id', actorIds)
     : { data: [] }
 
   const actorMap = (actors || []).reduce((acc, a) => {
