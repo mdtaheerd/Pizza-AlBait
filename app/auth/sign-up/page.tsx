@@ -1,6 +1,5 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -36,72 +35,34 @@ export default function SignUpPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
     try {
-      // First check if user already exists with this email
-      const reregisterResponse = await fetch('/api/auth/reregister', {
+      // Use server-side API to create user without email confirmation
+      const response = await fetch('/api/auth/admin-signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({
+          email,
+          password,
+          fullName,
+          role,
+        }),
       })
-      const reregisterResult = await reregisterResponse.json()
 
-      if (reregisterResult.wasRejected) {
-        // User was rejected and has been reset to pending - show success message
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Registration failed')
+      }
+
+      // Redirect to success page
+      if (result.reregistered) {
         router.push('/auth/sign-up-success?reregistered=true')
-        return
+      } else {
+        router.push('/auth/sign-up-success')
       }
-
-      if (reregisterResult.isPending) {
-        setError('Your registration is already pending approval. Please wait for admin review.')
-        setIsLoading(false)
-        return
-      }
-
-      if (reregisterResult.isApproved) {
-        setError('You already have an approved account. Please login instead.')
-        setIsLoading(false)
-        return
-      }
-
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo:
-            process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ??
-            `${window.location.origin}/auth/callback`,
-          data: {
-            full_name: fullName,
-            role: role,
-          },
-        },
-      })
-      if (error) throw error
-
-      // Send notification to admin for non-candidate signups
-      if (role !== 'candidate' && data.user) {
-        try {
-          await fetch('/api/auth/notify-admin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId: data.user.id,
-              email,
-              fullName,
-              role,
-            }),
-          })
-        } catch (notifyError) {
-          // Don't block signup if notification fails
-          console.error('Failed to notify admin:', notifyError)
-        }
-      }
-
-      router.push('/auth/sign-up-success')
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'An error occurred')
     } finally {
@@ -234,7 +195,6 @@ export default function SignUpPage() {
                       <SelectContent>
                         <SelectItem value="recruiter">Recruiter/HRBP</SelectItem>
                         <SelectItem value="hiring_manager">Hiring Manager</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
