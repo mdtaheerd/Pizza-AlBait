@@ -19,10 +19,12 @@ export default async function UsersPage() {
     redirect('/dashboard')
   }
   
-  // Fetch all users
+  // Fetch only Recruiters/HRBP, Hiring Managers, and Admins (not candidates)
+  // Candidates are auto-approved and don't need admin verification
   const { data: users } = await supabase
     .from('profiles')
     .select('*, department:departments(*)')
+    .neq('role', 'candidate')
     .order('created_at', { ascending: false })
   
   return (
