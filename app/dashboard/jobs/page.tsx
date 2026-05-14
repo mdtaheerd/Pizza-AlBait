@@ -11,7 +11,7 @@ export default async function JobsPage() {
     .from('jobs')
     .select(`
       *,
-      department:departments(name)
+      department:departments(id, name)
     `)
     .order('created_at', { ascending: false })
 
@@ -19,6 +19,12 @@ export default async function JobsPage() {
   if (error) {
     console.error('[v0] Jobs fetch error:', error)
   }
+
+  // Fetch all departments for filter dropdown
+  const { data: departments } = await supabase
+    .from('departments')
+    .select('id, name')
+    .order('name')
 
   // Fetch creator and recruiter names separately to avoid foreign key issues
   const creatorIds = [...new Set((jobs || []).map(j => j.created_by).filter(Boolean))]
@@ -29,6 +35,13 @@ export default async function JobsPage() {
     ? await supabase.from('profiles').select('id, full_name').in('id', allProfileIds)
     : { data: [] }
   
+  // Fetch all recruiters for filter dropdown
+  const { data: allRecruiters } = await supabase
+    .from('profiles')
+    .select('id, full_name')
+    .in('role', ['recruiter', 'admin'])
+    .order('full_name')
+
   const profileMap = (profiles || []).reduce((acc, p) => {
     acc[p.id] = p.full_name
     return acc
@@ -70,7 +83,11 @@ export default async function JobsPage() {
         </Button>
       </div>
 
-      <JobsTable jobs={jobsWithCounts} />
+      <JobsTable 
+        jobs={jobsWithCounts} 
+        departments={departments || []}
+        recruiters={allRecruiters || []}
+      />
     </div>
   )
 }
