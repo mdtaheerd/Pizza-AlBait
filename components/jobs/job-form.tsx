@@ -33,6 +33,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
 
   const [formData, setFormData] = useState({
     title: job?.title || '',
+    num_positions: (job as any)?.num_positions?.toString() || '1',
     description: job?.description || '',
     requirements: job?.requirements || '',
     department_id: job?.department_id || '',
@@ -78,6 +79,7 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
 
       const jobData = {
         title: formData.title,
+        num_positions: formData.num_positions ? parseInt(formData.num_positions) : 1,
         description: formData.description || null,
         requirements: formData.requirements || null,
         department_id: formData.department_id || null,
@@ -129,16 +131,30 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
 
   return (
     <Card>
-      <CardContent className="pt-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="title">Job Title <RequiredMark /></Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="e.g. Senior Planning Engineer"
-              required
+          <div className="grid gap-4 sm:grid-cols-4">
+            <div className="sm:col-span-3 space-y-2">
+              <Label htmlFor="title">Job Title <RequiredMark /></Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="e.g. Senior Planning Engineer"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="num_positions">No. of Positions <RequiredMark /></Label>
+              <Input
+                id="num_positions"
+                type="number"
+                min="1"
+                value={formData.num_positions}
+                onChange={(e) => setFormData({ ...formData, num_positions: e.target.value })}
+                placeholder="1"
+                required
+              />
+            </div>
+          </div>
             />
           </div>
 

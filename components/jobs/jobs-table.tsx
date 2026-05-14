@@ -283,12 +283,19 @@ export function JobsTable({ jobs, departments, recruiters }: JobsTableProps) {
                   </TableCell>
                   <TableCell>
                     <div>
-                      <Link
-                        href={`/dashboard/jobs/${job.id}`}
-                        className="font-medium hover:underline"
-                      >
-                        {job.title}
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/dashboard/jobs/${job.id}`}
+                          className="font-medium hover:underline"
+                        >
+                          {job.title}
+                        </Link>
+                        {(job as any).num_positions && (job as any).num_positions > 0 && (
+                          <Badge variant="outline" className="text-xs font-normal">
+                            {(job as any).num_positions} {(job as any).num_positions === 1 ? 'position' : 'positions'}
+                          </Badge>
+                        )}
+                      </div>
                       {job.location && (
                         <p className="text-sm text-muted-foreground">{job.location}</p>
                       )}
