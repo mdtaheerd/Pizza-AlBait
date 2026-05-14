@@ -55,6 +55,7 @@ export function CandidateProfileEditForm({ candidate }: CandidateProfileEditForm
     current_location: candidate.current_location || '',
     current_company: candidate.current_company || '',
     current_job_title: candidate.current_job_title || '',
+    years_of_experience: candidate.years_of_experience?.toString() || '',
     current_salary: candidate.current_salary?.toString() || '',
     current_salary_currency: candidate.current_salary_currency || 'AED',
     expected_salary: candidate.expected_salary?.toString() || '',
@@ -372,6 +373,19 @@ export function CandidateProfileEditForm({ candidate }: CandidateProfileEditForm
                     name="current_job_title"
                     value={formData.current_job_title}
                     onChange={handleChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="years_of_experience">Years of Experience</Label>
+                  <Input
+                    id="years_of_experience"
+                    name="years_of_experience"
+                    type="number"
+                    min="0"
+                    max="50"
+                    value={formData.years_of_experience}
+                    onChange={handleChange}
+                    placeholder="e.g. 5"
                   />
                 </div>
               </div>
