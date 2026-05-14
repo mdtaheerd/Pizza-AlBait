@@ -21,10 +21,17 @@ export default async function ApplyToJobPage({ params }: Props) {
     notFound()
   }
 
-  // Fetch open jobs
+  // Fetch open jobs with recruiter info
   const { data: jobs } = await supabase
     .from('jobs')
-    .select('id, title, department:departments(id, name), location')
+    .select(`
+      id, 
+      title, 
+      department:departments(id, name), 
+      location,
+      recruiter_id,
+      recruiter:profiles!jobs_recruiter_id_fkey(id, full_name)
+    `)
     .eq('status', 'open')
     .order('created_at', { ascending: false })
 

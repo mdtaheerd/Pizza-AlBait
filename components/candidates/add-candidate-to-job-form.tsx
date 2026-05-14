@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/client'
-import { ArrowLeft, Briefcase, Loader2 } from 'lucide-react'
+import { ArrowLeft, Briefcase, Loader2, User } from 'lucide-react'
 import Link from 'next/link'
 
 interface Job {
@@ -21,6 +21,8 @@ interface Job {
   title: string
   department: { id: string; name: string } | null
   location: string | null
+  recruiter_id: string | null
+  recruiter: { id: string; full_name: string } | null
 }
 
 interface AddCandidateToJobFormProps {
@@ -47,7 +49,16 @@ export function AddCandidateToJobForm({ candidateId, candidateName, availableJob
     setError(null)
 
     try {
-      // Create application
+      // First, delete any existing rejected application for this candidate+job
+      // This allows re-adding a previously rejected candidate to the same job
+      await supabase
+        .from('applications')
+        .delete()
+        .eq('candidate_id', candidateId)
+        .eq('job_id', selectedJobId)
+        .eq('stage', 'rejected')
+
+      // Create new application
       const { error: appError } = await supabase
         .from('applications')
         .insert({
@@ -118,9 +129,12 @@ export function AddCandidateToJobForm({ candidateId, candidateName, availableJob
                   {availableJobs.map((job) => (
                     <SelectItem key={job.id} value={job.id}>
                       <div className="flex flex-col">
-                        <span>{job.title}</span>
+                        <span className="font-medium">{job.title}</span>
                         <span className="text-xs text-muted-foreground">
                           {job.department?.name || 'No department'} • {job.location || 'No location'}
+                          {job.recruiter?.full_name && (
+                            <span className="ml-1">• Recruiter: {job.recruiter.full_name}</span>
+                          )}
                         </span>
                       </div>
                     </SelectItem>
