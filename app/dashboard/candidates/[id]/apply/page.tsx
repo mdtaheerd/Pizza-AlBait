@@ -1,5 +1,5 @@
 import { createServiceClient } from '@/lib/supabase/server'
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { AddCandidateToJobForm } from '@/components/candidates/add-candidate-to-job-form'
 
 interface Props {
@@ -28,21 +28,23 @@ export default async function ApplyToJobPage({ params }: Props) {
     .eq('status', 'open')
     .order('created_at', { ascending: false })
 
-  // Fetch existing applications to filter out already applied jobs
+  // Fetch existing ACTIVE applications (not rejected) to filter out
+  // Rejected candidates can be re-added to the same or different jobs
   const { data: existingApplications } = await supabase
     .from('applications')
-    .select('job_id')
+    .select('job_id, stage')
     .eq('candidate_id', id)
+    .neq('stage', 'rejected')
 
   const appliedJobIds = existingApplications?.map(a => a.job_id) || []
   const availableJobs = jobs?.filter(job => !appliedJobIds.includes(job.id)) || []
 
   return (
     <div className="container max-w-2xl py-8">
-      <h1 className="text-2xl font-bold mb-6">Add {candidate.name} to a Job</h1>
+      <h1 className="text-2xl font-bold mb-6">Add {candidate.full_name} to a Job</h1>
       <AddCandidateToJobForm 
         candidateId={id} 
-        candidateName={candidate.name}
+        candidateName={candidate.full_name}
         availableJobs={availableJobs} 
       />
     </div>
