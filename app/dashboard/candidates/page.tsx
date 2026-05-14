@@ -12,26 +12,39 @@ export default async function CandidatesPage() {
     .select('*')
     .order('created_at', { ascending: false })
 
-  // Get application counts for each candidate
+  // Get application counts and job titles for each candidate
   const { data: applications } = await supabase
     .from('applications')
-    .select('candidate_id, stage')
+    .select('candidate_id, stage, job_id, job:jobs(id, title)')
 
   const applicationsByCandidate = (applications || []).reduce((acc, app) => {
     if (!acc[app.candidate_id]) {
-      acc[app.candidate_id] = { total: 0, active: 0 }
+      acc[app.candidate_id] = { total: 0, active: 0, positions: [] }
     }
     acc[app.candidate_id].total++
     if (!['hired', 'rejected'].includes(app.stage)) {
       acc[app.candidate_id].active++
     }
+    if (app.job?.title && !acc[app.candidate_id].positions.includes(app.job.title)) {
+      acc[app.candidate_id].positions.push(app.job.title)
+    }
     return acc
-  }, {} as Record<string, { total: number; active: number }>)
+  }, {} as Record<string, { total: number; active: number; positions: string[] }>)
+
+  // Get unique values for filter dropdowns
+  const { data: jobs } = await supabase
+    .from('jobs')
+    .select('id, title')
+    .order('title')
 
   const candidatesWithStats = (candidates || []).map((candidate) => ({
     ...candidate,
-    _stats: applicationsByCandidate[candidate.id] || { total: 0, active: 0 },
+    _stats: applicationsByCandidate[candidate.id] || { total: 0, active: 0, positions: [] },
   }))
+
+  // Extract unique nationalities and qualifications from candidates
+  const nationalities = [...new Set((candidates || []).map(c => c.nationality).filter(Boolean))].sort()
+  const qualifications = [...new Set((candidates || []).map(c => c.qualification).filter(Boolean))].sort()
 
   return (
     <div className="space-y-6">
@@ -58,7 +71,12 @@ export default async function CandidatesPage() {
         </div>
       </div>
 
-      <CandidatesTable candidates={candidatesWithStats} />
+      <CandidatesTable 
+        candidates={candidatesWithStats} 
+        nationalities={nationalities}
+        qualifications={qualifications}
+        jobs={jobs || []}
+      />
     </div>
   )
 }
