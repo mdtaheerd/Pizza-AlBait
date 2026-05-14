@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,11 +14,14 @@ import {
 import { Loader2, Home, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function CandidateLoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectUrl = searchParams.get('redirect')
+  
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
@@ -54,12 +57,15 @@ export default function CandidateLoginPage() {
         .eq('id', data.user.id)
         .single()
 
-      if (profile?.role === 'candidate') {
-        router.refresh()
+      router.refresh()
+      
+      // If there's a redirect URL (e.g., applying for a job), go there
+      if (redirectUrl) {
+        window.location.href = redirectUrl
+      } else if (profile?.role === 'candidate') {
         window.location.href = '/candidate/dashboard'
       } else {
         // If not a candidate, redirect to regular dashboard
-        router.refresh()
         window.location.href = '/dashboard'
       }
     } catch (err) {
@@ -69,6 +75,11 @@ export default function CandidateLoginPage() {
       setIsLoading(false)
     }
   }
+
+  // Build the register link with redirect param if present
+  const registerLink = redirectUrl 
+    ? `/candidate/register?redirect=${encodeURIComponent(redirectUrl)}`
+    : '/candidate/register'
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center bg-gradient-to-b from-primary/5 via-background to-background p-6 md:p-10">
@@ -99,7 +110,10 @@ export default function CandidateLoginPage() {
             <div>
               <CardTitle className="text-xl">Candidate Login</CardTitle>
               <CardDescription>
-                Login to your candidate account
+                {redirectUrl 
+                  ? 'Login to continue with your application'
+                  : 'Login to your candidate account'
+                }
               </CardDescription>
             </div>
           </CardHeader>
@@ -166,7 +180,7 @@ export default function CandidateLoginPage() {
               <div className="text-center text-sm">
                 <p className="text-muted-foreground">
                   Don&apos;t have an account?{' '}
-                  <Link href="/candidate/register" className="text-primary hover:underline">
+                  <Link href={registerLink} className="text-primary hover:underline">
                     Register here
                   </Link>
                 </p>

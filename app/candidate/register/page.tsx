@@ -34,13 +34,15 @@ import {
 import { Loader2, Home, Check, ChevronsUpDown, Upload, FileText, X } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { COUNTRY_CODES, COUNTRIES, CURRENCY_OPTIONS, SalaryCurrency } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 export default function CandidateRegisterPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectUrl = searchParams.get('redirect')
   const [isLoading, setIsLoading] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -264,7 +266,7 @@ export default function CandidateRegisterPage() {
       }
 
       // Redirect to candidate dashboard or success page
-      router.push('/candidate/register/success')
+      redirectUrl ? window.location.href = redirectUrl : router.push('/candidate/register/success')
     } catch (err) {
       console.error('[v0] Registration error:', err)
       setError(err instanceof Error ? err.message : 'An error occurred during registration')

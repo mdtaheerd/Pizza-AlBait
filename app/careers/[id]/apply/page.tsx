@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -13,9 +13,26 @@ export default async function ApplyPage({ params }: ApplyPageProps) {
   const { id } = await params
   const supabase = await createClient()
 
-  // Check if user is authenticated - redirect to registration if not
+  // Check if user is authenticated
   const { data: { user } } = await supabase.auth.getUser()
+  
   if (!user) {
+    // User not logged in - redirect to candidate login with return URL
+    // They can register from the login page if they don't have an account
+    redirect(`/candidate/login?redirect=/careers/${id}/apply`)
+  }
+
+  // User is logged in - check if they have a candidate profile
+  const serviceClient = createServiceClient()
+  const { data: candidate } = await serviceClient
+    .from('candidates')
+    .select('id')
+    .eq('email', user.email)
+    .single()
+
+  if (!candidate) {
+    // User is logged in but doesn't have a candidate profile
+    // This shouldn't normally happen, but redirect to registration to complete profile
     redirect(`/candidate/register?redirect=/careers/${id}/apply`)
   }
 
