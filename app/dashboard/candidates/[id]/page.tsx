@@ -1,4 +1,4 @@
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 
 // Force dynamic rendering to ensure fresh data on every request
@@ -105,7 +105,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   }))
 
   // Fetch candidate history
-  const { data: history } = await serviceClient
+  const { data: history } = await supabase
     .from('candidate_history')
     .select('*, job:jobs(title)')
     .eq('candidate_id', id)
