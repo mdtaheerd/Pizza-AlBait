@@ -60,6 +60,10 @@ interface ExtendedApplication {
   hiring_manager_comments?: string | null
   offer_sent_at?: string | null
   hired_at?: string | null
+  rejected_at?: string | null
+  shortlisted_at?: string | null
+  interviewed_at?: string | null
+  screening_at?: string | null
   rejection_comments?: string | null
   rejection_reason?: string | null
   candidate?: {
@@ -81,11 +85,11 @@ interface ExtendedApplication {
     expected_salary?: number | null
     expected_salary_currency?: string | null
     notice_period_days?: number | null
-  }
     years_of_experience?: number | null
     current_company?: string | null
     current_job_title?: string | null
     current_location?: string | null
+  }
   job?: {
     id: string
     title: string
@@ -346,6 +350,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
       'Notice Period (Days)',
       'Applied Date',
       'Stage',
+      'Status Update Date',
       'Interview Date',
       'Rejection Reason',
       'Rejection Comments',
@@ -373,6 +378,17 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
       app.candidate?.notice_period_days?.toString() || '',
       format(new Date(app.applied_at), 'yyyy-MM-dd'),
       STAGE_LABELS[app.stage as keyof typeof STAGE_LABELS] || app.stage,
+      (() => {
+        const stageDate = 
+          app.stage === 'offer' ? app.offer_sent_at :
+          app.stage === 'hired' ? app.hired_at :
+          app.stage === 'rejected' ? app.rejected_at :
+          app.stage === 'interview' ? app.interviewed_at :
+          app.stage === 'screening' ? app.screening_at :
+          app.stage === 'shortlisted' ? app.shortlisted_at :
+          app.updated_at;
+        return stageDate ? format(new Date(stageDate), 'MMM d, yyyy') : '';
+      })(),
       app.interview_date ? format(new Date(app.interview_date), 'yyyy-MM-dd HH:mm') : '',
       app.rejection_reason || '',
       app.rejection_comments || '',
@@ -583,9 +599,13 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                         <TableHead>Current Salary</TableHead>
                         <TableHead>Expected Salary</TableHead>
                         <TableHead>Position Salary Range</TableHead>
+                        <TableHead>Years of Exp</TableHead>
+                        <TableHead>Current Company</TableHead>
+                        <TableHead>Current Job Title</TableHead>
                         <TableHead>Notice Period (Days)</TableHead>
                         <TableHead>Applied Date</TableHead>
                         <TableHead>Stage</TableHead>
+                        <TableHead>Status Update Date</TableHead>
                         <TableHead>Interview Date</TableHead>
                         {reportType === 'rejected' && <TableHead>Rejection Reason</TableHead>}
                         {reportType === 'rejected' && <TableHead>Rejection Comments</TableHead>}
@@ -630,6 +650,15 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                           <TableCell className="text-sm">
                             {formatJobSalary(app.job?.salary_min ?? null, app.job?.salary_max ?? null, app.job?.salary_currency as SalaryCurrency | undefined)}
                           </TableCell>
+                          <TableCell className="text-sm">
+                            {app.candidate?.years_of_experience ?? '-'}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {app.candidate?.current_company || '-'}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {app.candidate?.current_job_title || '-'}
+                          </TableCell>
                           <TableCell>
                             {app.candidate?.notice_period_days !== null && app.candidate?.notice_period_days !== undefined
                               ? app.candidate.notice_period_days
@@ -642,6 +671,19 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                             <Badge className={STAGE_COLORS[app.stage as keyof typeof STAGE_COLORS]}>
                               {STAGE_LABELS[app.stage as keyof typeof STAGE_LABELS] || app.stage}
                             </Badge>
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {(() => {
+                              const stageDate = 
+                                app.stage === 'offer' ? app.offer_sent_at :
+                                app.stage === 'hired' ? app.hired_at :
+                                app.stage === 'rejected' ? app.rejected_at :
+                                app.stage === 'interview' ? app.interviewed_at :
+                                app.stage === 'screening' ? app.screening_at :
+                                app.stage === 'shortlisted' ? app.shortlisted_at :
+                                app.updated_at;
+                              return stageDate ? format(new Date(stageDate), 'MMM d, yyyy') : '-';
+                            })()}
                           </TableCell>
                           <TableCell className="text-sm">
                             {app.interview_date 
@@ -663,7 +705,7 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
                       ))}
                       {filteredApplications.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={reportType === 'rejected' ? 21 : 19} className="text-center text-muted-foreground py-8">
+                          <TableCell colSpan={reportType === 'rejected' ? 25 : 23} className="text-center text-muted-foreground py-8">
                             No applications found
                           </TableCell>
                         </TableRow>
