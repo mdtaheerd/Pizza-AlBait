@@ -63,7 +63,6 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   // Fetch interviews separately for each application
   const applicationIds = (applications || []).map(a => a.id)
   const { data: allInterviews } = applicationIds.length > 0
-    ? await serviceClient.from
     ? await serviceClient.from('interviews').select('id, application_id, scheduled_at, status').in('application_id', applicationIds)
     : { data: [] }
   
