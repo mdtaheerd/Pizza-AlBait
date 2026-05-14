@@ -31,7 +31,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { MoreHorizontal, Eye, Pencil, Trash2, FileText, Linkedin, Globe, Search, X, Filter, Briefcase, UserCheck, Clock } from 'lucide-react'
+import { MoreHorizontal, Eye, Pencil, Trash2, FileText, Linkedin, Globe, Search, X, Filter, Briefcase, UserCheck, Clock, XCircle, UserPlus } from 'lucide-react'
 import { format } from 'date-fns'
 import type { Candidate } from '@/lib/types'
 import Link from 'next/link'
@@ -176,8 +176,14 @@ export function CandidatesTable({ candidates, nationalities, jobs, recruiters }:
       // Filter by status (in process vs available)
       if (selectedStatus !== 'all') {
         const isInProcess = candidate._stats.active > 0
+        const isHired = candidate._stats.hired > 0
+        const isRejected = candidate._stats.rejected > 0 && !isHired && !isInProcess
+        const isAvailable = candidate._stats.total === 0
+        
         if (selectedStatus === 'in_process' && !isInProcess) return false
-        if (selectedStatus === 'available' && isInProcess) return false
+        if (selectedStatus === 'hired' && !isHired) return false
+        if (selectedStatus === 'rejected' && !isRejected) return false
+        if (selectedStatus === 'available' && !isAvailable) return false
       }
 
       return true
@@ -309,6 +315,9 @@ export function CandidatesTable({ candidates, nationalities, jobs, recruiters }:
             ) : (
               filteredCandidates.map((candidate) => {
                 const isInProcess = candidate._stats.active > 0
+                const isHired = candidate._stats.hired > 0
+                const isRejected = candidate._stats.rejected > 0 && !isHired && !isInProcess
+                const isAvailable = candidate._stats.total === 0
                 const currentStages = candidate._stats.stages
                 
                 return (
@@ -330,7 +339,21 @@ export function CandidatesTable({ candidates, nationalities, jobs, recruiters }:
                       </a>
                     </TableCell>
                     <TableCell>
-                      {isInProcess ? (
+                      {isHired ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge className="bg-green-100 text-green-800 hover:bg-green-100 border-green-200">
+                              <UserCheck className="h-3 w-3 mr-1" />
+                              Hired
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <div className="text-xs">
+                              <p className="font-medium">{candidate._stats.hired} position(s) hired</p>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : isInProcess ? (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200">
@@ -345,9 +368,23 @@ export function CandidatesTable({ candidates, nationalities, jobs, recruiters }:
                             </div>
                           </TooltipContent>
                         </Tooltip>
+                      ) : isRejected ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge className="bg-red-100 text-red-800 hover:bg-red-100 border-red-200">
+                              <XCircle className="h-3 w-3 mr-1" />
+                              Rejected
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <div className="text-xs">
+                              <p className="font-medium">{candidate._stats.rejected} application(s) rejected</p>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
                       ) : (
-                        <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50">
-                          <UserCheck className="h-3 w-3 mr-1" />
+                        <Badge variant="outline" className="text-blue-700 border-blue-200 bg-blue-50">
+                          <UserPlus className="h-3 w-3 mr-1" />
                           Available
                         </Badge>
                       )}

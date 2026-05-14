@@ -33,17 +33,26 @@ export default async function CandidatesPage() {
       acc[app.candidate_id] = { 
         total: 0, 
         active: 0, 
+        hired: 0,
+        rejected: 0,
         positions: [],
         recruiters: new Set<string>(),
         stages: new Set<string>()
       }
     }
     acc[app.candidate_id].total++
-    const isActive = !['hired', 'rejected'].includes(app.stage)
-    if (isActive) {
+    // Track all stages including hired/rejected
+    acc[app.candidate_id].stages.add(app.stage)
+    
+    if (app.stage === 'hired') {
+      acc[app.candidate_id].hired++
+    } else if (app.stage === 'rejected') {
+      acc[app.candidate_id].rejected++
+    } else {
+      // Active applications (not hired or rejected)
       acc[app.candidate_id].active++
-      acc[app.candidate_id].stages.add(app.stage)
     }
+    const isActive = !['hired', 'rejected'].includes(app.stage)
     if (app.job?.title) {
       const positionInfo = {
         title: app.job.title,
@@ -64,6 +73,8 @@ export default async function CandidatesPage() {
   }, {} as Record<string, { 
     total: number
     active: number
+    hired: number
+    rejected: number
     positions: { title: string; projectName: string | null; recruiterName: string | null; stage: string }[]
     recruiters: Set<string>
     stages: Set<string>
@@ -89,10 +100,12 @@ export default async function CandidatesPage() {
       _stats: stats ? {
         total: stats.total,
         active: stats.active,
+        hired: stats.hired,
+        rejected: stats.rejected,
         positions: stats.positions,
         recruiters: Array.from(stats.recruiters),
         stages: Array.from(stats.stages)
-      } : { total: 0, active: 0, positions: [], recruiters: [], stages: [] },
+      } : { total: 0, active: 0, hired: 0, rejected: 0, positions: [], recruiters: [], stages: [] },
     }
   })
 
