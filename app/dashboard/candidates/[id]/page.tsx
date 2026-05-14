@@ -54,7 +54,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   const serviceClient = createServiceClient()
   const { data: applications, error: applicationsError } = await serviceClient
     .from('applications')
-    .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by)')
+    .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, recruiter_id, hiring_manager_id)')
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
   
@@ -80,7 +80,8 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   // Fetch locker and hiring manager profiles separately to avoid join issues
   const lockerIds = [...new Set((applicationsWithInterviews || []).map(a => a.locked_by).filter(Boolean))]
   const hmIds = [...new Set((applicationsWithInterviews || []).map(a => a.job?.hiring_manager_id).filter(Boolean))]
-  const allProfileIds = [...new Set([...lockerIds, ...hmIds])]
+  const recruiterIds = [...new Set((applicationsWithInterviews || []).map(a => a.job?.recruiter_id).filter(Boolean))]
+  const allProfileIds = [...new Set([...lockerIds, ...hmIds, ...recruiterIds])]
   
   const { data: relatedProfiles } = allProfileIds.length > 0
     ? await serviceClient.from('profiles').select('id, full_name, email').in('id', allProfileIds)
@@ -97,7 +98,8 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
     locker: app.locked_by ? profileMap[app.locked_by] : null,
     job: app.job ? {
       ...app.job,
-      hiring_manager: app.job.hiring_manager_id ? profileMap[app.job.hiring_manager_id] : null
+      hiring_manager: app.job.hiring_manager_id ? profileMap[app.job.hiring_manager_id] : null,
+      recruiter: app.job.recruiter_id ? profileMap[app.job.recruiter_id] : null
     } : null
   }))
 
@@ -406,6 +408,8 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
                           hiring_manager: (application.job as any).hiring_manager,
                         } : undefined,
                       }}
+                      recruiterName={(application.job as any)?.recruiter?.full_name}
+                      hiringManagerName={(application.job as any)?.hiring_manager?.full_name}
                       currentUser={currentUserProfile}
                     />
                   )}
@@ -418,6 +422,8 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
                       recruiterRemarksUpdatedAt={(application as any).recruiter_remarks_updated_at}
                       hmRemarks={(application as any).hm_remarks}
                       hmRemarksUpdatedAt={(application as any).hm_remarks_updated_at}
+                      recruiterName={(application.job as any)?.recruiter?.full_name}
+                      hiringManagerName={(application.job as any)?.hiring_manager?.full_name}
                       currentUser={currentUserProfile}
                     />
                   )}

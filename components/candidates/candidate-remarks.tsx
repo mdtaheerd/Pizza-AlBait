@@ -11,7 +11,11 @@ import { useRouter } from 'next/navigation'
 interface CandidateRemarksProps {
   applicationId: string
   recruiterRemarks?: string | null
-  hiringManagerRemarks?: string | null
+  recruiterRemarksUpdatedAt?: string | null
+  hmRemarks?: string | null
+  hmRemarksUpdatedAt?: string | null
+  recruiterName?: string | null
+  hiringManagerName?: string | null
   currentUser?: {
     id: string
     role: string
@@ -21,13 +25,17 @@ interface CandidateRemarksProps {
 export function CandidateRemarks({
   applicationId,
   recruiterRemarks,
-  hiringManagerRemarks,
+  recruiterRemarksUpdatedAt,
+  hmRemarks,
+  hmRemarksUpdatedAt,
+  recruiterName,
+  hiringManagerName,
   currentUser
 }: CandidateRemarksProps) {
   const [isEditingRecruiter, setIsEditingRecruiter] = useState(false)
   const [isEditingHM, setIsEditingHM] = useState(false)
   const [recruiterText, setRecruiterText] = useState(recruiterRemarks || '')
-  const [hmText, setHmText] = useState(hiringManagerRemarks || '')
+  const [hmText, setHmText] = useState(hmRemarks || '')
   const [saving, setSaving] = useState(false)
   const router = useRouter()
 
@@ -78,15 +86,17 @@ export function CandidateRemarks({
       {/* Recruiter/HRBP Remarks */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Badge variant="outline" className="text-xs">Recruiter/HRBP</Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-xs">Recruiter/HRBP</Badge>
+            {recruiterName && (
+              <span className="text-xs text-muted-foreground">({recruiterName})</span>
+            )}
+          </div>
           {isRecruiter && !isEditingRecruiter && (
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={() => {
-                console.log('[v0] Clicked Add for Recruiter')
-                setIsEditingRecruiter(true)
-              }}
+              onClick={() => setIsEditingRecruiter(true)}
               className="h-7 text-xs"
             >
               <Pencil className="h-3 w-3 mr-1" />
@@ -127,19 +137,21 @@ export function CandidateRemarks({
       {/* Hiring Manager Remarks */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Badge variant="outline" className="text-xs bg-blue-50">Hiring Manager</Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-xs bg-blue-50">Hiring Manager</Badge>
+            {hiringManagerName && (
+              <span className="text-xs text-muted-foreground">({hiringManagerName})</span>
+            )}
+          </div>
           {isHiringManager && !isEditingHM && (
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={() => {
-                console.log('[v0] Clicked Add for Hiring Manager')
-                setIsEditingHM(true)
-              }}
+              onClick={() => setIsEditingHM(true)}
               className="h-7 text-xs"
             >
               <Pencil className="h-3 w-3 mr-1" />
-              {hiringManagerRemarks ? 'Edit' : 'Add'}
+              {hmRemarks ? 'Edit' : 'Add'}
             </Button>
           )}
         </div>
@@ -159,7 +171,7 @@ export function CandidateRemarks({
               </Button>
               <Button size="sm" variant="outline" onClick={() => {
                 setIsEditingHM(false)
-                setHmText(hiringManagerRemarks || '')
+                setHmText(hmRemarks || '')
               }}>
                 <X className="h-3 w-3 mr-1" />
                 Cancel
@@ -168,7 +180,7 @@ export function CandidateRemarks({
           </div>
         ) : (
           <p className="text-sm text-muted-foreground bg-muted/50 p-2 rounded">
-            {hiringManagerRemarks || 'No remarks added yet'}
+            {hmRemarks || 'No remarks added yet'}
           </p>
         )}
       </div>
