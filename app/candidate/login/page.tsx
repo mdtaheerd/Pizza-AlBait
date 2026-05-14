@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, Suspense } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,7 +17,7 @@ import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-export default function CandidateLoginPage() {
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectUrl = searchParams.get('redirect')
@@ -82,6 +82,79 @@ export default function CandidateLoginPage() {
     : '/candidate/register'
 
   return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          type="email"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          placeholder="your.email@example.com"
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">Password</Label>
+          <Link
+            href="/auth/forgot-password"
+            className="text-xs text-muted-foreground hover:text-primary underline underline-offset-4"
+          >
+            Forgot password?
+          </Link>
+        </div>
+        <div className="relative">
+          <Input
+            id="password"
+            type={showPassword ? 'text' : 'password'}
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            placeholder="Enter your password"
+            required
+            className="pr-10"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            tabIndex={-1}
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3">
+          <p className="text-sm text-destructive">{error}</p>
+        </div>
+      )}
+
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        Login
+      </Button>
+
+      <div className="text-center text-sm">
+        <p className="text-muted-foreground">
+          Don&apos;t have an account?{' '}
+          <Link href={registerLink} className="text-primary hover:underline">
+            Register here
+          </Link>
+        </p>
+      </div>
+    </form>
+  )
+}
+
+export default function CandidateLoginPage() {
+  return (
     <div className="flex min-h-svh w-full items-center justify-center bg-gradient-to-b from-primary/5 via-background to-background p-6 md:p-10">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-accent/10 via-transparent to-transparent" />
       
@@ -110,82 +183,14 @@ export default function CandidateLoginPage() {
             <div>
               <CardTitle className="text-xl">Candidate Login</CardTitle>
               <CardDescription>
-                {redirectUrl 
-                  ? 'Login to continue with your application'
-                  : 'Login to your candidate account'
-                }
+                Login to your candidate account
               </CardDescription>
             </div>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="your.email@example.com"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  <Link
-                    href="/auth/forgot-password"
-                    className="text-xs text-muted-foreground hover:text-primary underline underline-offset-4"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    placeholder="Enter your password"
-                    required
-                    className="pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    tabIndex={-1}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {error && (
-                <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3">
-                  <p className="text-sm text-destructive">{error}</p>
-                </div>
-              )}
-
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Login
-              </Button>
-
-              <div className="text-center text-sm">
-                <p className="text-muted-foreground">
-                  Don&apos;t have an account?{' '}
-                  <Link href={registerLink} className="text-primary hover:underline">
-                    Register here
-                  </Link>
-                </p>
-              </div>
-            </form>
+            <Suspense fallback={<div className="flex justify-center py-4"><Loader2 className="h-6 w-6 animate-spin" /></div>}>
+              <LoginForm />
+            </Suspense>
           </CardContent>
         </Card>
       </div>
