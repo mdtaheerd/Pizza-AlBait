@@ -131,6 +131,8 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
 
   return (
     <Card>
+      <CardContent className="pt-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-4">
             <div className="sm:col-span-3 space-y-2">
               <Label htmlFor="title">Job Title <RequiredMark /></Label>
