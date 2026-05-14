@@ -437,7 +437,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
       </Card>
 
       {/* Candidate History Timeline */}
-      {historyWithActor && historyWithActor.length > 0 && (
+      {historyWithActor {historyWithActor && historyWithActor.length > 0 && ({historyWithActor && historyWithActor.length > 0 && ( (
         <CandidateHistoryTimeline history={historyWithActor as CandidateHistory[]} />
       )}
 
