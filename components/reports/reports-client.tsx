@@ -82,6 +82,10 @@ interface ExtendedApplication {
     expected_salary_currency?: string | null
     notice_period_days?: number | null
   }
+    years_of_experience?: number | null
+    current_company?: string | null
+    current_job_title?: string | null
+    current_location?: string | null
   job?: {
     id: string
     title: string
@@ -332,6 +336,10 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
       'Phone',
       'Home Country Phone',
       'Nationality',
+      'Years of Experience',
+      'Current Company',
+      'Current Position',
+      'Current Location',
       'Current Salary',
       'Expected Salary',
       'Position Salary Range',
@@ -355,6 +363,10 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
       app.candidate?.phone ? `${app.candidate.country_code || ''} ${app.candidate.phone}` : '',
       app.candidate?.home_country_phone ? `${app.candidate.home_country_code || ''} ${app.candidate.home_country_phone}` : '',
       app.candidate?.nationality || '',
+      app.candidate?.years_of_experience?.toString() || '',
+      app.candidate?.current_company || '',
+      app.candidate?.current_job_title || '',
+      app.candidate?.current_location || '',
       formatSalaryForCSV(app.candidate?.current_salary, (app.candidate?.current_salary_currency as SalaryCurrency) || 'AED'),
       formatSalaryForCSV(app.candidate?.expected_salary, (app.candidate?.expected_salary_currency as SalaryCurrency) || 'AED'),
       formatJobSalaryForCSV(app.job?.salary_min ?? null, app.job?.salary_max ?? null, (app.job?.salary_currency as SalaryCurrency) || 'AED'),
@@ -378,7 +390,6 @@ export function ReportsClient({ applications, jobs, currentUser }: ReportsClient
     link.download = `${activeReport}_report_${format(new Date(), 'yyyy-MM-dd')}.csv`
     link.click()
   }
-
   // Export Jobs Report to CSV
   const exportJobsToCSV = () => {
     const headers = ['Job Title', 'Department', 'Status', 'Recruiter Name', 'Recruiter Email', 'Created Date', 'Closing Date', 'Applications Count']

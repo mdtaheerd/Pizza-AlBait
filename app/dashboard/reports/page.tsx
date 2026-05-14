@@ -44,7 +44,11 @@ export default async function ReportsPage() {
         current_salary_currency,
         expected_salary,
         expected_salary_currency,
-        notice_period_days
+        notice_period_days,
+        years_of_experience,
+        current_company,
+        current_job_title,
+        current_location
       ),
       job:jobs(
         id,
