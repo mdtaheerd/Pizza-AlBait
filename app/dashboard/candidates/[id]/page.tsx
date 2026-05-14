@@ -52,11 +52,17 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
 
   // Fetch applications using the same supabase client (RLS is disabled on all tables)
   const serviceClient = createServiceClient()
+  console.log('[v0] Fetching applications for candidate:', id)
   const { data: applications, error: applicationsError } = await serviceClient
     .from('applications')
     .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, recruiter_id, hiring_manager_id)')
     .eq('candidate_id', id)
     .order('applied_at', { ascending: false })
+  
+  if (applicationsError) {
+    console.error('[v0] Applications fetch error:', applicationsError)
+  }
+  console.log('[v0] Applications found:', applications?.length || 0, applications)
   
   // Fetch interviews separately for each application
   const applicationIds = (applications || []).map(a => a.id)
