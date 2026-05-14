@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 
 // Force dynamic rendering to ensure fresh data on every request
@@ -31,6 +31,7 @@ const SOURCE_LABELS: Record<string, string> = {
 export default async function CandidateDetailPage({ params }: CandidateDetailPageProps) {
   const { id } = await params
   const supabase = await createClient()
+  const serviceClient = createServiceClient()
 
   // Get current user profile
   const { data: { user } } = await supabase.auth.getUser()
@@ -52,7 +53,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
 
   // Fetch applications using the same supabase client (RLS is disabled on all tables)
   // Use the same authenticated client for applications
-  const { data: applications, error: applicationsError } = await supabase
+  const { data: applications, error: applicationsError } = await serviceClient
     .from('applications')
     .select('*, job:jobs(id, title, department:departments(id, name), salary_min, salary_max, salary_currency, created_by, recruiter_id, hiring_manager_id)')
     .eq('candidate_id', id)
@@ -62,7 +63,8 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   // Fetch interviews separately for each application
   const applicationIds = (applications || []).map(a => a.id)
   const { data: allInterviews } = applicationIds.length > 0
-    ? await supabase.from('interviews').select('id, application_id, scheduled_at, status').in('application_id', applicationIds)
+    ? await serviceClient.from
+    ? await serviceClient.from('interviews').select('id, application_id, scheduled_at, status').in('application_id', applicationIds)
     : { data: [] }
   
   // Group interviews by application_id
@@ -105,7 +107,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
   }))
 
   // Fetch candidate history
-  const { data: history } = await supabase
+  const { data: history } = await serviceClient
     .from('candidate_history')
     .select('*, job:jobs(title)')
     .eq('candidate_id', id)
