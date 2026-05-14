@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -39,7 +39,7 @@ import { createClient } from '@/lib/supabase/client'
 import { COUNTRY_CODES, COUNTRIES, CURRENCY_OPTIONS, SalaryCurrency } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
-export default function CandidateRegisterPage() {
+function CandidateRegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectUrl = searchParams.get('redirect')
@@ -731,5 +731,17 @@ export default function CandidateRegisterPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function CandidateRegisterPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-svh w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }>
+      <CandidateRegisterForm />
+    </Suspense>
   )
 }
