@@ -81,7 +81,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
 
   // Fetch locker and hiring manager profiles separately to avoid join issues
   const lockerIds = [...new Set((applicationsWithInterviews || []).map(a => a.locked_by).filter(Boolean))]
-  const hmIds = [...new Set((applicationsWithInterviews || []).map(a => a.job?.hiring_manager_id).filter(Boolean))]
+  const hmIds: string[] = [] // hiring_manager_id does not exist in jobs table
   const recruiterIds = [...new Set((applicationsWithInterviews || []).map(a => a.job?.recruiter_id).filter(Boolean))]
   const allProfileIds = [...new Set([...lockerIds, ...hmIds, ...recruiterIds])]
   
@@ -100,7 +100,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
     locker: app.locked_by ? profileMap[app.locked_by] : null,
     job: app.job ? {
       ...app.job,
-      hiring_manager: app.job.hiring_manager_id ? profileMap[app.job.hiring_manager_id] : null,
+      hiring_manager: null, // hiring_manager_id not in jobs table
       recruiter: app.job.recruiter_id ? profileMap[app.job.recruiter_id] : null
     } : null
   }))
