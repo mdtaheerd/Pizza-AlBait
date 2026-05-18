@@ -196,38 +196,28 @@ function CandidateRegisterForm() {
       }
       setIsUploading(false)
 
-      // 2. Sign up the user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.full_name,
-            role: 'candidate',
-          },
-        },
+      // 2. Register candidate via API (bypasses email confirmation)
+      const registerResponse = await fetch('/api/candidate/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          fullName: formData.full_name,
+          phone: formData.phone,
+          nationality: formData.nationality,
+          currentLocation: formData.current_location,
+        }),
       })
 
-      if (authError) throw authError
+      const registerResult = await registerResponse.json()
 
-      if (!authData.user) {
-        throw new Error('Failed to create account')
+      if (!registerResponse.ok || registerResult.error) {
+        throw new Error(registerResult.error || 'Registration failed')
       }
 
-      // 2. Create the candidate profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: authData.user.id,
-          email: formData.email,
-          full_name: formData.full_name,
-          role: 'candidate',
-          approval_status: 'approved', // Candidates don't need approval
-        })
-
-      if (profileError) {
-        console.error('[v0] Profile creation error:', profileError)
-      }
+      // Get the user ID from the response
+      const userId = registerResult.userId
 
       // 4. Create the candidate record with CV info
       const { error: candidateError } = await supabase
@@ -252,7 +242,7 @@ function CandidateRegisterForm() {
           expected_salary: parseFloat(formData.expected_salary),
           expected_salary_currency: formData.expected_salary_currency,
           notice_period_days: parseInt(formData.notice_period_days),
-          user_id: authData.user.id,
+          user_id: userId,
           source: 'career_page',
           resume_url: uploadedCvUrl,
           cv_filename: cvFilename,
