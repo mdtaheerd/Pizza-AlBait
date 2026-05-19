@@ -21,7 +21,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Linkedin, Mail, User, Loader2, Briefcase, Home, Eye, EyeOff } from 'lucide-react'
+import { Linkedin, Mail, User, Loader2, Briefcase, Home, Eye, EyeOff, AlertTriangle } from 'lucide-react'
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('')
@@ -96,11 +96,31 @@ export default function SignUpPage() {
             />
           </Link>
           
+          {/* Warning for Job Applicants */}
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div className="text-sm">
+                <p className="font-semibold text-amber-800">Are you a Job Applicant?</p>
+                <p className="text-amber-700 mt-1">
+                  This page is for HR/Recruiters only. If you want to apply for a job, please{' '}
+                  <Link href="/careers" className="text-primary font-medium underline hover:text-primary/80">
+                    view our open positions
+                  </Link>
+                  {' '}or{' '}
+                  <Link href="/candidate/register" className="text-primary font-medium underline hover:text-primary/80">
+                    register as a candidate
+                  </Link>.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <Card className="shadow-xl">
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl">Create an account</CardTitle>
+              <CardTitle className="text-2xl">HR/Recruiter Registration</CardTitle>
               <CardDescription>
-                Join your team to start hiring
+                For CPECC HR team and Hiring Managers only
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
