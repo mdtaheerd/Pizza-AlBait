@@ -297,11 +297,6 @@ export function JobsTable({ jobs, departments, recruiters }: JobsTableProps) {
                             </Badge>
                           )}
                         </div>
-                        {(job as any).num_positions && (job as any).num_positions > 0 && (
-                          <Badge variant="outline" className="text-xs font-normal">
-                            {(job as any).num_positions} {(job as any).num_positions === 1 ? 'position' : 'positions'}
-                          </Badge>
-                        )}
                       </div>
                       {job.location && (
                         <p className="text-sm text-muted-foreground">{job.location}</p>
