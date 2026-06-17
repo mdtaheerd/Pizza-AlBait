@@ -6,7 +6,7 @@ export default async function NewJobPage() {
 
   const [{ data: departments }, { data: recruiters }] = await Promise.all([
     supabase.from('departments').select('*').order('name'),
-    supabase.from('profiles').select('*').eq('approval_status', 'approved').in('role', ['recruiter', 'hiring_manager']).order('full_name'),
+    supabase.from('profiles').select('*').eq('approval_status', 'approved').in('role', ['recruiter', 'hiring_manager', 'admin']).order('full_name'),
   ])
 
   return (
