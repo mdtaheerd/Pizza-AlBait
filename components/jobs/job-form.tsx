@@ -443,6 +443,17 @@ export function JobForm({ job, departments, recruiters = [] }: JobFormProps) {
               />
             </div>
 
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="other_requirements">Other Requirements</Label>
+              <Textarea
+                id="other_requirements"
+                value={formData.other_requirements}
+                onChange={(e) => setFormData({ ...formData, other_requirements: e.target.value })}
+                placeholder="e.g. Valid UAE driving license, willingness to relocate, specific software skills, etc."
+                rows={3}
+              />
+            </div>
+
 
           </div>
 
