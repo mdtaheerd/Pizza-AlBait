@@ -13,7 +13,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
   const [{ data: job, error }, { data: departments }, { data: recruiters }] = await Promise.all([
     supabase.from('jobs').select('*').eq('id', id).single(),
     supabase.from('departments').select('*').order('name'),
-    supabase.from('profiles').select('*').eq('approval_status', 'approved').order('full_name'),
+    supabase.from('profiles').select('*').eq('approval_status', 'approved').in('role', ['recruiter', 'hiring_manager']).order('full_name'),
   ])
 
   if (error || !job) {
