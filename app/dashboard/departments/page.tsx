@@ -40,6 +40,7 @@ export default async function DepartmentsPage() {
     .from('profiles')
     .select('department_id')
     .eq('approval_status', 'approved')
+    .in('role', ['recruiter', 'hiring_manager'])
   
   const userCountMap = (userCounts || []).reduce((acc, user) => {
     if (user.department_id) {
