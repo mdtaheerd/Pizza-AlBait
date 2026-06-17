@@ -1,13 +1,30 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { checkApiAuthorization } from '@/lib/api-security'
 
 export async function POST(request: Request) {
   try {
+    // SECURITY: Only admins may create HR/Recruiter accounts.
+    // Public self-registration for staff roles is disabled to stop job
+    // applicants from registering themselves as Recruiter/HRBP.
+    const auth = await checkApiAuthorization(['admin'])
+    if (!auth.authorized) {
+      return auth.error!
+    }
+
     const { email, password, fullName, role } = await request.json()
 
     if (!email || !password || !fullName || !role) {
       return NextResponse.json(
         { error: 'Missing required fields' },
+        { status: 400 }
+      )
+    }
+
+    // Only allow recruiter and hiring_manager roles to be created here
+    if (!['recruiter', 'hiring_manager'].includes(role)) {
+      return NextResponse.json(
+        { error: 'Invalid role' },
         { status: 400 }
       )
     }
@@ -23,32 +40,27 @@ export async function POST(request: Request) {
       .single()
 
     if (existingUser) {
-      if (existingUser.approval_status === 'pending') {
-        return NextResponse.json(
-          { error: 'Your registration is already pending approval. Please wait for admin review.', code: 'PENDING' },
-          { status: 400 }
-        )
-      }
       if (existingUser.approval_status === 'approved') {
         return NextResponse.json(
-          { error: 'You already have an approved account. Please login instead.', code: 'APPROVED' },
+          { error: 'This user already has an approved account.', code: 'APPROVED' },
           { status: 400 }
         )
       }
-      if (existingUser.approval_status === 'rejected') {
-        // Reset rejected user to pending
+      if (existingUser.approval_status === 'pending' || existingUser.approval_status === 'rejected') {
+        // Admin is creating the account, so approve immediately
         await supabase
           .from('profiles')
           .update({ 
-            approval_status: 'pending',
+            approval_status: 'approved',
             full_name: fullName,
-            role: role 
+            role: role,
+            updated_at: new Date().toISOString(),
           })
           .eq('id', existingUser.id)
         
         return NextResponse.json({ 
           success: true, 
-          message: 'Your registration has been resubmitted for approval.',
+          message: 'User account activated and approved.',
           reregistered: true 
         })
       }
@@ -80,7 +92,7 @@ export async function POST(request: Request) {
       throw new Error('Failed to create user')
     }
 
-    // Create profile with pending approval status
+    // Create profile - admin-created accounts are auto-approved
     const { error: profileError } = await supabase
       .from('profiles')
       .upsert({
@@ -88,7 +100,7 @@ export async function POST(request: Request) {
         email: email,
         full_name: fullName,
         role: role,
-        approval_status: 'pending',
+        approval_status: 'approved',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
@@ -118,7 +130,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Registration successful. Please wait for admin approval.' 
+      message: 'User account created and approved.' 
     })
 
   } catch (error) {

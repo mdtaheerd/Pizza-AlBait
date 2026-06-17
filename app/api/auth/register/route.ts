@@ -1,8 +1,15 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { checkApiAuthorization } from '@/lib/api-security'
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Only admins may create HR/Recruiter accounts via this endpoint.
+    const auth = await checkApiAuthorization(['admin'])
+    if (!auth.authorized) {
+      return auth.error!
+    }
+
     const { email, password, fullName, role, departmentId } = await request.json()
 
     // Validate inputs

@@ -213,12 +213,12 @@ export default function LoginPage() {
                   </Button>
                 </div>
                 <div className="mt-4 text-center text-sm text-muted-foreground">
-                  {"Don't have an account? "}
+                  {"Looking to apply for a job? "}
                   <Link
-                    href="/auth/sign-up"
+                    href="/candidate/register"
                     className="text-primary font-medium underline underline-offset-4 hover:text-primary/80"
                   >
-                    Sign up
+                    Register as a candidate
                   </Link>
                 </div>
               </form>
