@@ -425,8 +425,8 @@ export default async function HomePage() {
                       </Link>
                     </Button>
                     <Button size="lg" variant="outline" asChild className="rounded-xl">
-                      <Link href="/auth/sign-up">
-                        Create Account
+                      <Link href="/careers">
+                        View Open Positions
                       </Link>
                     </Button>
                   </div>

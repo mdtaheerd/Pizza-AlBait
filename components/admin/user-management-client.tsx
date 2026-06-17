@@ -32,7 +32,15 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs'
-import { CheckCircle, XCircle, Clock, Search, UserCheck, UserX, Loader2 } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
+import { CheckCircle, XCircle, Clock, Search, UserCheck, UserX, Loader2, UserPlus } from 'lucide-react'
 import { format } from 'date-fns'
 
 interface UserManagementClientProps {
@@ -50,6 +58,46 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
   const [revokeReason, setRevokeReason] = useState('')
+
+  // Add User dialog state
+  const [addUserOpen, setAddUserOpen] = useState(false)
+  const [addUserLoading, setAddUserLoading] = useState(false)
+  const [addUserError, setAddUserError] = useState<string | null>(null)
+  const [newUser, setNewUser] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    role: 'recruiter',
+  })
+
+  const handleAddUser = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setAddUserLoading(true)
+    setAddUserError(null)
+    try {
+      const response = await fetch('/api/auth/admin-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: newUser.email,
+          password: newUser.password,
+          fullName: newUser.fullName,
+          role: newUser.role,
+        }),
+      })
+      const result = await response.json()
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create user')
+      }
+      setAddUserOpen(false)
+      setNewUser({ fullName: '', email: '', password: '', role: 'recruiter' })
+      router.refresh()
+    } catch (error) {
+      setAddUserError(error instanceof Error ? error.message : 'An error occurred')
+    } finally {
+      setAddUserLoading(false)
+    }
+  }
 
   const pendingUsers = users.filter(u => u.approval_status === 'pending' && u.role !== 'admin')
   const approvedUsers = users.filter(u => u.approval_status === 'approved')
@@ -348,15 +396,21 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
         </Card>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search users..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9"
-        />
+      {/* Search + Add User */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="relative max-w-sm flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search users..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Button onClick={() => setAddUserOpen(true)} className="gap-2">
+          <UserPlus className="h-4 w-4" />
+          Add User
+        </Button>
       </div>
 
       {/* Tabs */}
@@ -428,6 +482,78 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Add User Dialog */}
+      <Dialog open={addUserOpen} onOpenChange={setAddUserOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add HR/Recruiter User</DialogTitle>
+            <DialogDescription>
+              Create a new Recruiter/HRBP or Hiring Manager account. The account is
+              activated and approved immediately.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleAddUser} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-fullName">Full Name</Label>
+              <Input
+                id="new-fullName"
+                required
+                value={newUser.fullName}
+                onChange={(e) => setNewUser({ ...newUser, fullName: e.target.value })}
+                placeholder="John Doe"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-email">Email</Label>
+              <Input
+                id="new-email"
+                type="email"
+                required
+                value={newUser.email}
+                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                placeholder="you@company.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-password">Temporary Password</Label>
+              <Input
+                id="new-password"
+                type="text"
+                required
+                minLength={6}
+                value={newUser.password}
+                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                placeholder="Min. 6 characters"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-role">Role</Label>
+              <Select value={newUser.role} onValueChange={(v) => setNewUser({ ...newUser, role: v })}>
+                <SelectTrigger id="new-role">
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recruiter">Recruiter/HRBP</SelectItem>
+                  <SelectItem value="hiring_manager">Hiring Manager</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {addUserError && (
+              <p className="text-sm text-destructive">{addUserError}</p>
+            )}
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setAddUserOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={addUserLoading}>
+                {addUserLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                Create User
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Reject Dialog */}
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
