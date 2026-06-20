@@ -40,7 +40,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { CheckCircle, XCircle, Clock, Search, UserCheck, UserX, Loader2, UserPlus } from 'lucide-react'
+import { CheckCircle, XCircle, Clock, Search, UserCheck, UserX, Loader2, UserPlus, KeyRound, Eye, EyeOff, CheckCircle2 } from 'lucide-react'
 import { format } from 'date-fns'
 
 interface UserManagementClientProps {
@@ -69,6 +69,47 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
     password: '',
     role: 'recruiter',
   })
+
+  // Reset Password dialog state
+  const [resetDialogOpen, setResetDialogOpen] = useState(false)
+  const [resetLoading, setResetLoading] = useState(false)
+  const [resetError, setResetError] = useState<string | null>(null)
+  const [resetSuccess, setResetSuccess] = useState<string | null>(null)
+  const [resetPasswordValue, setResetPasswordValue] = useState('')
+  const [showResetPwd, setShowResetPwd] = useState(false)
+
+  const openResetDialog = (user: Profile) => {
+    setSelectedUser(user)
+    setResetPasswordValue('')
+    setResetError(null)
+    setResetSuccess(null)
+    setResetDialogOpen(true)
+  }
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedUser) return
+    setResetLoading(true)
+    setResetError(null)
+    setResetSuccess(null)
+    try {
+      const response = await fetch('/api/admin/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: selectedUser.email, newPassword: resetPasswordValue }),
+      })
+      const result = await response.json()
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to reset password')
+      }
+      setResetSuccess(result.message || 'Password updated successfully')
+      setResetPasswordValue('')
+    } catch (error) {
+      setResetError(error instanceof Error ? error.message : 'An error occurred')
+    } finally {
+      setResetLoading(false)
+    }
+  }
 
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -245,7 +286,7 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
     }
   }
 
-  const UserTable = ({ userList, showActions = false, showRevokeAction = false, showReapproveAction = false }: { userList: Profile[], showActions?: boolean, showRevokeAction?: boolean, showReapproveAction?: boolean }) => (
+  const UserTable = ({ userList, showActions = false, showRevokeAction = false, showReapproveAction = false, showResetPassword = false }: { userList: Profile[], showActions?: boolean, showRevokeAction?: boolean, showReapproveAction?: boolean, showResetPassword?: boolean }) => (
     <Table>
       <TableHeader>
         <TableRow>
@@ -254,13 +295,13 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
           <TableHead>Role</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Registered</TableHead>
-          {(showActions || showRevokeAction || showReapproveAction) && <TableHead className="text-right">Actions</TableHead>}
+          {(showActions || showRevokeAction || showReapproveAction || showResetPassword) && <TableHead className="text-right">Actions</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody>
         {userList.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={(showActions || showRevokeAction) ? 6 : 5} className="text-center text-muted-foreground py-8">
+            <TableCell colSpan={(showActions || showRevokeAction || showReapproveAction || showResetPassword) ? 6 : 5} className="text-center text-muted-foreground py-8">
               No users found
             </TableCell>
           </TableRow>
@@ -276,81 +317,85 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
                 </Badge>
               </TableCell>
               <TableCell>{format(new Date(user.created_at), 'MMM d, yyyy')}</TableCell>
-              {showActions && (
+              {(showActions || showRevokeAction || showReapproveAction || showResetPassword) && (
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-green-600 border-green-200 hover:bg-green-50"
-                      onClick={() => handleApprove(user.id)}
-                      disabled={loading === user.id}
-                    >
-                      {loading === user.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <>
-                          <UserCheck className="h-4 w-4 mr-1" />
-                          Approve
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-red-600 border-red-200 hover:bg-red-50"
-                      onClick={() => openRejectDialog(user)}
-                      disabled={loading === user.id}
-                    >
-                      <UserX className="h-4 w-4 mr-1" />
-                      Reject
-                    </Button>
-                  </div>
-                </TableCell>
-              )}
-              {showRevokeAction && user.id !== currentUserId && (
-                <TableCell className="text-right">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-red-600 border-red-200 hover:bg-red-50"
-                    onClick={() => openRevokeDialog(user)}
-                    disabled={loading === user.id}
-                  >
-                    {loading === user.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
+                    {showActions && (
                       <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-green-600 border-green-200 hover:bg-green-50"
+                          onClick={() => handleApprove(user.id)}
+                          disabled={loading === user.id}
+                        >
+                          {loading === user.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <>
+                              <UserCheck className="h-4 w-4 mr-1" />
+                              Approve
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-600 border-red-200 hover:bg-red-50"
+                          onClick={() => openRejectDialog(user)}
+                          disabled={loading === user.id}
+                        >
+                          <UserX className="h-4 w-4 mr-1" />
+                          Reject
+                        </Button>
+                      </>
+                    )}
+                    {showReapproveAction && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-green-600 border-green-200 hover:bg-green-50"
+                        onClick={() => handleApprove(user.id)}
+                        disabled={loading === user.id}
+                      >
+                        {loading === user.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <UserCheck className="h-4 w-4 mr-1" />
+                            Re-approve
+                          </>
+                        )}
+                      </Button>
+                    )}
+                    {showResetPassword && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-primary border-primary/30 hover:bg-primary/5"
+                        onClick={() => openResetDialog(user)}
+                        disabled={loading === user.id}
+                      >
+                        <KeyRound className="h-4 w-4 mr-1" />
+                        Reset Password
+                      </Button>
+                    )}
+                    {showRevokeAction && user.id !== currentUserId && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-red-600 border-red-200 hover:bg-red-50"
+                        onClick={() => openRevokeDialog(user)}
+                        disabled={loading === user.id}
+                      >
                         <UserX className="h-4 w-4 mr-1" />
                         Revoke Access
-                      </>
+                      </Button>
                     )}
-                  </Button>
-                </TableCell>
-              )}
-              {showRevokeAction && user.id === currentUserId && (
-                <TableCell className="text-right">
-                  <span className="text-xs text-muted-foreground">Current user</span>
-                </TableCell>
-              )}
-              {showReapproveAction && (
-                <TableCell className="text-right">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-green-600 border-green-200 hover:bg-green-50"
-                    onClick={() => handleApprove(user.id)}
-                    disabled={loading === user.id}
-                  >
-                    {loading === user.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <>
-                        <UserCheck className="h-4 w-4 mr-1" />
-                        Re-approve
-                      </>
+                    {showRevokeAction && user.id === currentUserId && (
+                      <span className="text-xs text-muted-foreground">Current user</span>
                     )}
-                  </Button>
+                  </div>
                 </TableCell>
               )}
             </TableRow>
@@ -455,7 +500,7 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
               <CardTitle>Approved Users</CardTitle>
             </CardHeader>
             <CardContent>
-              <UserTable userList={filterUsers(approvedUsers)} showRevokeAction={true} />
+              <UserTable userList={filterUsers(approvedUsers)} showRevokeAction={true} showResetPassword={true} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -477,7 +522,7 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
               <CardTitle>All Users</CardTitle>
             </CardHeader>
             <CardContent>
-              <UserTable userList={filterUsers(users)} />
+              <UserTable userList={filterUsers(users)} showResetPassword={true} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -552,6 +597,73 @@ export function UserManagementClient({ users, currentUserId }: UserManagementCli
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Password Dialog */}
+      <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+            <DialogDescription>
+              Set a new password for {selectedUser?.full_name || selectedUser?.email}. The
+              change takes effect immediately - no email is sent. Share the new password
+              with the user securely.
+            </DialogDescription>
+          </DialogHeader>
+          {resetSuccess ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                {resetSuccess}
+              </div>
+              <DialogFooter>
+                <Button onClick={() => setResetDialogOpen(false)}>Done</Button>
+              </DialogFooter>
+            </div>
+          ) : (
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="reset-email">Email</Label>
+                <Input id="reset-email" value={selectedUser?.email || ''} disabled />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reset-password">New Password</Label>
+                <div className="relative">
+                  <Input
+                    id="reset-password"
+                    type={showResetPwd ? 'text' : 'password'}
+                    required
+                    minLength={6}
+                    value={resetPasswordValue}
+                    onChange={(e) => setResetPasswordValue(e.target.value)}
+                    placeholder="Min. 6 characters"
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowResetPwd(!showResetPwd)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    tabIndex={-1}
+                  >
+                    {showResetPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+              {resetError && (
+                <p className="text-sm text-destructive">{resetError}</p>
+              )}
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setResetDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={resetLoading}>
+                  {resetLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                  Update Password
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
 
